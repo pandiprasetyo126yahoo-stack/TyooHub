@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 | VIP FULL SCRIPT (NO-KEY & MULTI-DEVICE / MULTI-ACCOUNT SAFE)
--- MAP: MOUNT SOREYA UPDATE (WITH AUTO NO-RENDER & TRADE REFRESH)
+-- MAP: MOUNT SOREYA UPDATE (ULTRA POTATO & MAX PERFORMANCE BOOST)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -1454,7 +1454,7 @@ uac.Parent = UnfavBtn
 UnfavBtn.MouseButton1Click:Connect(function() UnfavoriteAllFish() end)
 
 ----------------------------------------------------
--- 3. AUTO TRADE PAGE (DENGAN TOMBOL REFRESH PLAYER)
+-- 3. AUTO TRADE PAGE
 ----------------------------------------------------
 local TitleTrade = Instance.new("TextLabel")
 TitleTrade.Parent = TradePage
@@ -2237,7 +2237,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 11. SETTINGS & PERFORMANCE BOOST (DENGAN AUTO MATIKAN RENDER KECUALI MODE FOTO / POTRET)
+-- 11. SETTINGS & PERFORMANCE BOOST (ULTRA NO-RENDER / POTATO)
 ----------------------------------------------------
 local TitleSet = Instance.new("TextLabel")
 TitleSet.Parent = SettingsPage
@@ -2252,24 +2252,29 @@ local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
 AntiLagBtn.Size = UDim2.new(1,0,0,35)
 AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 180)
-AntiLagBtn.Text = "⚡ Super Potato Graphics (No Render)"
+AntiLagBtn.Text = "⚡ Ultra Potato Graphics (Max No-Render)"
 AntiLagBtn.TextColor3 = Color3.new(1,1,1)
 AntiLagBtn.Font = Enum.Font.GothamBold
 local alc = Instance.new("UICorner")
 alc.Parent = AntiLagBtn
 
-local function ApplyNoRender()
+local function ApplyUltraNoRender()
 	pcall(function()
+		-- Pengaturan Lighting Ekstrem
 		Lighting.GlobalShadows = false
 		Lighting.FogEnd = 999999
-		Lighting.Brightness = 2
+		Lighting.Brightness = 1
+		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+		
 		for _, v in ipairs(Lighting:GetChildren()) do
 			if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("SunRaysEffect") then
 				v:Destroy()
 			end
 		end
+		
+		-- Pembersihan Total Workspace (Partikel, Tekstur, Efek, Bayangan)
 		for _, v in ipairs(workspace:GetDescendants()) do
-			if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+			if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") or v:IsA("Explosion") or v:IsA("Highlight") then
 				v:Destroy()
 			elseif v:IsA("BasePart") then
 				v.Material = Enum.Material.SmoothPlastic
@@ -2277,8 +2282,19 @@ local function ApplyNoRender()
 				v.CastShadow = false
 			elseif v:IsA("Decal") or v:IsA("Texture") then
 				v:Destroy()
+			elseif v:IsA("Model") and not v:IsDescendantOf(LocalPlayer.Character) then
+				-- Jika model player lain atau objek berat, optimalkan bagian dalamnya
+				pcall(function()
+					for _, d in ipairs(v:GetDescendants()) do
+						if d:IsA("ParticleEmitter") or d:IsA("Trail") or d:IsA("Beam") then
+							d:Destroy()
+						end
+					end
+				end)
 			end
 		end
+		
+		-- Hilangkan Gelombang & Refleksi Air Terrain
 		if workspace:FindFirstChildOfClass("Terrain") then
 			local terrain = workspace:FindFirstChildOfClass("Terrain")
 			terrain.WaterWaveSize = 0
@@ -2291,8 +2307,8 @@ local function ApplyNoRender()
 end
 
 AntiLagBtn.MouseButton1Click:Connect(function()
-	ApplyNoRender()
-	AntiLagBtn.Text = "⚡ Super Potato Graphics Aktif!"
+	ApplyUltraNoRender()
+	AntiLagBtn.Text = "⚡ Ultra Potato Graphics Aktif!"
 	AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
 end)
 
@@ -2302,12 +2318,10 @@ task.spawn(function()
 		pcall(function()
 			local isPhotoOrPortraitActive = false
 			
-			-- Deteksi apakah Mode Foto / Potret atau Sembunyikan UI sedang aktif dari PlayerGui game
 			for _, gui in ipairs(PlayerGui:GetDescendants()) do
 				if gui:IsA("TextLabel") or gui:IsA("TextButton") then
 					local text = string.lower(gui.Text or "")
 					if string.find(text, "mode foto") or string.find(text, "mode potret") or string.find(text, "sembunyikan ui") then
-						-- Cek apakah tombol/setting tersebut menyala (misalnya dicek melalui warna background atau status induknya)
 						if gui.Parent and (gui.Parent.BackgroundColor3 == Color3.fromRGB(0, 170, 0) or gui.Parent.BackgroundColor3 == Color3.fromRGB(0, 255, 0)) then
 							isPhotoOrPortraitActive = true
 						end
@@ -2315,12 +2329,11 @@ task.spawn(function()
 				end
 			end
 			
-			-- Jika Mode Foto atau Potret TIDAK aktif, jalankan fitur matikan render secara otomatis
 			if not isPhotoOrPortraitActive then
-				ApplyNoRender()
+				ApplyUltraNoRender()
 			end
 		end)
-		task.wait(10) -- Cek setiap 10 detik secara otomatis
+		task.wait(10)
 	end
 end)
 
@@ -2537,17 +2550,15 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- FLOATING BUTTON (TYO HUB TEXT BUTTON)
+-- FLOATING BUTTON (IMAGE BUTTON)
 ----------------------------------------------------
-local Float = Instance.new("TextButton")
+local Float = Instance.new("ImageButton")
 Float.Parent = Gui
 Float.Size = UDim2.new(0, 55, 0, 55)
 Float.Position = UDim2.new(0, 20, 0, 120)
-Float.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Float.Text = "TYO\nHUB"
-Float.TextColor3 = Color3.new(1, 1, 1)
-Float.Font = Enum.Font.GothamBold
-Float.TextSize = 12
+Float.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Float.Image = "rbxassetid://1000301096"
+Float.ScaleType = Enum.ScaleType.Crop
 
 local flCorner = Instance.new("UICorner")
 flCorner.CornerRadius = UDim.new(1, 0)
@@ -2555,7 +2566,7 @@ flCorner.Parent = Float
 
 local flStroke = Instance.new("UIStroke")
 flStroke.Parent = Float
-flStroke.Color = Color3.fromRGB(255, 255, 255)
+flStroke.Color = Color3.fromRGB(0, 170, 255)
 flStroke.Thickness = 2
 
 MakeDraggable(Float)
