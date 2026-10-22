@@ -1,5 +1,5 @@
 -- ==============================================================================
--- TYO HUB V3 | VIP FULL SCRIPT (NO-KEY & MULTI-DEVICE / MULTI-ACCOUNT SAFE)
+-- TYO HUB V3 (SPEED HUB AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (ULTRA POTATO & MAX PERFORMANCE BOOST)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
@@ -108,13 +108,13 @@ local function SendServerWideWebhook(playerName, catchType, position)
 			local requestFunc = (syn and syn.request) or (http and http.request) or request or (fluxus and fluxus.request)
 			if not requestFunc then return end
 			
-			local embedTitle = "👑 Tyo Hub V3 - Mount Soreya Rare Catch Tracker!"
+			local embedTitle = "👑 Aemeath WuWa Hub V3 - Mount Soreya Rare Catch Tracker!"
 			local alertContent = string.format("@everyone 🚨 **%s Berhasil Mendapatkan Tangkapan Langka!**", targetPlayer)
-			local embedColor = 16711935
+			local embedColor = 10040319 -- Speed Hub Purple Accent
 			
 			if string.find(typeLower, "core") or string.find(typeLower, "aether") then
 				alertContent = string.format("@everyone ⚡ **%s Mendapatkan Item Spesial / Aether Material!**", targetPlayer)
-				embedTitle = "💎 Tyo Hub V3 - Mount Soreya Event Tracker!"
+				embedTitle = "💎 Aemeath WuWa Hub V3 - Mount Soreya Event Tracker!"
 				embedColor = 16776960
 			end
 			
@@ -132,7 +132,7 @@ local function SendServerWideWebhook(playerName, catchType, position)
 							{ ["name"] = "🎯 Tipe Tangkapan", ["value"] = tostring(catchType), ["inline"] = true },
 							{ ["name"] = "📍 Koordinat", ["value"] = posStr, ["inline"] = true }
 						},
-						["footer"] = { ["text"] = "Tyo Hub V3 • Mount Soreya Monitor" },
+						["footer"] = { ["text"] = "Aemeath Wuthering Waves Edition • Monitor" },
 						["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
 					}
 				}
@@ -330,7 +330,7 @@ getgenv().AutoGalatamaRunning = false
 getgenv().AutoSummitRunning = false
 getgenv().AntiAFKRunning = false
 getgenv().HideNameRunning = false
-getgenv().FakeNameInput = "TYO HUB"
+getgenv().FakeNameInput = "AEMEATH HUB"
 getgenv().CurrentSelectedHalo = nil
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
@@ -743,31 +743,53 @@ local function MakeDraggable(guiObject, handleObject)
 end
 
 ----------------------------------------------------
--- MAIN HUB UI (NO KEY / LANGSUNG TERBUKA)
+-- MAIN HUB UI (SPEED HUB DARK PURPLE & NEON DESIGN)
 ----------------------------------------------------
 local Main = Instance.new("Frame")
 Main.Parent = Gui
 Main.Visible = true
-Main.Size = UDim2.new(0,550,0,320)
-Main.Position = UDim2.new(0.5,-275,0.5,-160)
-Main.BackgroundColor3 = Color3.fromRGB(20,20,25)
+Main.Size = UDim2.new(0, 560, 0, 330)
+Main.Position = UDim2.new(0.5, -280, 0.5, -165)
+Main.BackgroundColor3 = Color3.fromRGB(15, 12, 22)
 Main.ClipsDescendants = true
 MakeDraggable(Main)
 
 local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0,18)
+mainCorner.CornerRadius = UDim.new(0, 10)
 mainCorner.Parent = Main
 
 local MainStroke = Instance.new("UIStroke")
 MainStroke.Parent = Main
-MainStroke.Color = Color3.fromRGB(0,170,255)
+MainStroke.Color = Color3.fromRGB(140, 60, 255)
+MainStroke.Thickness = 1.5
+
+-- Top Bar Header
+local TopBar = Instance.new("Frame")
+TopBar.Parent = Main
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 10)
+TopCorner.Parent = TopBar
+
+local HubTitle = Instance.new("TextLabel")
+HubTitle.Parent = TopBar
+HubTitle.Position = UDim2.new(0, 15, 0, 0)
+HubTitle.Size = UDim2.new(0, 300, 1, 0)
+HubTitle.BackgroundTransparency = 1
+HubTitle.Text = "AEMEATH WUWA HUB <font color='#A050FF'>V3</font>"
+HubTitle.RichText = true
+HubTitle.Font = Enum.Font.GothamBold
+HubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+HubTitle.TextSize = 14
+HubTitle.TextXAlignment = Enum.TextXAlignment.Left
 
 local ControlsFrame = Instance.new("Frame")
-ControlsFrame.Parent = Main
-ControlsFrame.Size = UDim2.new(0, 65, 0, 30)
-ControlsFrame.Position = UDim2.new(1, -70, 0, 5)
+ControlsFrame.Parent = TopBar
+ControlsFrame.Size = UDim2.new(0, 65, 1, 0)
+ControlsFrame.Position = UDim2.new(1, -70, 0, 0)
 ControlsFrame.BackgroundTransparency = 1
-ControlsFrame.ZIndex = 10
 
 local ControlLayout = Instance.new("UIListLayout")
 ControlLayout.Parent = ControlsFrame
@@ -778,13 +800,12 @@ ControlLayout.Padding = UDim.new(0, 5)
 
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Parent = ControlsFrame
-MinimizeBtn.Size = UDim2.new(0, 26, 0, 26)
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+MinimizeBtn.Size = UDim2.new(0, 24, 0, 24)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(38, 30, 52)
 MinimizeBtn.Text = "-"
-MinimizeBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+MinimizeBtn.TextColor3 = Color3.fromRGB(220, 215, 230)
 MinimizeBtn.Font = Enum.Font.GothamBold
-MinimizeBtn.TextSize = 18
-MinimizeBtn.ZIndex = 11
+MinimizeBtn.TextSize = 14
 
 local minCorner = Instance.new("UICorner")
 minCorner.CornerRadius = UDim.new(0, 6)
@@ -792,27 +813,28 @@ minCorner.Parent = MinimizeBtn
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = ControlsFrame
-CloseBtn.Size = UDim2.new(0, 26, 0, 26)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-CloseBtn.Text = "×"
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 80)
+CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 18
-CloseBtn.ZIndex = 11
+CloseBtn.TextSize = 11
 
 local clsCorner = Instance.new("UICorner")
 clsCorner.CornerRadius = UDim.new(0, 6)
 clsCorner.Parent = CloseBtn
 
+CloseBtn.MouseButton1Click:Connect(function() Main.Visible = false end)
+
 local PingLabel = Instance.new("TextLabel")
-PingLabel.Parent = Main
-PingLabel.Size = UDim2.new(0,150,0,25)
-PingLabel.Position = UDim2.new(1,-225,0,7)
+PingLabel.Parent = TopBar
+PingLabel.Size = UDim2.new(0, 120, 1, 0)
+PingLabel.Position = UDim2.new(1, -200, 0, 0)
 PingLabel.BackgroundTransparency = 1
-PingLabel.Text = "Ping: Menghitung..."
-PingLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+PingLabel.Text = "Ping: ... ms"
+PingLabel.TextColor3 = Color3.fromRGB(23, 255, 151)
 PingLabel.Font = Enum.Font.GothamBold
-PingLabel.TextSize = 12
+PingLabel.TextSize = 11
 PingLabel.TextXAlignment = Enum.TextXAlignment.Right
 
 task.spawn(function()
@@ -825,158 +847,179 @@ task.spawn(function()
 	end
 end)
 
+-- Sidebar Tabs (Speed Hub Vertical Layout)
 local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Parent = Main
-Sidebar.Size = UDim2.new(0,140,1,0)
-Sidebar.BackgroundColor3 = Color3.fromRGB(15,15,20)
-Sidebar.CanvasSize = UDim2.new(0,0,2.8,0)
-Sidebar.ScrollBarThickness = 2
+Sidebar.Position = UDim2.new(0, 8, 0, 42)
+Sidebar.Size = UDim2.new(0, 135, 1, -50)
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 16, 28)
+Sidebar.CanvasSize = UDim2.new(0, 0, 2.8, 0)
+Sidebar.ScrollBarThickness = 0
 
 local sbCorner = Instance.new("UICorner")
+sbCorner.CornerRadius = UDim.new(0, 8)
 sbCorner.Parent = Sidebar
 
-local HubTitle = Instance.new("TextLabel")
-HubTitle.Parent = Sidebar
-HubTitle.BackgroundTransparency = 1
-HubTitle.Position = UDim2.new(0, 0, 0, 8)
-HubTitle.Size = UDim2.new(1, 0, 0, 22)
-HubTitle.Text = "TYO HUB V3"
-HubTitle.Font = Enum.Font.GothamBold
-HubTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
-HubTitle.TextSize = 16
-
-local HubSubTitle = Instance.new("TextLabel")
-HubSubTitle.Parent = Sidebar
-HubSubTitle.BackgroundTransparency = 1
-HubSubTitle.Position = UDim2.new(0, 0, 0, 30)
-HubSubTitle.Size = UDim2.new(1, 0, 0, 18)
-HubSubTitle.Text = "🏔️ Mount Soreya"
-HubSubTitle.Font = Enum.Font.GothamBold
-HubSubTitle.TextColor3 = Color3.fromRGB(0, 255, 150)
-HubSubTitle.TextSize = 11
+local SidebarLayout = Instance.new("UIListLayout")
+SidebarLayout.Parent = Sidebar
+SidebarLayout.Padding = UDim.new(0, 4)
+SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local Content = Instance.new("Frame")
 Content.Parent = Main
-Content.Position = UDim2.new(0,150,0,30)
-Content.Size = UDim2.new(1,-160,1,-40)
+Content.Position = UDim2.new(0, 150, 0, 42)
+Content.Size = UDim2.new(1, -158, 1, -50)
 Content.BackgroundTransparency = 1
 
 local isMinimized = false
 MinimizeBtn.MouseButton1Click:Connect(function()
 	isMinimized = not isMinimized
 	MinimizeBtn.Text = isMinimized and "+" or "-"
-	Main:TweenSize(isMinimized and UDim2.new(0,550,0,38) or UDim2.new(0,550,0,320), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+	Main:TweenSize(isMinimized and UDim2.new(0,560,0,35) or UDim2.new(0,560,0,330), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 	Sidebar.Visible = not isMinimized
 	Content.Visible = not isMinimized
-	PingLabel.Visible = not isMinimized
 end)
-CloseBtn.MouseButton1Click:Connect(function() Main.Visible = false end)
 
-local function CreateNavButton(text, yPos)
+local navButtons = {}
+local pages = {}
+
+local function CreateNavButton(text)
 	local btn = Instance.new("TextButton")
 	btn.Parent = Sidebar
-	btn.Position = UDim2.new(0, 10, 0, yPos)
-	btn.Size = UDim2.new(1, -20, 0, 28)
-	btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-	btn.Text = text
-	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Size = UDim2.new(0, 125, 0, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
+	btn.Text = "  " .. text
+	btn.TextColor3 = Color3.fromRGB(170, 160, 190)
 	btn.Font = Enum.Font.GothamMedium
-	btn.TextSize = 12
+	btn.TextSize = 11
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	
 	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 6)
 	corner.Parent = btn
+	
+	local indicator = Instance.new("Frame")
+	indicator.Name = "Indicator"
+	indicator.Parent = btn
+	indicator.Size = UDim2.new(0, 3, 0, 18)
+	indicator.Position = UDim2.new(0, 3, 0.5, -9)
+	indicator.BackgroundColor3 = Color3.fromRGB(160, 80, 255)
+	indicator.Visible = false
+	
+	local indCorner = Instance.new("UICorner")
+	indCorner.CornerRadius = UDim.new(0, 2)
+	indCorner.Parent = indicator
+	
 	return btn
 end
-
-local HomeBtn = CreateNavButton("Fishing & Sell", 55)
-local FavoriteBtn = CreateNavButton("⭐ Favorite", 90)
-local TradeBtn = CreateNavButton("🤝 Auto Trade", 125)
-local GalatamaBtn = CreateNavButton("Galatama", 160)
-local TeleportShopBtn = CreateNavButton("Teleport Shop", 195)
-local SummitBtn = CreateNavButton("Summit", 230)
-local PlayerMenuBtn = CreateNavButton("Player", 265)
-local HaloMenuBtn = CreateNavButton("Halo Kepala", 300)
-local PlayerTpBtn = CreateNavButton("Teleport Player", 335)
-local PrivacyBtn = CreateNavButton("Privacy", 370)
-local SettingsBtn = CreateNavButton("Settings", 405)
-local CreditsBtn = CreateNavButton("Credits", 440)
 
 local function MakePage()
 	local f = Instance.new("ScrollingFrame")
 	f.Parent = Content
-	f.Size = UDim2.new(1,0,1,0)
+	f.Size = UDim2.new(1, 0, 1, 0)
 	f.BackgroundTransparency = 1
 	f.Visible = false
-	f.CanvasSize = UDim2.new(0,0,6,0)
-	f.ScrollBarThickness = 4
+	f.CanvasSize = UDim2.new(0, 0, 6, 0)
+	f.ScrollBarThickness = 3
+	f.ScrollBarImageColor3 = Color3.fromRGB(140, 60, 255)
+	
 	local pad = Instance.new("UIPadding")
 	pad.Parent = f
-	pad.PaddingTop = UDim.new(0, 10)
+	pad.PaddingTop = UDim.new(0, 5)
+	
 	local l = Instance.new("UIListLayout")
 	l.Parent = f
 	l.SortOrder = Enum.SortOrder.LayoutOrder
-	l.Padding = UDim.new(0, 8)
+	l.Padding = UDim.new(0, 6)
+	
 	return f
 end
 
-local FishingPage = MakePage()
-FishingPage.Visible = true
-local FavoritePage = MakePage()
-local TradePage = MakePage()
-local GalatamaPage = MakePage()
-local TeleportShopPage = MakePage()
-local SummitPage = MakePage()
-local PlayerPage = MakePage()
-local HaloPage = MakePage()
-local PlayerTpPage = MakePage()
-local PrivacyPage = MakePage()
-local SettingsPage = MakePage()
-local CreditsPage = MakePage()
+local tabList = {"Fishing & Sell", "⭐ Favorite", "🤝 Auto Trade", "Galatama", "Teleport Shop", "Summit", "Player", "Halo Kepala", "Teleport Player", "Privacy", "Settings", "Credits"}
 
-local function HideAll()
-	FishingPage.Visible = false
-	FavoritePage.Visible = false
-	TradePage.Visible = false
-	GalatamaPage.Visible = false
-	TeleportShopPage.Visible = false
-	SummitPage.Visible = false
-	PlayerPage.Visible = false
-	HaloPage.Visible = false
-	PlayerTpPage.Visible = false
-	PrivacyPage.Visible = false
-	SettingsPage.Visible = false
-	CreditsPage.Visible = false
+for _, name in ipairs(tabList) do
+	local btn = CreateNavButton(name)
+	local page = MakePage()
+	navButtons[name] = btn
+	pages[name] = page
+	
+	btn.MouseButton1Click:Connect(function()
+		for _, p in pairs(pages) do p.Visible = false end
+		for _, b in pairs(navButtons) do
+			b.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
+			b.TextColor3 = Color3.fromRGB(170, 160, 190)
+			if b:FindFirstChild("Indicator") then b.Indicator.Visible = false end
+		end
+		page.Visible = true
+		btn.BackgroundColor3 = Color3.fromRGB(45, 32, 68)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		if btn:FindFirstChild("Indicator") then btn.Indicator.Visible = true end
+	end)
 end
 
-HomeBtn.MouseButton1Click:Connect(function() HideAll(); FishingPage.Visible = true end)
-FavoriteBtn.MouseButton1Click:Connect(function() HideAll(); FavoritePage.Visible = true end)
-TradeBtn.MouseButton1Click:Connect(function() HideAll(); TradePage.Visible = true end)
-GalatamaBtn.MouseButton1Click:Connect(function() HideAll(); GalatamaPage.Visible = true end)
-TeleportShopBtn.MouseButton1Click:Connect(function() HideAll(); TeleportShopPage.Visible = true end)
-SummitBtn.MouseButton1Click:Connect(function() HideAll(); SummitPage.Visible = true end)
-PlayerMenuBtn.MouseButton1Click:Connect(function() HideAll(); PlayerPage.Visible = true end)
-HaloMenuBtn.MouseButton1Click:Connect(function() HideAll(); HaloPage.Visible = true end)
-PlayerTpBtn.MouseButton1Click:Connect(function() HideAll(); PlayerTpPage.Visible = true end)
-PrivacyBtn.MouseButton1Click:Connect(function() HideAll(); PrivacyPage.Visible = true end)
-SettingsBtn.MouseButton1Click:Connect(function() HideAll(); SettingsPage.Visible = true end)
-CreditsBtn.MouseButton1Click:Connect(function() HideAll(); CreditsPage.Visible = true end)
+-- Default active tab
+pages["Fishing & Sell"].Visible = true
+navButtons["Fishing & Sell"].BackgroundColor3 = Color3.fromRGB(45, 32, 68)
+navButtons["Fishing & Sell"].TextColor3 = Color3.fromRGB(255, 255, 255)
+navButtons["Fishing & Sell"].Indicator.Visible = true
 
+----------------------------------------------------
+-- SPEED HUB STYLE TOGGLE BUILDER
+----------------------------------------------------
 local function AddToggle(parent, text, callback)
-	local b = Instance.new("TextButton")
-	b.Parent = parent
-	b.Size = UDim2.new(1,0,0,35)
-	b.BackgroundColor3 = Color3.fromRGB(30,30,40)
-	b.Text = " " .. text .. " [OFF]"
-	b.TextColor3 = Color3.new(1,1,1)
-	b.Font = Enum.Font.Gotham
-	b.TextSize = 13
-	b.TextXAlignment = Enum.TextXAlignment.Left
-	local c = Instance.new("UICorner")
-	c.Parent = b
+	local frame = Instance.new("Frame")
+	frame.Parent = parent
+	frame.Size = UDim2.new(1, -5, 0, 36)
+	frame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+	
+	local fc = Instance.new("UICorner")
+	fc.CornerRadius = UDim.new(0, 6)
+	fc.Parent = frame
+	
+	local label = Instance.new("TextLabel")
+	label.Parent = frame
+	label.Position = UDim2.new(0, 12, 0, 0)
+	label.Size = UDim2.new(0.7, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(220, 215, 230)
+	label.Font = Enum.Font.GothamMedium
+	label.TextSize = 11
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	
+	local switchBg = Instance.new("TextButton")
+	switchBg.Parent = frame
+	switchBg.Position = UDim2.new(1, -45, 0.5, -10)
+	switchBg.Size = UDim2.new(0, 36, 0, 20)
+	switchBg.BackgroundColor3 = Color3.fromRGB(38, 30, 52)
+	switchBg.Text = ""
+	
+	local sbc = Instance.new("UICorner")
+	sbc.CornerRadius = UDim.new(1, 0)
+	sbc.Parent = switchBg
+	
+	local knob = Instance.new("Frame")
+	knob.Parent = switchBg
+	knob.Position = UDim2.new(0, 2, 0.5, -7)
+	knob.Size = UDim2.new(0, 14, 0, 14)
+	knob.BackgroundColor3 = Color3.fromRGB(140, 130, 160)
+	
+	local kc = Instance.new("UICorner")
+	kc.CornerRadius = UDim.new(1, 0)
+	kc.Parent = knob
+	
 	local state = false
-	b.MouseButton1Click:Connect(function()
+	switchBg.MouseButton1Click:Connect(function()
 		state = not state
-		b.Text = " " .. text .. (state and " [ON]" or " [OFF]")
-		b.BackgroundColor3 = state and Color3.fromRGB(0,100,180) or Color3.fromRGB(30,30,40)
+		if state then
+			knob:TweenPosition(UDim2.new(1, -16, 0.5, -7), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.15, true)
+			switchBg.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
+			knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		else
+			knob:TweenPosition(UDim2.new(0, 2, 0.5, -7), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.15, true)
+			switchBg.BackgroundColor3 = Color3.fromRGB(38, 30, 52)
+			knob.BackgroundColor3 = Color3.fromRGB(140, 130, 160)
+		end
 		callback(state)
 	end)
 end
@@ -984,30 +1027,33 @@ end
 ----------------------------------------------------
 -- 1. FISHING PAGE
 ----------------------------------------------------
+local FishingPage = pages["Fishing & Sell"]
+
 local TitleFish = Instance.new("TextLabel")
 TitleFish.Parent = FishingPage
-TitleFish.Size = UDim2.new(1,0,0,30)
+TitleFish.Size = UDim2.new(1, 0, 0, 25)
 TitleFish.BackgroundTransparency = 1
 TitleFish.Text = "🔥 AUTO FISHING & SELL (MOUNT SOREYA)"
-TitleFish.TextColor3 = Color3.fromRGB(0,170,255)
+TitleFish.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleFish.Font = Enum.Font.GothamBold
-TitleFish.TextSize = 13
+TitleFish.TextSize = 12
 
 local SpotDropdownFrame = Instance.new("Frame")
 SpotDropdownFrame.Parent = FishingPage
-SpotDropdownFrame.Size = UDim2.new(1,0,0,35)
-SpotDropdownFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+SpotDropdownFrame.Size = UDim2.new(1, -5, 0, 36)
+SpotDropdownFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 SpotDropdownFrame.ClipsDescendants = true
 local sdc = Instance.new("UICorner")
+sdc.CornerRadius = UDim.new(0, 6)
 sdc.Parent = SpotDropdownFrame
 
 local DropHeader = Instance.new("TextButton")
 DropHeader.Parent = SpotDropdownFrame
-DropHeader.Size = UDim2.new(1,0,0,35)
+DropHeader.Size = UDim2.new(1, 0, 0, 36)
 DropHeader.BackgroundTransparency = 1
 DropHeader.Text = " 📍 Spot: " .. (getgenv().SelectedFishingSpot or "Spot Mancing Jembatan") .. " 🔽"
-DropHeader.TextColor3 = Color3.fromRGB(0, 170, 255)
-DropHeader.Font = Enum.Font.GothamBold
+DropHeader.TextColor3 = Color3.fromRGB(220, 215, 230)
+DropHeader.Font = Enum.Font.GothamMedium
 DropHeader.TextSize = 11
 DropHeader.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -1017,7 +1063,7 @@ end
 
 local DropContainer = Instance.new("Frame")
 DropContainer.Parent = SpotDropdownFrame
-DropContainer.Position = UDim2.new(0, 5, 0, 35)
+DropContainer.Position = UDim2.new(0, 5, 0, 36)
 DropContainer.Size = UDim2.new(1, -10, 0, 95)
 DropContainer.BackgroundTransparency = 1
 
@@ -1028,20 +1074,21 @@ DropLayout.Padding = UDim.new(0, 4)
 local isDropOpen = false
 DropHeader.MouseButton1Click:Connect(function()
 	isDropOpen = not isDropOpen
-	SpotDropdownFrame:TweenSize(isDropOpen and UDim2.new(1,0,0,135) or UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+	SpotDropdownFrame:TweenSize(isDropOpen and UDim2.new(1, -5, 0, 135) or UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 end)
 
 for _, spotName in ipairs({"Spot Mancing Jembatan", "Spot Mancing Core", "Spot Mancing Ikan Anomali"}) do
 	local optBtn = Instance.new("TextButton")
 	optBtn.Parent = DropContainer
-	optBtn.Size = UDim2.new(1,0,0,26)
-	optBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
+	optBtn.Size = UDim2.new(1, 0, 0, 28)
+	optBtn.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
 	optBtn.Text = " " .. spotName
-	optBtn.TextColor3 = Color3.new(1,1,1)
+	optBtn.TextColor3 = Color3.fromRGB(170, 160, 190)
 	optBtn.Font = Enum.Font.Gotham
 	optBtn.TextSize = 11
 	optBtn.TextXAlignment = Enum.TextXAlignment.Left
 	local obc = Instance.new("UICorner")
+	obc.CornerRadius = UDim.new(0, 4)
 	obc.Parent = optBtn
 	
 	optBtn.MouseButton1Click:Connect(function()
@@ -1049,33 +1096,34 @@ for _, spotName in ipairs({"Spot Mancing Jembatan", "Spot Mancing Core", "Spot M
 		getgenv().TyoConfig.SelectedSpot = spotName
 		SetSpotDisplay(spotName)
 		isDropOpen = false
-		SpotDropdownFrame:TweenSize(UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+		SpotDropdownFrame:TweenSize(UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 		SaveConfig()
 	end)
 end
 
 local ModeDropdownFrame = Instance.new("Frame")
 ModeDropdownFrame.Parent = FishingPage
-ModeDropdownFrame.Size = UDim2.new(1,0,0,35)
-ModeDropdownFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+ModeDropdownFrame.Size = UDim2.new(1, -5, 0, 36)
+ModeDropdownFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 ModeDropdownFrame.ClipsDescendants = true
 local mdc = Instance.new("UICorner")
+mdc.CornerRadius = UDim.new(0, 6)
 mdc.Parent = ModeDropdownFrame
 
 local ModeDropHeader = Instance.new("TextButton")
 ModeDropHeader.Parent = ModeDropdownFrame
-ModeDropHeader.Size = UDim2.new(1,0,0,35)
+ModeDropHeader.Size = UDim2.new(1, 0, 0, 36)
 ModeDropHeader.BackgroundTransparency = 1
 ModeDropHeader.Text = " 🎮 Mode Fishing: " .. (getgenv().TyoConfig.MinigameMode or "Legit") .. " 🔽"
-ModeDropHeader.TextColor3 = Color3.fromRGB(255, 200, 0)
-ModeDropHeader.Font = Enum.Font.GothamBold
+ModeDropHeader.TextColor3 = Color3.fromRGB(220, 215, 230)
+ModeDropHeader.Font = Enum.Font.GothamMedium
 ModeDropHeader.TextSize = 11
 ModeDropHeader.TextXAlignment = Enum.TextXAlignment.Left
 
 local ModeDropContainer = Instance.new("Frame")
 ModeDropContainer.Parent = ModeDropdownFrame
-ModeDropContainer.Position = UDim2.new(0, 5, 0, 35)
-ModeDropContainer.Size = UDim2.new(1, -10, 0, 60)
+ModeDropContainer.Position = UDim2.new(0, 5, 0, 36)
+ModeDropContainer.Size = UDim2.new(1, -10, 0, 65)
 ModeDropContainer.BackgroundTransparency = 1
 
 local ModeDropLayout = Instance.new("UIListLayout")
@@ -1085,7 +1133,7 @@ ModeDropLayout.Padding = UDim.new(0, 4)
 local isModeDropOpen = false
 ModeDropHeader.MouseButton1Click:Connect(function()
 	isModeDropOpen = not isModeDropOpen
-	ModeDropdownFrame:TweenSize(isModeDropOpen and UDim2.new(1,0,0,100) or UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+	ModeDropdownFrame:TweenSize(isModeDropOpen and UDim2.new(1, -5, 0, 105) or UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 end)
 
 local fishingModes = {
@@ -1096,14 +1144,15 @@ local fishingModes = {
 for _, modeData in ipairs(fishingModes) do
 	local mOptBtn = Instance.new("TextButton")
 	mOptBtn.Parent = ModeDropContainer
-	mOptBtn.Size = UDim2.new(1,0,0,26)
-	mOptBtn.BackgroundColor3 = Color3.fromRGB(40,40,50)
+	mOptBtn.Size = UDim2.new(1, 0, 0, 28)
+	mOptBtn.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
 	mOptBtn.Text = " " .. modeData.Name
-	mOptBtn.TextColor3 = Color3.new(1,1,1)
+	mOptBtn.TextColor3 = Color3.fromRGB(170, 160, 190)
 	mOptBtn.Font = Enum.Font.Gotham
 	mOptBtn.TextSize = 11
 	mOptBtn.TextXAlignment = Enum.TextXAlignment.Left
 	local mobc = Instance.new("UICorner")
+	mobc.CornerRadius = UDim.new(0, 4)
 	mobc.Parent = mOptBtn
 	
 	mOptBtn.MouseButton1Click:Connect(function()
@@ -1111,7 +1160,7 @@ for _, modeData in ipairs(fishingModes) do
 		getgenv().TyoConfig.MinigameMode = modeData.Value
 		ModeDropHeader.Text = " 🎮 Mode Fishing: " .. modeData.Value .. " 🔽"
 		isModeDropOpen = false
-		ModeDropdownFrame:TweenSize(UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+		ModeDropdownFrame:TweenSize(UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 		SaveConfig()
 		if oldMode ~= modeData.Value then
 			task.spawn(function()
@@ -1150,14 +1199,16 @@ end)
 
 local BiteDelayBox = Instance.new("TextBox")
 BiteDelayBox.Parent = FishingPage
-BiteDelayBox.Size = UDim2.new(1,0,0,35)
-BiteDelayBox.BackgroundColor3 = Color3.fromRGB(35,35,45)
+BiteDelayBox.Size = UDim2.new(1, -5, 0, 36)
+BiteDelayBox.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 BiteDelayBox.PlaceholderText = "Bite Delay (Detik, Cth: 0.5) - Mode Instant"
+BiteDelayBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 BiteDelayBox.Text = tostring(getgenv().TyoConfig.BiteDelay)
-BiteDelayBox.TextColor3 = Color3.new(1,1,1)
-BiteDelayBox.Font = Enum.Font.Gotham
-BiteDelayBox.TextSize = 12
+BiteDelayBox.TextColor3 = Color3.fromRGB(220, 215, 230)
+BiteDelayBox.Font = Enum.Font.GothamMedium
+BiteDelayBox.TextSize = 11
 local bdCorner = Instance.new("UICorner")
+bdCorner.CornerRadius = UDim.new(0, 6)
 bdCorner.Parent = BiteDelayBox
 BiteDelayBox.FocusLost:Connect(function()
 	getgenv().BiteDelayInput = BiteDelayBox.Text
@@ -1167,14 +1218,16 @@ end)
 
 local TapDelayBox = Instance.new("TextBox")
 TapDelayBox.Parent = FishingPage
-TapDelayBox.Size = UDim2.new(1,0,0,35)
-TapDelayBox.BackgroundColor3 = Color3.fromRGB(35,35,45)
+TapDelayBox.Size = UDim2.new(1, -5, 0, 36)
+TapDelayBox.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 TapDelayBox.PlaceholderText = "Jeda Tap (Detik, Cth: 0.12) - Mode Legit"
+TapDelayBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 TapDelayBox.Text = tostring(getgenv().TyoConfig.TapDelay or "0.12")
-TapDelayBox.TextColor3 = Color3.new(1,1,1)
-TapDelayBox.Font = Enum.Font.Gotham
-TapDelayBox.TextSize = 12
+TapDelayBox.TextColor3 = Color3.fromRGB(220, 215, 230)
+TapDelayBox.Font = Enum.Font.GothamMedium
+TapDelayBox.TextSize = 11
 local tdCorner = Instance.new("UICorner")
+tdCorner.CornerRadius = UDim.new(0, 6)
 tdCorner.Parent = TapDelayBox
 TapDelayBox.FocusLost:Connect(function()
 	getgenv().TyoConfig.TapDelay = TapDelayBox.Text
@@ -1199,14 +1252,16 @@ end)
 
 local SellTimerBox = Instance.new("TextBox")
 SellTimerBox.Parent = FishingPage
-SellTimerBox.Size = UDim2.new(1,0,0,35)
-SellTimerBox.BackgroundColor3 = Color3.fromRGB(35,35,45)
+SellTimerBox.Size = UDim2.new(1, -5, 0, 36)
+SellTimerBox.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 SellTimerBox.PlaceholderText = "Jeda Waktu Jual (Menit, Cth: 5)"
+SellTimerBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 SellTimerBox.Text = tostring(getgenv().TyoConfig.AutoSellTimer)
-SellTimerBox.TextColor3 = Color3.new(1,1,1)
-SellTimerBox.Font = Enum.Font.Gotham
-SellTimerBox.TextSize = 12
+SellTimerBox.TextColor3 = Color3.fromRGB(220, 215, 230)
+SellTimerBox.Font = Enum.Font.GothamMedium
+SellTimerBox.TextSize = 11
 local stCorner = Instance.new("UICorner")
+stCorner.CornerRadius = UDim.new(0, 6)
 stCorner.Parent = SellTimerBox
 SellTimerBox.FocusLost:Connect(function()
 	getgenv().AutoSellTimerInput = SellTimerBox.Text
@@ -1214,53 +1269,52 @@ SellTimerBox.FocusLost:Connect(function()
 	SaveConfig()
 end)
 
-----------------------------------------------------
--- SYSTEM ROTASI / LOOP SPOT MANCING
-----------------------------------------------------
 local TitleLoop = Instance.new("TextLabel")
 TitleLoop.Parent = FishingPage
-TitleLoop.Size = UDim2.new(1,0,0,25)
+TitleLoop.Size = UDim2.new(1, -5, 0, 25)
 TitleLoop.BackgroundTransparency = 1
 TitleLoop.Text = "⏳ ROTASI AUTO SPOT MANCING (TIMER)"
-TitleLoop.TextColor3 = Color3.fromRGB(0,255,170)
+TitleLoop.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleLoop.Font = Enum.Font.GothamBold
-TitleLoop.TextSize = 13
+TitleLoop.TextSize = 12
 
 AddToggle(FishingPage, "Aktifkan Loop Spot Mancing (Timer)", function(v) getgenv().LoopSpotEnabled = v end)
 
 local function CreateSpotTimerSetting(parent, spotName)
 	local frame = Instance.new("Frame")
 	frame.Parent = parent
-	frame.Size = UDim2.new(1,0,0,35)
-	frame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+	frame.Size = UDim2.new(1, -5, 0, 36)
+	frame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 	local fc = Instance.new("UICorner")
+	fc.CornerRadius = UDim.new(0, 6)
 	fc.Parent = frame
 	local toggleBtn = Instance.new("TextButton")
 	toggleBtn.Parent = frame
-	toggleBtn.Size = UDim2.new(0.65,0,1,0)
+	toggleBtn.Size = UDim2.new(0.65, 0, 1, 0)
 	toggleBtn.BackgroundTransparency = 1
 	toggleBtn.Text = " " .. spotName .. " [OFF]"
-	toggleBtn.TextColor3 = Color3.new(1,1,1)
-	toggleBtn.Font = Enum.Font.Gotham
+	toggleBtn.TextColor3 = Color3.fromRGB(220, 215, 230)
+	toggleBtn.Font = Enum.Font.GothamMedium
 	toggleBtn.TextSize = 11
 	toggleBtn.TextXAlignment = Enum.TextXAlignment.Left
 	local timeBox = Instance.new("TextBox")
 	timeBox.Parent = frame
-	timeBox.Size = UDim2.new(0.3, -5, 0, 25)
-	timeBox.Position = UDim2.new(0.7, 0, 0, 5)
-	timeBox.BackgroundColor3 = Color3.fromRGB(45,45,55)
+	timeBox.Size = UDim2.new(0.3, -5, 0, 26)
+	timeBox.Position = UDim2.new(0.7, 0, 0.5, -13)
+	timeBox.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
 	timeBox.Text = getgenv().SpotLoopConfig[spotName].Timer
 	timeBox.PlaceholderText = "Menit"
-	timeBox.TextColor3 = Color3.fromRGB(0,170,255)
+	timeBox.TextColor3 = Color3.fromRGB(160, 80, 255)
 	timeBox.Font = Enum.Font.GothamBold
 	timeBox.TextSize = 11
 	local tc = Instance.new("UICorner")
+	tc.CornerRadius = UDim.new(0, 4)
 	tc.Parent = timeBox
 	toggleBtn.MouseButton1Click:Connect(function()
 		local cur = not getgenv().SpotLoopConfig[spotName].Enabled
 		getgenv().SpotLoopConfig[spotName].Enabled = cur
 		toggleBtn.Text = " " .. spotName .. (cur and " [ON]" or " [OFF]")
-		toggleBtn.TextColor3 = cur and Color3.fromRGB(0,255,150) or Color3.new(1,1,1)
+		toggleBtn.TextColor3 = cur and Color3.fromRGB(23, 255, 151) or Color3.fromRGB(220, 215, 230)
 	end)
 	timeBox.FocusLost:Connect(function() getgenv().SpotLoopConfig[spotName].Timer = timeBox.Text end)
 end
@@ -1297,38 +1351,39 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- DROPDOWN BUILDER (UNIVERSAL MULTI-SELECT)
+-- DROPDOWN BUILDER (SPEED HUB STYLE)
 ----------------------------------------------------
 local function CreateMultiSelectDropdown(parent, titleText, optionsTable, targetStateTable)
 	local container = Instance.new("Frame")
 	container.Parent = parent
-	container.Size = UDim2.new(1,0,0,40)
-	container.BackgroundColor3 = Color3.fromRGB(30,30,40)
+	container.Size = UDim2.new(1, -5, 0, 36)
+	container.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 	container.ClipsDescendants = true
 	local cc = Instance.new("UICorner")
+	cc.CornerRadius = UDim.new(0, 6)
 	cc.Parent = container
 	local header = Instance.new("TextButton")
 	header.Parent = container
-	header.Size = UDim2.new(1,0,0,40)
+	header.Size = UDim2.new(1, 0, 0, 36)
 	header.BackgroundTransparency = 1
 	header.Text = " " .. titleText
-	header.TextColor3 = Color3.new(1,1,1)
+	header.TextColor3 = Color3.fromRGB(220, 215, 230)
 	header.Font = Enum.Font.GothamMedium
-	header.TextSize = 12
+	header.TextSize = 11
 	header.TextXAlignment = Enum.TextXAlignment.Left
 	local countLabel = Instance.new("TextLabel")
 	countLabel.Parent = header
-	countLabel.Size = UDim2.new(0,120,1,0)
-	countLabel.Position = UDim2.new(1,-130,0,0)
+	countLabel.Size = UDim2.new(0, 120, 1, 0)
+	countLabel.Position = UDim2.new(1, -130, 0, 0)
 	countLabel.BackgroundTransparency = 1
-	countLabel.TextColor3 = Color3.fromRGB(0,170,255)
+	countLabel.TextColor3 = Color3.fromRGB(160, 80, 255)
 	countLabel.Font = Enum.Font.GothamBold
 	countLabel.TextSize = 11
 	countLabel.TextXAlignment = Enum.TextXAlignment.Right
 	local optionsHolder = Instance.new("Frame")
 	optionsHolder.Parent = container
-	optionsHolder.Position = UDim2.new(0,5,0,40)
-	optionsHolder.Size = UDim2.new(1,-10,0,0)
+	optionsHolder.Position = UDim2.new(0, 5, 0, 36)
+	optionsHolder.Size = UDim2.new(1, -10, 0, 0)
 	optionsHolder.BackgroundTransparency = 1
 	local listLayout = Instance.new("UIListLayout")
 	listLayout.Parent = optionsHolder
@@ -1344,21 +1399,22 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	end
 	local selectAllBtn = Instance.new("TextButton")
 	selectAllBtn.Parent = optionsHolder
-	selectAllBtn.Size = UDim2.new(1,0,0,28)
-	selectAllBtn.BackgroundColor3 = Color3.fromRGB(0,150,120)
+	selectAllBtn.Size = UDim2.new(1, 0, 0, 28)
+	selectAllBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 	selectAllBtn.Text = " ⚡ SELECT ALL / UNSELECT ALL"
-	selectAllBtn.TextColor3 = Color3.new(1,1,1)
+	selectAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	selectAllBtn.Font = Enum.Font.GothamBold
-	selectAllBtn.TextSize = 11
+	selectAllBtn.TextSize = 10
 	selectAllBtn.TextXAlignment = Enum.TextXAlignment.Left
 	local saCorner = Instance.new("UICorner")
+	saCorner.CornerRadius = UDim.new(0, 4)
 	saCorner.Parent = selectAllBtn
 	local allState = false
 	selectAllBtn.MouseButton1Click:Connect(function()
 		allState = not allState
 		for _, optName in ipairs(optionsTable) do targetStateTable[optName] = allState end
 		for optName, btn in pairs(itemButtons) do
-			btn.BackgroundColor3 = allState and Color3.fromRGB(0,120,200) or Color3.fromRGB(40,40,50)
+			btn.BackgroundColor3 = allState and Color3.fromRGB(45, 32, 68) or Color3.fromRGB(28, 22, 40)
 			btn.Text = " " .. optName .. (allState and " [✓]" or " [ ]")
 		end
 		UpdateSummary()
@@ -1367,19 +1423,20 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	for _, optName in ipairs(optionsTable) do
 		local optBtn = Instance.new("TextButton")
 		optBtn.Parent = optionsHolder
-		optBtn.Size = UDim2.new(1,0,0,28)
-		optBtn.BackgroundColor3 = targetStateTable[optName] and Color3.fromRGB(0,120,200) or Color3.fromRGB(40,40,50)
+		optBtn.Size = UDim2.new(1, 0, 0, 28)
+		optBtn.BackgroundColor3 = targetStateTable[optName] and Color3.fromRGB(45, 32, 68) or Color3.fromRGB(28, 22, 40)
 		optBtn.Text = " " .. optName .. (targetStateTable[optName] and " [✓]" or " [ ]")
-		optBtn.TextColor3 = Color3.new(1,1,1)
+		optBtn.TextColor3 = Color3.fromRGB(170, 160, 190)
 		optBtn.Font = Enum.Font.Gotham
 		optBtn.TextSize = 11
 		optBtn.TextXAlignment = Enum.TextXAlignment.Left
 		local obc = Instance.new("UICorner")
+		obc.CornerRadius = UDim.new(0, 4)
 		obc.Parent = optBtn
 		itemButtons[optName] = optBtn
 		optBtn.MouseButton1Click:Connect(function()
 			targetStateTable[optName] = not targetStateTable[optName]
-			optBtn.BackgroundColor3 = targetStateTable[optName] and Color3.fromRGB(0,120,200) or Color3.fromRGB(40,40,50)
+			optBtn.BackgroundColor3 = targetStateTable[optName] and Color3.fromRGB(45, 32, 68) or Color3.fromRGB(28, 22, 40)
 			optBtn.Text = " " .. optName .. (targetStateTable[optName] and " [✓]" or " [ ]")
 			UpdateSummary()
 			SaveConfig()
@@ -1389,21 +1446,23 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	local isOpen = false
 	header.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
-		container:TweenSize(isOpen and UDim2.new(1,0,0, 45 + ((#optionsTable + 1) * 32)) or UDim2.new(1,0,0,40), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+		container:TweenSize(isOpen and UDim2.new(1, -5, 0, 42 + ((#optionsTable + 1) * 32)) or UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 	end)
 end
 
 ----------------------------------------------------
 -- 2. FAVORITE PAGE
 ----------------------------------------------------
+local FavoritePage = pages["⭐ Favorite"]
+
 local TitleFav = Instance.new("TextLabel")
 TitleFav.Parent = FavoritePage
-TitleFav.Size = UDim2.new(1,0,0,25)
+TitleFav.Size = UDim2.new(1, -5, 0, 25)
 TitleFav.BackgroundTransparency = 1
 TitleFav.Text = "⭐ AUTO FAVORITE FILTER (BUAT PET AETHER)"
-TitleFav.TextColor3 = Color3.fromRGB(0,170,255)
+TitleFav.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleFav.Font = Enum.Font.GothamBold
-TitleFav.TextSize = 13
+TitleFav.TextSize = 12
 
 AddToggle(FavoritePage, "AUTO FAVORITE (SECRET & AETHER)", function(v) getgenv().AutoFavoriteRunning = v end)
 
@@ -1419,84 +1478,90 @@ CreateMultiSelectDropdown(FavoritePage, "Fav Filter Mutasi", mutationList, getge
 
 local TitleUnfav = Instance.new("TextLabel")
 TitleUnfav.Parent = FavoritePage
-TitleUnfav.Size = UDim2.new(1,0,0,25)
+TitleUnfav.Size = UDim2.new(1, -5, 0, 25)
 TitleUnfav.BackgroundTransparency = 1
 TitleUnfav.Text = "🗑️ UNFAVORITE FILTER SETTINGS"
-TitleUnfav.TextColor3 = Color3.fromRGB(255,100,100)
+TitleUnfav.TextColor3 = Color3.fromRGB(255, 100, 100)
 TitleUnfav.Font = Enum.Font.GothamBold
-TitleUnfav.TextSize = 13
+TitleUnfav.TextSize = 12
 
 CreateMultiSelectDropdown(FavoritePage, "Unfav Filter Rarity", rarityList, getgenv().UnfavRarities)
 CreateMultiSelectDropdown(FavoritePage, "Unfav Filter Mutasi", mutationList, getgenv().UnfavMutations)
 
 local UnfavFilterBtn = Instance.new("TextButton")
 UnfavFilterBtn.Parent = FavoritePage
-UnfavFilterBtn.Size = UDim2.new(1,0,0,38)
+UnfavFilterBtn.Size = UDim2.new(1, -5, 0, 34)
 UnfavFilterBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 30)
 UnfavFilterBtn.Text = "🎯 UNFAVORITE BY FILTER"
-UnfavFilterBtn.TextColor3 = Color3.new(1,1,1)
+UnfavFilterBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 UnfavFilterBtn.Font = Enum.Font.GothamBold
-UnfavFilterBtn.TextSize = 12
+UnfavFilterBtn.TextSize = 11
 local ufc = Instance.new("UICorner")
+ufc.CornerRadius = UDim.new(0, 6)
 ufc.Parent = UnfavFilterBtn
 UnfavFilterBtn.MouseButton1Click:Connect(function() UnfavoriteByFilter() end)
 
 local UnfavBtn = Instance.new("TextButton")
 UnfavBtn.Parent = FavoritePage
-UnfavBtn.Size = UDim2.new(1,0,0,38)
+UnfavBtn.Size = UDim2.new(1, -5, 0, 34)
 UnfavBtn.BackgroundColor3 = Color3.fromRGB(220, 70, 70)
 UnfavBtn.Text = "🚨 UNFAVORITE ALL FISH"
-UnfavBtn.TextColor3 = Color3.new(1,1,1)
+UnfavBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 UnfavBtn.Font = Enum.Font.GothamBold
-UnfavBtn.TextSize = 12
+UnfavBtn.TextSize = 11
 local uac = Instance.new("UICorner")
+uac.CornerRadius = UDim.new(0, 6)
 uac.Parent = UnfavBtn
 UnfavBtn.MouseButton1Click:Connect(function() UnfavoriteAllFish() end)
 
 ----------------------------------------------------
 -- 3. AUTO TRADE PAGE
 ----------------------------------------------------
+local TradePage = pages["🤝 Auto Trade"]
+
 local TitleTrade = Instance.new("TextLabel")
 TitleTrade.Parent = TradePage
-TitleTrade.Size = UDim2.new(1,0,0,30)
+TitleTrade.Size = UDim2.new(1, -5, 0, 25)
 TitleTrade.BackgroundTransparency = 1
-TitleTrade.Text = "🤝 AUTO TRADE & MULTI-ACCOUNT UTILITIES"
-TitleTrade.TextColor3 = Color3.fromRGB(0,170,255)
+TitleTrade.Text = "🤝 AUTO TRADE & MULTI-ACCOUNT"
+TitleTrade.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleTrade.Font = Enum.Font.GothamBold
-TitleTrade.TextSize = 13
+TitleTrade.TextSize = 12
 
 local RefreshTradePlayersBtn = Instance.new("TextButton")
 RefreshTradePlayersBtn.Parent = TradePage
-RefreshTradePlayersBtn.Size = UDim2.new(1,0,0,35)
-RefreshTradePlayersBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+RefreshTradePlayersBtn.Size = UDim2.new(1, -5, 0, 34)
+RefreshTradePlayersBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 RefreshTradePlayersBtn.Text = "🔄 Refresh Player di Trade"
-RefreshTradePlayersBtn.TextColor3 = Color3.new(1,1,1)
+RefreshTradePlayersBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 RefreshTradePlayersBtn.Font = Enum.Font.GothamBold
-RefreshTradePlayersBtn.TextSize = 12
+RefreshTradePlayersBtn.TextSize = 11
 local rtpb = Instance.new("UICorner")
+rtpb.CornerRadius = UDim.new(0, 6)
 rtpb.Parent = RefreshTradePlayersBtn
 
 local TradeTargetDropFrame = Instance.new("Frame")
 TradeTargetDropFrame.Parent = TradePage
-TradeTargetDropFrame.Size = UDim2.new(1,0,0,35)
-TradeTargetDropFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+TradeTargetDropFrame.Size = UDim2.new(1, -5, 0, 36)
+TradeTargetDropFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 TradeTargetDropFrame.ClipsDescendants = true
 local ttdc = Instance.new("UICorner")
+ttdc.CornerRadius = UDim.new(0, 6)
 ttdc.Parent = TradeTargetDropFrame
 
 local TradeTargetHeader = Instance.new("TextButton")
 TradeTargetHeader.Parent = TradeTargetDropFrame
-TradeTargetHeader.Size = UDim2.new(1,0,0,35)
+TradeTargetHeader.Size = UDim2.new(1, 0, 0, 36)
 TradeTargetHeader.BackgroundTransparency = 1
 TradeTargetHeader.Text = " 🎯 Target Trade: " .. (getgenv().TyoConfig.SelectedTradeTarget ~= "" and getgenv().TyoConfig.SelectedTradeTarget or "Pilih Player") .. " 🔽"
-TradeTargetHeader.TextColor3 = Color3.fromRGB(255, 200, 0)
-TradeTargetHeader.Font = Enum.Font.GothamBold
+TradeTargetHeader.TextColor3 = Color3.fromRGB(220, 215, 230)
+TradeTargetHeader.Font = Enum.Font.GothamMedium
 TradeTargetHeader.TextSize = 11
 TradeTargetHeader.TextXAlignment = Enum.TextXAlignment.Left
 
 local TradeTargetContainer = Instance.new("ScrollingFrame")
 TradeTargetContainer.Parent = TradeTargetDropFrame
-TradeTargetContainer.Position = UDim2.new(0, 5, 0, 35)
+TradeTargetContainer.Position = UDim2.new(0, 5, 0, 36)
 TradeTargetContainer.Size = UDim2.new(1, -10, 0, 110)
 TradeTargetContainer.BackgroundTransparency = 1
 TradeTargetContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -1507,7 +1572,6 @@ TradeListLayout.Parent = TradeTargetContainer
 TradeListLayout.Padding = UDim.new(0, 4)
 TradeListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Otomatis atur CanvasSize Trade agar bisa digulir sampai ke bawah
 TradeListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	TradeTargetContainer.CanvasSize = UDim2.new(0, 0, 0, TradeListLayout.AbsoluteContentSize.Y + 10)
 end)
@@ -1515,7 +1579,7 @@ end)
 local isTradeDropOpen = false
 TradeTargetHeader.MouseButton1Click:Connect(function()
 	isTradeDropOpen = not isTradeDropOpen
-	TradeTargetDropFrame:TweenSize(isTradeDropOpen and UDim2.new(1,0,0,150) or UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+	TradeTargetDropFrame:TweenSize(isTradeDropOpen and UDim2.new(1, -5, 0, 150) or UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 end)
 
 local function RefreshTradeTargets()
@@ -1525,19 +1589,20 @@ local function RefreshTradeTargets()
 			local btn = Instance.new("TextButton")
 			btn.Parent = TradeTargetContainer
 			btn.Size = UDim2.new(1, -5, 0, 28)
-			btn.BackgroundColor3 = Color3.fromRGB(40,40,50)
+			btn.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
 			btn.Text = " 👤 " .. plr.Name
-			btn.TextColor3 = Color3.new(1,1,1)
+			btn.TextColor3 = Color3.fromRGB(170, 160, 190)
 			btn.Font = Enum.Font.Gotham
 			btn.TextSize = 11
 			btn.TextXAlignment = Enum.TextXAlignment.Left
 			local bc = Instance.new("UICorner")
+			bc.CornerRadius = UDim.new(0, 4)
 			bc.Parent = btn
 			btn.MouseButton1Click:Connect(function()
 				getgenv().TyoConfig.SelectedTradeTarget = plr.Name
 				TradeTargetHeader.Text = " 🎯 Target Trade: " .. plr.Name .. " 🔽"
 				isTradeDropOpen = false
-				TradeTargetDropFrame:TweenSize(UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+				TradeTargetDropFrame:TweenSize(UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 				SaveConfig()
 			end)
 		end
@@ -1557,25 +1622,27 @@ Players.PlayerRemoving:Connect(RefreshTradeTargets)
 
 local AddAllTradeBtn = Instance.new("TextButton")
 AddAllTradeBtn.Parent = TradePage
-AddAllTradeBtn.Size = UDim2.new(1,0,0,38)
-AddAllTradeBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+AddAllTradeBtn.Size = UDim2.new(1, -5, 0, 34)
+AddAllTradeBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 AddAllTradeBtn.Text = "📦 Auto Add All Ikan ke Trade"
-AddAllTradeBtn.TextColor3 = Color3.new(1,1,1)
+AddAllTradeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AddAllTradeBtn.Font = Enum.Font.GothamBold
-AddAllTradeBtn.TextSize = 12
+AddAllTradeBtn.TextSize = 11
 local aatc = Instance.new("UICorner")
+aatc.CornerRadius = UDim.new(0, 6)
 aatc.Parent = AddAllTradeBtn
 AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddAllFishToTrade() end)
 
 local SendTradeReqBtn = Instance.new("TextButton")
 SendTradeReqBtn.Parent = TradePage
-SendTradeReqBtn.Size = UDim2.new(1,0,0,38)
-SendTradeReqBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 120)
+SendTradeReqBtn.Size = UDim2.new(1, -5, 0, 34)
+SendTradeReqBtn.BackgroundColor3 = Color3.fromRGB(120, 50, 220)
 SendTradeReqBtn.Text = "🚀 Kirim Request Trade ke Target"
-SendTradeReqBtn.TextColor3 = Color3.new(1,1,1)
+SendTradeReqBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SendTradeReqBtn.Font = Enum.Font.GothamBold
-SendTradeReqBtn.TextSize = 12
+SendTradeReqBtn.TextSize = 11
 local strc = Instance.new("UICorner")
+strc.CornerRadius = UDim.new(0, 6)
 strc.Parent = SendTradeReqBtn
 SendTradeReqBtn.MouseButton1Click:Connect(function() SendTradeRequestToTarget() end)
 
@@ -1584,24 +1651,27 @@ AddToggle(TradePage, "Auto Accept Trade (Terima Otomatis)", function(v) getgenv(
 ----------------------------------------------------
 -- 4. GALATAMA PAGE
 ----------------------------------------------------
+local GalatamaPage = pages["Galatama"]
+
 local TitleGal = Instance.new("TextLabel")
 TitleGal.Parent = GalatamaPage
-TitleGal.Size = UDim2.new(1,0,0,30)
+TitleGal.Size = UDim2.new(1, -5, 0, 25)
 TitleGal.BackgroundTransparency = 1
 TitleGal.Text = "🏆 GALATAMA & CORE EVENT UTILITIES"
-TitleGal.TextColor3 = Color3.fromRGB(0,170,255)
+TitleGal.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleGal.Font = Enum.Font.GothamBold
-TitleGal.TextSize = 13
+TitleGal.TextSize = 12
 
 local TeleportGalatamaBtn = Instance.new("TextButton")
 TeleportGalatamaBtn.Parent = GalatamaPage
-TeleportGalatamaBtn.Size = UDim2.new(1,0,0,35)
-TeleportGalatamaBtn.BackgroundColor3 = Color3.fromRGB(0,100,180)
+TeleportGalatamaBtn.Size = UDim2.new(1, -5, 0, 34)
+TeleportGalatamaBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 TeleportGalatamaBtn.Text = "📍 Teleport ke Galatama"
-TeleportGalatamaBtn.TextColor3 = Color3.new(1,1,1)
+TeleportGalatamaBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 TeleportGalatamaBtn.Font = Enum.Font.GothamBold
-TeleportGalatamaBtn.TextSize = 13
+TeleportGalatamaBtn.TextSize = 11
 local tgc = Instance.new("UICorner")
+tgc.CornerRadius = UDim.new(0, 6)
 tgc.Parent = TeleportGalatamaBtn
 TeleportGalatamaBtn.MouseButton1Click:Connect(function()
 	pcall(function() LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-8008.12744, 1227.96838, -6091.92627) + Vector3.new(0, 5, 0) end)
@@ -1628,12 +1698,12 @@ end)
 
 local TitleCoreEvent = Instance.new("TextLabel")
 TitleCoreEvent.Parent = GalatamaPage
-TitleCoreEvent.Size = UDim2.new(1,0,0,25)
+TitleCoreEvent.Size = UDim2.new(1, -5, 0, 25)
 TitleCoreEvent.BackgroundTransparency = 1
 TitleCoreEvent.Text = "💎 AUTO DETECT WITHERING CORE EVENT"
-TitleCoreEvent.TextColor3 = Color3.fromRGB(255,200,0)
+TitleCoreEvent.TextColor3 = Color3.fromRGB(255, 200, 0)
 TitleCoreEvent.Font = Enum.Font.GothamBold
-TitleCoreEvent.TextSize = 13
+TitleCoreEvent.TextSize = 12
 
 AddToggle(GalatamaPage, "Auto Teleport Saat Event Core Berlangsung", function(v) getgenv().AutoDetectCoreEvent = v end)
 
@@ -1687,25 +1757,28 @@ end)
 ----------------------------------------------------
 -- 5. TELEPORT SHOP PAGE
 ----------------------------------------------------
+local TeleportShopPage = pages["Teleport Shop"]
+
 local TitleShop = Instance.new("TextLabel")
 TitleShop.Parent = TeleportShopPage
-TitleShop.Size = UDim2.new(1,0,0,30)
+TitleShop.Size = UDim2.new(1, -5, 0, 25)
 TitleShop.BackgroundTransparency = 1
 TitleShop.Text = "🛒 TELEPORT TO SHOPS & NPCS"
-TitleShop.TextColor3 = Color3.fromRGB(0,170,255)
+TitleShop.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleShop.Font = Enum.Font.GothamBold
-TitleShop.TextSize = 13
+TitleShop.TextSize = 12
 
 local function AddShopTeleportBtn(parent, name, cf)
 	local btn = Instance.new("TextButton")
 	btn.Parent = parent
-	btn.Size = UDim2.new(1,0,0,35)
-	btn.BackgroundColor3 = Color3.fromRGB(35,35,45)
+	btn.Size = UDim2.new(1, -5, 0, 34)
+	btn.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 	btn.Text = "📍 Teleport ke " .. name
-	btn.TextColor3 = Color3.new(1,1,1)
+	btn.TextColor3 = Color3.fromRGB(220, 215, 230)
 	btn.Font = Enum.Font.GothamMedium
-	btn.TextSize = 12
+	btn.TextSize = 11
 	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 6)
 	c.Parent = btn
 	btn.MouseButton1Click:Connect(function() pcall(function() LocalPlayer.Character.HumanoidRootPart.CFrame = cf + Vector3.new(0, 5, 0) end) end)
 end
@@ -1720,14 +1793,16 @@ AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.6
 ----------------------------------------------------
 -- 6. SUMMIT PAGE
 ----------------------------------------------------
+local SummitPage = pages["Summit"]
+
 local TitleSum = Instance.new("TextLabel")
 TitleSum.Parent = SummitPage
-TitleSum.Size = UDim2.new(1,0,0,30)
+TitleSum.Size = UDim2.new(1, -5, 0, 25)
 TitleSum.BackgroundTransparency = 1
 TitleSum.Text = "⛰️ AUTO SUMMIT FARM (INSTANT TP)"
-TitleSum.TextColor3 = Color3.fromRGB(0,170,255)
+TitleSum.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleSum.Font = Enum.Font.GothamBold
-TitleSum.TextSize = 13
+TitleSum.TextSize = 12
 
 getgenv().SummitDelay = 1
 getgenv().SummitCpHeight = 1.5
@@ -1800,14 +1875,16 @@ end)
 local function AddSummitBox(placeholder, default, onChange)
 	local box = Instance.new("TextBox")
 	box.Parent = SummitPage
-	box.Size = UDim2.new(1,0,0,35)
-	box.BackgroundColor3 = Color3.fromRGB(35,35,45)
+	box.Size = UDim2.new(1, -5, 0, 36)
+	box.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 	box.PlaceholderText = placeholder
+	box.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 	box.Text = tostring(default)
-	box.TextColor3 = Color3.new(1,1,1)
-	box.Font = Enum.Font.Gotham
-	box.TextSize = 12
+	box.TextColor3 = Color3.fromRGB(220, 215, 230)
+	box.Font = Enum.Font.GothamMedium
+	box.TextSize = 11
 	local bc = Instance.new("UICorner")
+	bc.CornerRadius = UDim.new(0, 6)
 	bc.Parent = box
 	box.FocusLost:Connect(function()
 		local n = tonumber(box.Text)
@@ -1915,23 +1992,29 @@ end)
 ----------------------------------------------------
 -- 7. PLAYER PAGE
 ----------------------------------------------------
+local PlayerPage = pages["Player"]
+
 local TitlePly = Instance.new("TextLabel")
 TitlePly.Parent = PlayerPage
-TitlePly.Size = UDim2.new(1,0,0,30)
+TitlePly.Size = UDim2.new(1, -5, 0, 25)
 TitlePly.BackgroundTransparency = 1
 TitlePly.Text = "⚡ PLAYER SETTINGS & VISUALS"
-TitlePly.TextColor3 = Color3.fromRGB(0,170,255)
+TitlePly.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitlePly.Font = Enum.Font.GothamBold
-TitlePly.TextSize = 13
+TitlePly.TextSize = 12
 
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Parent = PlayerPage
-SpeedBox.Size = UDim2.new(1,0,0,35)
-SpeedBox.BackgroundColor3 = Color3.fromRGB(35,35,45)
+SpeedBox.Size = UDim2.new(1, -5, 0, 36)
+SpeedBox.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 SpeedBox.PlaceholderText = "Ketik WalkSpeed (Cth: 50)"
+SpeedBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 SpeedBox.Text = ""
-SpeedBox.TextColor3 = Color3.new(1,1,1)
+SpeedBox.TextColor3 = Color3.fromRGB(220, 215, 230)
+SpeedBox.Font = Enum.Font.GothamMedium
+SpeedBox.TextSize = 11
 local spc = Instance.new("UICorner")
+spc.CornerRadius = UDim.new(0, 6)
 spc.Parent = SpeedBox
 SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
@@ -1945,13 +2028,14 @@ end)
 
 local HeadlessBtn = Instance.new("TextButton")
 HeadlessBtn.Parent = PlayerPage
-HeadlessBtn.Size = UDim2.new(1,0,0,35)
-HeadlessBtn.BackgroundColor3 = Color3.fromRGB(0,100,180)
+HeadlessBtn.Size = UDim2.new(1, -5, 0, 34)
+HeadlessBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 HeadlessBtn.Text = "👻 Enable Headless"
-HeadlessBtn.TextColor3 = Color3.new(1,1,1)
+HeadlessBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 HeadlessBtn.Font = Enum.Font.GothamBold
-HeadlessBtn.TextSize = 13
+HeadlessBtn.TextSize = 11
 local hlc = Instance.new("UICorner")
+hlc.CornerRadius = UDim.new(0, 6)
 hlc.Parent = HeadlessBtn
 HeadlessBtn.MouseButton1Click:Connect(function()
 	pcall(function()
@@ -1965,19 +2049,20 @@ end)
 
 local FireRgbBtn = Instance.new("TextButton")
 FireRgbBtn.Parent = PlayerPage
-FireRgbBtn.Size = UDim2.new(1,0,0,35)
-FireRgbBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 200)
+FireRgbBtn.Size = UDim2.new(1, -5, 0, 34)
+FireRgbBtn.BackgroundColor3 = Color3.fromRGB(120, 50, 220)
 FireRgbBtn.Text = "🔥🌈 Auto RGB Fire: [OFF]"
-FireRgbBtn.TextColor3 = Color3.new(1,1,1)
+FireRgbBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FireRgbBtn.Font = Enum.Font.GothamBold
-FireRgbBtn.TextSize = 13
+FireRgbBtn.TextSize = 11
 local frc = Instance.new("UICorner")
+frc.CornerRadius = UDim.new(0, 6)
 frc.Parent = FireRgbBtn
 local autoRgbActive = false
 FireRgbBtn.MouseButton1Click:Connect(function()
 	autoRgbActive = not autoRgbActive
 	FireRgbBtn.Text = "🔥🌈 Auto RGB Fire: " .. (autoRgbActive and "[ON]" or "[OFF]")
-	FireRgbBtn.BackgroundColor3 = autoRgbActive and Color3.fromRGB(0, 150, 50) or Color3.fromRGB(150, 0, 200)
+	FireRgbBtn.BackgroundColor3 = autoRgbActive and Color3.fromRGB(23, 255, 151) or Color3.fromRGB(120, 50, 220)
 	pcall(function()
 		local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
 		if head then
@@ -2017,14 +2102,16 @@ end)
 ----------------------------------------------------
 -- 8. HALO PAGE
 ----------------------------------------------------
+local HaloPage = pages["Halo Kepala"]
+
 local TitleHalo = Instance.new("TextLabel")
 TitleHalo.Parent = HaloPage
-TitleHalo.Size = UDim2.new(1,0,0,30)
+TitleHalo.Size = UDim2.new(1, -5, 0, 25)
 TitleHalo.BackgroundTransparency = 1
 TitleHalo.Text = "👑 HALO & AKSESORIS KEPALA"
-TitleHalo.TextColor3 = Color3.fromRGB(0,170,255)
+TitleHalo.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleHalo.Font = Enum.Font.GothamBold
-TitleHalo.TextSize = 13
+TitleHalo.TextSize = 12
 
 local function ApplyHaloToCharacter(haloName)
 	getgenv().CurrentSelectedHalo = haloName
@@ -2067,13 +2154,14 @@ pcall(function()
 	if haloSourceFolder then
 		local clearHaloBtn = Instance.new("TextButton")
 		clearHaloBtn.Parent = HaloPage
-		clearHaloBtn.Size = UDim2.new(1,0,0,32)
-		clearHaloBtn.BackgroundColor3 = Color3.fromRGB(150, 30, 30)
+		clearHaloBtn.Size = UDim2.new(1, -5, 0, 34)
+		clearHaloBtn.BackgroundColor3 = Color3.fromRGB(220, 70, 70)
 		clearHaloBtn.Text = "❌ Lepas Aksesoris Kepala"
-		clearHaloBtn.TextColor3 = Color3.new(1,1,1)
+		clearHaloBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 		clearHaloBtn.Font = Enum.Font.GothamBold
-		clearHaloBtn.TextSize = 12
+		clearHaloBtn.TextSize = 11
 		local chc = Instance.new("UICorner")
+		chc.CornerRadius = UDim.new(0, 6)
 		chc.Parent = clearHaloBtn
 		
 		clearHaloBtn.MouseButton1Click:Connect(function()
@@ -2087,13 +2175,14 @@ pcall(function()
 			local name = haloItem.Name
 			local haloBtn = Instance.new("TextButton")
 			haloBtn.Parent = HaloPage
-			haloBtn.Size = UDim2.new(1,0,0,32)
-			haloBtn.BackgroundColor3 = Color3.fromRGB(35,35,45)
+			haloBtn.Size = UDim2.new(1, -5, 0, 34)
+			haloBtn.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 			haloBtn.Text = "👑 " .. name
-			haloBtn.TextColor3 = Color3.new(1,1,1)
+			haloBtn.TextColor3 = Color3.fromRGB(220, 215, 230)
 			haloBtn.Font = Enum.Font.GothamMedium
-			haloBtn.TextSize = 12
+			haloBtn.TextSize = 11
 			local hbc = Instance.new("UICorner")
+			hbc.CornerRadius = UDim.new(0, 6)
 			hbc.Parent = haloBtn
 			haloBtn.MouseButton1Click:Connect(function() ApplyHaloToCharacter(name) end)
 		end
@@ -2101,75 +2190,115 @@ pcall(function()
 end)
 
 ----------------------------------------------------
--- 9. TELEPORT PLAYER PAGE (DENGAN SCROLL & PERBAIKAN TP)
+-- 9. TELEPORT PLAYER PAGE
 ----------------------------------------------------
+local PlayerTpPage = pages["Teleport Player"]
+
 local TitleTpPly = Instance.new("TextLabel")
 TitleTpPly.Parent = PlayerTpPage
-TitleTpPly.Size = UDim2.new(1,0,0,30)
+TitleTpPly.Size = UDim2.new(1, -5, 0, 25)
 TitleTpPly.BackgroundTransparency = 1
 TitleTpPly.Text = "👥 TELEPORT TO OTHER PLAYERS"
-TitleTpPly.TextColor3 = Color3.fromRGB(0,170,255)
+TitleTpPly.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleTpPly.Font = Enum.Font.GothamBold
-TitleTpPly.TextSize = 13
+TitleTpPly.TextSize = 12
 
 local RefreshPlayerBtn = Instance.new("TextButton")
 RefreshPlayerBtn.Parent = PlayerTpPage
-RefreshPlayerBtn.Size = UDim2.new(1,0,0,35)
-RefreshPlayerBtn.BackgroundColor3 = Color3.fromRGB(0,100,180)
+RefreshPlayerBtn.Size = UDim2.new(1, -5, 0, 34)
+RefreshPlayerBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 RefreshPlayerBtn.Text = "🔄 Refresh / Scan Pemain"
-RefreshPlayerBtn.TextColor3 = Color3.new(1,1,1)
+RefreshPlayerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 RefreshPlayerBtn.Font = Enum.Font.GothamBold
-RefreshPlayerBtn.TextSize = 12
+RefreshPlayerBtn.TextSize = 11
 local rpc = Instance.new("UICorner")
+rpc.CornerRadius = UDim.new(0, 6)
 rpc.Parent = RefreshPlayerBtn
 
 local PlayerListContainer = Instance.new("ScrollingFrame")
 PlayerListContainer.Parent = PlayerTpPage
-PlayerListContainer.Size = UDim2.new(1,0,0,210)
+PlayerListContainer.Size = UDim2.new(1, -5, 0, 210)
 PlayerListContainer.BackgroundTransparency = 1
 PlayerListContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
 PlayerListContainer.ScrollBarThickness = 3
+PlayerListContainer.ScrollBarImageColor3 = Color3.fromRGB(140, 60, 255)
 
 local ListLayout = Instance.new("UIListLayout")
 ListLayout.Parent = PlayerListContainer
 ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ListLayout.Padding = UDim.new(0, 5)
+ListLayout.Padding = UDim.new(0, 4)
 
--- Otomatis atur CanvasSize Teleport Player agar bisa digulir sampai ke bawah
 ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	PlayerListContainer.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
 end)
 
+local function GetCharacterRootPart(char)
+	if not char then return nil end
+	return char:FindFirstChild("HumanoidRootPart") 
+		or char:FindFirstChild("Torso") 
+		or char:FindFirstChild("UpperTorso") 
+		or char:FindFirstChild("Head")
+end
+
 local function ScanAndDisplayPlayers()
-	for _, child in ipairs(PlayerListContainer:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+	for _, child in ipairs(PlayerListContainer:GetChildren()) do if child:IsA("Frame") or child:IsA("TextButton") then child:Destroy() end end
 	for _, plr in ipairs(Players:GetPlayers()) do
 		if plr ~= LocalPlayer then
-			local pBtn = Instance.new("TextButton")
-			pBtn.Parent = PlayerListContainer
-			pBtn.Size = UDim2.new(1, -5, 0, 32)
-			pBtn.BackgroundColor3 = Color3.fromRGB(35,35,45)
-			pBtn.Text = " 👤 " .. plr.Name .. " (" .. plr.DisplayName .. ")"
-			pBtn.TextColor3 = Color3.new(1,1,1)
-			pBtn.Font = Enum.Font.GothamMedium
-			pBtn.TextSize = 11
-			pBtn.TextXAlignment = Enum.TextXAlignment.Left
-			local pbc = Instance.new("UICorner")
-			pbc.Parent = pBtn
-			pBtn.MouseButton1Click:Connect(function()
-				pcall(function()
-					local targetChar = plr.Character
-					local hrpTarget = targetChar and (targetChar:FindFirstChild("HumanoidRootPart") or targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("UpperTorso"))
-					local myChar = LocalPlayer.Character
-					local myHrp = myChar and (myChar:FindFirstChild("HumanoidRootPart") or myChar:FindFirstChild("Torso") or myChar:FindFirstChild("UpperTorso"))
-					
-					if hrpTarget and myHrp then
-						-- Request streaming agar area player target ter-load dengan baik
-						pcall(function()
-							LocalPlayer:RequestStreamAroundAsync(hrpTarget.Position, 5)
-						end)
-						task.wait(0.1)
-						myHrp.CFrame = hrpTarget.CFrame + Vector3.new(0, 3, 0)
-					end
+			local card = Instance.new("Frame")
+			card.Parent = PlayerListContainer
+			card.Size = UDim2.new(1, -5, 0, 34)
+			card.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+			
+			local cc = Instance.new("UICorner")
+			cc.CornerRadius = UDim.new(0, 6)
+			cc.Parent = card
+			
+			local pName = Instance.new("TextLabel")
+			pName.Parent = card
+			pName.Position = UDim2.new(0, 10, 0, 0)
+			pName.Size = UDim2.new(0.65, 0, 1, 0)
+			pName.BackgroundTransparency = 1
+			pName.Text = "👤 " .. plr.Name
+			pName.TextColor3 = Color3.fromRGB(220, 215, 230)
+			pName.Font = Enum.Font.GothamMedium
+			pName.TextSize = 11
+			pName.TextXAlignment = Enum.TextXAlignment.Left
+			
+			local tpBtn = Instance.new("TextButton")
+			tpBtn.Parent = card
+			tpBtn.Position = UDim2.new(1, -70, 0.5, -11)
+			tpBtn.Size = UDim2.new(0, 60, 0, 22)
+			tpBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
+			tpBtn.Text = "Teleport"
+			tpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+			tpBtn.Font = Enum.Font.GothamBold
+			tpBtn.TextSize = 10
+			
+			local tpc = Instance.new("UICorner")
+			tpc.CornerRadius = UDim.new(0, 4)
+			tpc.Parent = tpBtn
+			
+			tpBtn.MouseButton1Click:Connect(function()
+				task.spawn(function()
+					pcall(function()
+						local targetChar = plr.Character
+						local targetPart = GetCharacterRootPart(targetChar)
+						local myChar = LocalPlayer.Character
+						local myPart = GetCharacterRootPart(myChar)
+						
+						if targetPart and myPart then
+							pcall(function() LocalPlayer:RequestStreamAroundAsync(targetPart.Position, 5) end)
+							if myPart:IsA("BasePart") then
+								myPart.Anchored = false
+								myPart.AssemblyLinearVelocity = Vector3.zero
+							end
+							local destinationCFrame = targetPart.CFrame * CFrame.new(0, 3, 2)
+							for i = 1, 3 do
+								if myChar and myPart then myPart.CFrame = destinationCFrame end
+								task.wait(0.05)
+							end
+						end
+					end)
 				end)
 			end)
 		end
@@ -2183,25 +2312,31 @@ Players.PlayerAdded:Connect(ScanAndDisplayPlayers)
 Players.PlayerRemoving:Connect(ScanAndDisplayPlayers)
 
 ----------------------------------------------------
--- 10. PRIVACY & ANTI-ADMIN PAGE
+-- 10. PRIVACY PAGE
 ----------------------------------------------------
+local PrivacyPage = pages["Privacy"]
+
 local TitlePrv = Instance.new("TextLabel")
 TitlePrv.Parent = PrivacyPage
-TitlePrv.Size = UDim2.new(1,0,0,30)
+TitlePrv.Size = UDim2.new(1, -5, 0, 25)
 TitlePrv.BackgroundTransparency = 1
 TitlePrv.Text = "🛡️ PRIVACY & ANTI-ADMIN"
-TitlePrv.TextColor3 = Color3.fromRGB(0,170,255)
+TitlePrv.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitlePrv.Font = Enum.Font.GothamBold
-TitlePrv.TextSize = 13
+TitlePrv.TextSize = 12
 
 local FakeNameBox = Instance.new("TextBox")
 FakeNameBox.Parent = PrivacyPage
-FakeNameBox.Size = UDim2.new(1,0,0,35)
-FakeNameBox.BackgroundColor3 = Color3.fromRGB(35,35,45)
-FakeNameBox.PlaceholderText = "Nama Samaran (Cth: TYO HUB)"
-FakeNameBox.Text = "TYO HUB"
-FakeNameBox.TextColor3 = Color3.new(1,1,1)
+FakeNameBox.Size = UDim2.new(1, -5, 0, 36)
+FakeNameBox.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+FakeNameBox.PlaceholderText = "Nama Samaran (Cth: AEMEATH HUB)"
+FakeNameBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
+FakeNameBox.Text = "AEMEATH HUB"
+FakeNameBox.TextColor3 = Color3.fromRGB(220, 215, 230)
+FakeNameBox.Font = Enum.Font.GothamMedium
+FakeNameBox.TextSize = 11
 local fnc = Instance.new("UICorner")
+fnc.CornerRadius = UDim.new(0, 6)
 fnc.Parent = FakeNameBox
 FakeNameBox.FocusLost:Connect(function() getgenv().FakeNameInput = FakeNameBox.Text end)
 
@@ -2211,7 +2346,7 @@ AddToggle(PrivacyPage, "Privacy Mode (Hide Name)", function(v)
 		task.spawn(function()
 			while getgenv().HideNameRunning do
 				pcall(function()
-					local fakeName = getgenv().FakeNameInput or "TYO HUB"
+					local fakeName = getgenv().FakeNameInput or "AEMEATH HUB"
 					local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
 					if head then
 						for _, child in ipairs(head:GetDescendants()) do
@@ -2230,19 +2365,21 @@ end)
 
 local AntiAdminToggleBtn = Instance.new("TextButton")
 AntiAdminToggleBtn.Parent = PrivacyPage
-AntiAdminToggleBtn.Size = UDim2.new(1,0,0,35)
-AntiAdminToggleBtn.BackgroundColor3 = getgenv().TyoConfig.AntiAdminEnabled and Color3.fromRGB(180, 50, 50) or Color3.fromRGB(30, 30, 40)
+AntiAdminToggleBtn.Size = UDim2.new(1, -5, 0, 36)
+AntiAdminToggleBtn.BackgroundColor3 = getgenv().TyoConfig.AntiAdminEnabled and Color3.fromRGB(180, 50, 50) or Color3.fromRGB(22, 18, 32)
 AntiAdminToggleBtn.Text = " Anti-Admin Protect (MPG Group): " .. (getgenv().TyoConfig.AntiAdminEnabled and "[ON]" or "[OFF]")
-AntiAdminToggleBtn.TextColor3 = Color3.new(1,1,1)
-AntiAdminToggleBtn.Font = Enum.Font.Gotham
+AntiAdminToggleBtn.TextColor3 = Color3.fromRGB(220, 215, 230)
+AntiAdminToggleBtn.Font = Enum.Font.GothamMedium
+AntiAdminToggleBtn.TextSize = 11
 AntiAdminToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
 local aac = Instance.new("UICorner")
+aac.CornerRadius = UDim.new(0, 6)
 aac.Parent = AntiAdminToggleBtn
 AntiAdminToggleBtn.MouseButton1Click:Connect(function()
 	getgenv().TyoConfig.AntiAdminEnabled = not getgenv().TyoConfig.AntiAdminEnabled
 	local active = getgenv().TyoConfig.AntiAdminEnabled
 	AntiAdminToggleBtn.Text = " Anti-Admin Protect (MPG Group): " .. (active and "[ON]" or "[OFF]")
-	AntiAdminToggleBtn.BackgroundColor3 = active and Color3.fromRGB(180, 50, 50) or Color3.fromRGB(30, 30, 40)
+	AntiAdminToggleBtn.BackgroundColor3 = active and Color3.fromRGB(180, 50, 50) or Color3.fromRGB(22, 18, 32)
 	SaveConfig()
 end)
 
@@ -2263,25 +2400,29 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 11. SETTINGS & PERFORMANCE BOOST (ULTRA NO-RENDER / POTATO)
+-- 11. SETTINGS & PERFORMANCE PAGE
 ----------------------------------------------------
+local SettingsPage = pages["Settings"]
+
 local TitleSet = Instance.new("TextLabel")
 TitleSet.Parent = SettingsPage
-TitleSet.Size = UDim2.new(1,0,0,30)
+TitleSet.Size = UDim2.new(1, -5, 0, 25)
 TitleSet.BackgroundTransparency = 1
 TitleSet.Text = "⚙️ SETTINGS & PERFORMANCE BOOST"
-TitleSet.TextColor3 = Color3.fromRGB(0,170,255)
+TitleSet.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleSet.Font = Enum.Font.GothamBold
-TitleSet.TextSize = 13
+TitleSet.TextSize = 12
 
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
-AntiLagBtn.Size = UDim2.new(1,0,0,35)
-AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 180)
+AntiLagBtn.Size = UDim2.new(1, -5, 0, 34)
+AntiLagBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 AntiLagBtn.Text = "⚡ Ultra Potato Graphics (Max No-Render)"
-AntiLagBtn.TextColor3 = Color3.new(1,1,1)
+AntiLagBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AntiLagBtn.Font = Enum.Font.GothamBold
+AntiLagBtn.TextSize = 11
 local alc = Instance.new("UICorner")
+alc.CornerRadius = UDim.new(0, 6)
 alc.Parent = AntiLagBtn
 
 local function ApplyUltraNoRender()
@@ -2331,76 +2472,56 @@ end
 AntiLagBtn.MouseButton1Click:Connect(function()
 	ApplyUltraNoRender()
 	AntiLagBtn.Text = "⚡ Ultra Potato Graphics Aktif!"
-	AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-end)
-
-task.spawn(function()
-	while true do
-		pcall(function()
-			local isPhotoOrPortraitActive = false
-			for _, gui in ipairs(PlayerGui:GetDescendants()) do
-				if gui:IsA("TextLabel") or gui:IsA("TextButton") then
-					local text = string.lower(gui.Text or "")
-					if string.find(text, "mode foto") or string.find(text, "mode potret") or string.find(text, "sembunyikan ui") then
-						if gui.Parent and (gui.Parent.BackgroundColor3 == Color3.fromRGB(0, 170, 0) or gui.Parent.BackgroundColor3 == Color3.fromRGB(0, 255, 0)) then
-							isPhotoOrPortraitActive = true
-						end
-					end
-				end
-			end
-			if not isPhotoOrPortraitActive then
-				ApplyUltraNoRender()
-			end
-		end)
-		task.wait(10)
-	end
+	AntiLagBtn.BackgroundColor3 = Color3.fromRGB(23, 255, 151)
 end)
 
 local BlackScreenGui = nil
 local BlackScreenToggleBtn = Instance.new("TextButton")
 BlackScreenToggleBtn.Parent = SettingsPage
-BlackScreenToggleBtn.Size = UDim2.new(1,0,0,35)
-BlackScreenToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+BlackScreenToggleBtn.Size = UDim2.new(1, -5, 0, 36)
+BlackScreenToggleBtn.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 BlackScreenToggleBtn.Text = " 📱 Black Screen (Battery Saver): [OFF]"
-BlackScreenToggleBtn.TextColor3 = Color3.new(1,1,1)
-BlackScreenToggleBtn.Font = Enum.Font.Gotham
+BlackScreenToggleBtn.TextColor3 = Color3.fromRGB(220, 215, 230)
+BlackScreenToggleBtn.Font = Enum.Font.GothamMedium
+BlackScreenToggleBtn.TextSize = 11
 BlackScreenToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
 local bsc = Instance.new("UICorner")
+bsc.CornerRadius = UDim.new(0, 6)
 bsc.Parent = BlackScreenToggleBtn
 local isBlackScreen = false
 
 BlackScreenToggleBtn.MouseButton1Click:Connect(function()
 	isBlackScreen = not isBlackScreen
 	BlackScreenToggleBtn.Text = " 📱 Black Screen (Battery Saver): " .. (isBlackScreen and "[ON]" or "[OFF]")
-	BlackScreenToggleBtn.BackgroundColor3 = isBlackScreen and Color3.fromRGB(0, 150, 100) or Color3.fromRGB(30, 30, 40)
+	BlackScreenToggleBtn.BackgroundColor3 = isBlackScreen and Color3.fromRGB(140, 60, 255) or Color3.fromRGB(22, 18, 32)
 	
 	if isBlackScreen then
 		if not BlackScreenGui then
 			BlackScreenGui = Instance.new("ScreenGui")
-			BlackScreenGui.Name = "TyoBlackScreen"
+			BlackScreenGui.Name = "AemeathBlackScreen"
 			BlackScreenGui.Parent = PlayerGui
 			BlackScreenGui.DisplayOrder = 999999
 			BlackScreenGui.IgnoreGuiInset = true
 			
 			local frame = Instance.new("Frame")
 			frame.Parent = BlackScreenGui
-			frame.Size = UDim2.new(1,0,1,0)
-			frame.BackgroundColor3 = Color3.fromRGB(2, 2, 5)
+			frame.Size = UDim2.new(1, 0, 1, 0)
+			frame.BackgroundColor3 = Color3.fromRGB(5, 4, 8)
 			
 			local txt = Instance.new("TextLabel")
 			txt.Parent = frame
-			txt.Size = UDim2.new(1,0,0,60)
-			txt.Position = UDim2.new(0,0,0.45,0)
+			txt.Size = UDim2.new(1, 0, 0, 60)
+			txt.Position = UDim2.new(0, 0, 0.45, 0)
 			txt.BackgroundTransparency = 1
-			txt.Text = "🌙 TYO HUB V3 - BATTERY SAVER ACTIVE\n(Sentuh Layar Untuk Kembali)"
-			txt.TextColor3 = Color3.fromRGB(0, 170, 255)
+			txt.Text = "🌙 AEMEATH WUWA HUB V3 - BATTERY SAVER ACTIVE\n(Sentuh Layar Untuk Kembali)"
+			txt.TextColor3 = Color3.fromRGB(160, 80, 255)
 			txt.Font = Enum.Font.GothamBold
-			txt.TextSize = 13
+			txt.TextSize = 12
 			
 			frame.InputBegan:Connect(function()
 				isBlackScreen = false
 				BlackScreenToggleBtn.Text = " 📱 Black Screen (Battery Saver): [OFF]"
-				BlackScreenToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+				BlackScreenToggleBtn.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 				BlackScreenGui.Enabled = false
 			end)
 		else
@@ -2413,29 +2534,35 @@ end)
 
 local WebhookToggleBtn = Instance.new("TextButton")
 WebhookToggleBtn.Parent = SettingsPage
-WebhookToggleBtn.Size = UDim2.new(1,0,0,35)
-WebhookToggleBtn.BackgroundColor3 = getgenv().TyoConfig.WebhookEnabled and Color3.fromRGB(0, 150, 100) or Color3.fromRGB(30, 30, 40)
+WebhookToggleBtn.Size = UDim2.new(1, -5, 0, 36)
+WebhookToggleBtn.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 WebhookToggleBtn.Text = " Webhook Server-Wide (Rare & Core): " .. (getgenv().TyoConfig.WebhookEnabled and "[ON]" or "[OFF]")
-WebhookToggleBtn.TextColor3 = Color3.new(1,1,1)
-WebhookToggleBtn.Font = Enum.Font.Gotham
+WebhookToggleBtn.TextColor3 = Color3.fromRGB(220, 215, 230)
+WebhookToggleBtn.Font = Enum.Font.GothamMedium
+WebhookToggleBtn.TextSize = 11
 WebhookToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
 local wtc = Instance.new("UICorner")
+wtc.CornerRadius = UDim.new(0, 6)
 wtc.Parent = WebhookToggleBtn
 WebhookToggleBtn.MouseButton1Click:Connect(function()
 	getgenv().TyoConfig.WebhookEnabled = not getgenv().TyoConfig.WebhookEnabled
 	WebhookToggleBtn.Text = " Webhook Server-Wide (Rare & Core): " .. (getgenv().TyoConfig.WebhookEnabled and "[ON]" or "[OFF]")
-	WebhookToggleBtn.BackgroundColor3 = getgenv().TyoConfig.WebhookEnabled and Color3.fromRGB(0, 150, 100) or Color3.fromRGB(30, 30, 40)
+	WebhookToggleBtn.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 	SaveConfig()
 end)
 
 local WebhookBox = Instance.new("TextBox")
 WebhookBox.Parent = SettingsPage
-WebhookBox.Size = UDim2.new(1,0,0,35)
-WebhookBox.BackgroundColor3 = Color3.fromRGB(35,35,45)
+WebhookBox.Size = UDim2.new(1, -5, 0, 36)
+WebhookBox.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
 WebhookBox.PlaceholderText = "Paste Discord Webhook URL di sini..."
+WebhookBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 WebhookBox.Text = tostring(getgenv().TyoConfig.WebhookUrl or "")
-WebhookBox.TextColor3 = Color3.new(1,1,1)
+WebhookBox.TextColor3 = Color3.fromRGB(220, 215, 230)
+WebhookBox.Font = Enum.Font.GothamMedium
+WebhookBox.TextSize = 11
 local wbc = Instance.new("UICorner")
+wbc.CornerRadius = UDim.new(0, 6)
 wbc.Parent = WebhookBox
 WebhookBox.FocusLost:Connect(function()
 	getgenv().TyoConfig.WebhookUrl = WebhookBox.Text
@@ -2444,13 +2571,14 @@ end)
 
 local TestWebhookBtn = Instance.new("TextButton")
 TestWebhookBtn.Parent = SettingsPage
-TestWebhookBtn.Size = UDim2.new(1,0,0,35)
-TestWebhookBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+TestWebhookBtn.Size = UDim2.new(1, -5, 0, 34)
+TestWebhookBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
 TestWebhookBtn.Text = "🧪 Test Kirim Webhook ke Discord"
-TestWebhookBtn.TextColor3 = Color3.new(1,1,1)
+TestWebhookBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 TestWebhookBtn.Font = Enum.Font.GothamBold
-TestWebhookBtn.TextSize = 13
+TestWebhookBtn.TextSize = 11
 local twc = Instance.new("UICorner")
+twc.CornerRadius = UDim.new(0, 6)
 twc.Parent = TestWebhookBtn
 TestWebhookBtn.MouseButton1Click:Connect(function()
 	pcall(function()
@@ -2468,7 +2596,7 @@ TestWebhookBtn.MouseButton1Click:Connect(function()
 				Method = "POST",
 				Headers = { ["Content-Type"] = "application/json" },
 				Body = HttpService:JSONEncode({
-					["content"] = "✅ **Tyo Hub V3 Mount Soreya Webhook Test Berhasil!**"
+					["content"] = "✅ **Aemeath WuWa Hub V3 Mount Soreya Webhook Test Berhasil!**"
 				})
 			})
 			TestWebhookBtn.Text = "✅ Pesan Test Berhasil Dikirim!"
@@ -2482,12 +2610,14 @@ end)
 
 local SaveConfigBtn = Instance.new("TextButton")
 SaveConfigBtn.Parent = SettingsPage
-SaveConfigBtn.Size = UDim2.new(1,0,0,35)
-SaveConfigBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+SaveConfigBtn.Size = UDim2.new(1, -5, 0, 34)
+SaveConfigBtn.BackgroundColor3 = Color3.fromRGB(23, 255, 151)
 SaveConfigBtn.Text = "💾 Simpan Konfigurasi"
-SaveConfigBtn.TextColor3 = Color3.new(1,1,1)
+SaveConfigBtn.TextColor3 = Color3.fromRGB(15, 12, 22)
 SaveConfigBtn.Font = Enum.Font.GothamBold
+SaveConfigBtn.TextSize = 11
 local scc = Instance.new("UICorner")
+scc.CornerRadius = UDim.new(0, 6)
 scc.Parent = SaveConfigBtn
 SaveConfigBtn.MouseButton1Click:Connect(function()
 	SaveConfig()
@@ -2498,12 +2628,14 @@ end)
 
 local ResetConfigBtn = Instance.new("TextButton")
 ResetConfigBtn.Parent = SettingsPage
-ResetConfigBtn.Size = UDim2.new(1,0,0,35)
-ResetConfigBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+ResetConfigBtn.Size = UDim2.new(1, -5, 0, 34)
+ResetConfigBtn.BackgroundColor3 = Color3.fromRGB(220, 70, 70)
 ResetConfigBtn.Text = "🔄 Reset Konfigurasi"
-ResetConfigBtn.TextColor3 = Color3.new(1,1,1)
+ResetConfigBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ResetConfigBtn.Font = Enum.Font.GothamBold
+ResetConfigBtn.TextSize = 11
 local rcc = Instance.new("UICorner")
+rcc.CornerRadius = UDim.new(0, 6)
 rcc.Parent = ResetConfigBtn
 ResetConfigBtn.MouseButton1Click:Connect(function()
 	ResetConfig()
@@ -2512,23 +2644,27 @@ ResetConfigBtn.MouseButton1Click:Connect(function()
 	ResetConfigBtn.Text = "🔄 Reset Konfigurasi"
 end)
 
+----------------------------------------------------
+-- 12. CREDITS PAGE
+----------------------------------------------------
+local CreditsPage = pages["Credits"]
 local CredLbl = Instance.new("TextLabel")
 CredLbl.Parent = CreditsPage
-CredLbl.Size = UDim2.new(1,0,1,0)
+CredLbl.Size = UDim2.new(1, -5, 1, 0)
 CredLbl.BackgroundTransparency = 1
-CredLbl.Text = "Created By TYO\nMap: Mount Soreya"
-CredLbl.TextColor3 = Color3.new(1,1,1)
+CredLbl.Text = "Aemeath Wuthering Waves Edition\nMap: Mount Soreya\nSpeed Hub Modern UI Redesign"
+CredLbl.TextColor3 = Color3.fromRGB(220, 215, 230)
 CredLbl.Font = Enum.Font.GothamBold
-CredLbl.TextSize = 20
+CredLbl.TextSize = 14
 
 ----------------------------------------------------
--- 12. BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
+-- BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
 ----------------------------------------------------
 local StatPanel = Instance.new("Frame")
 StatPanel.Parent = Main
-StatPanel.Size = UDim2.new(1, -160, 0, 24)
-StatPanel.Position = UDim2.new(0, 150, 1, -28)
-StatPanel.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+StatPanel.Size = UDim2.new(1, -158, 0, 24)
+StatPanel.Position = UDim2.new(0, 150, 1, -26)
+StatPanel.BackgroundColor3 = Color3.fromRGB(20, 16, 28)
 StatPanel.BorderSizePixel = 0
 local stpCorner = Instance.new("UICorner")
 stpCorner.CornerRadius = UDim.new(0, 6)
@@ -2540,9 +2676,9 @@ StatLabel.Size = UDim2.new(1, -10, 1, 0)
 StatLabel.Position = UDim2.new(0, 5, 0, 0)
 StatLabel.BackgroundTransparency = 1
 StatLabel.Text = "📊 Total Ikan: 0 | ⏱️ Play Time: 00s"
-StatLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
+StatLabel.TextColor3 = Color3.fromRGB(160, 80, 255)
 StatLabel.Font = Enum.Font.GothamBold
-StatLabel.TextSize = 11
+StatLabel.TextSize = 10
 StatLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 task.spawn(function()
@@ -2569,14 +2705,14 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- FLOATING BUTTON (IMAGE BUTTON)
+-- FLOATING BUTTON (AEMEATH WUTHERING WAVES LOGO)
 ----------------------------------------------------
 local Float = Instance.new("ImageButton")
 Float.Parent = Gui
-Float.Size = UDim2.new(0, 55, 0, 55)
+Float.Size = UDim2.new(0, 48, 0, 48)
 Float.Position = UDim2.new(0, 20, 0, 120)
-Float.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Float.Image = "rbxassetid://1000301096"
+Float.BackgroundColor3 = Color3.fromRGB(20, 16, 28)
+Float.Image = "rbxassetid://137785805499299"
 Float.ScaleType = Enum.ScaleType.Crop
 
 local flCorner = Instance.new("UICorner")
@@ -2585,7 +2721,7 @@ flCorner.Parent = Float
 
 local flStroke = Instance.new("UIStroke")
 flStroke.Parent = Float
-flStroke.Color = Color3.fromRGB(0, 170, 255)
+flStroke.Color = Color3.fromRGB(140, 60, 255)
 flStroke.Thickness = 2
 
 MakeDraggable(Float)
