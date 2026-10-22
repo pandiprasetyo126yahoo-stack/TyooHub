@@ -1,5 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 | VIP FULL SCRIPT (NO-KEY & MULTI-DEVICE / MULTI-ACCOUNT SAFE)
+-- MAP: MOUNT SOREYA UPDATE
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -36,7 +37,8 @@ getgenv().TyoConfig = {
 	AntiAdminEnabled = false,
 	TargetGroupId = 7019573,
 	WebhookEnabled = false,
-	WebhookUrl = ""
+	WebhookUrl = "",
+	SelectedTradeTarget = ""
 }
 
 local function SaveConfig()
@@ -63,6 +65,7 @@ local function LoadConfig()
 				if data.TargetGroupId then getgenv().TyoConfig.TargetGroupId = data.TargetGroupId end
 				if data.WebhookEnabled ~= nil then getgenv().TyoConfig.WebhookEnabled = data.WebhookEnabled end
 				if data.WebhookUrl then getgenv().TyoConfig.WebhookUrl = data.WebhookUrl end
+				if data.SelectedTradeTarget then getgenv().TyoConfig.SelectedTradeTarget = data.SelectedTradeTarget end
 			end
 		end
 	end)
@@ -79,7 +82,8 @@ local function ResetConfig()
 			AntiAdminEnabled = false,
 			TargetGroupId = 7019573,
 			WebhookEnabled = false,
-			WebhookUrl = ""
+			WebhookUrl = "",
+			SelectedTradeTarget = ""
 		}
 		if delfile and isfile then
 			if isfile(CONFIG_FILE) then delfile(CONFIG_FILE) end
@@ -100,17 +104,17 @@ local function SendServerWideWebhook(playerName, catchType, position)
 		local typeLower = string.lower(tostring(catchType))
 		local targetPlayer = tostring(playerName or "Unknown Player")
 		
-		if string.find(typeLower, "secret") or string.find(typeLower, "forgotten") or string.find(typeLower, "core") or string.find(typeLower, "catch") then
+		if string.find(typeLower, "secret") or string.find(typeLower, "forgotten") or string.find(typeLower, "core") or string.find(typeLower, "catch") or string.find(typeLower, "aether") then
 			local requestFunc = (syn and syn.request) or (http and http.request) or request or (fluxus and fluxus.request)
 			if not requestFunc then return end
 			
-			local embedTitle = "👑 Tyo Hub V3 - Server Rare Catch Tracker!"
+			local embedTitle = "👑 Tyo Hub V3 - Mount Soreya Rare Catch Tracker!"
 			local alertContent = string.format("@everyone 🚨 **%s Berhasil Mendapatkan Tangkapan Langka!**", targetPlayer)
 			local embedColor = 16711935
 			
-			if string.find(typeLower, "core") then
-				alertContent = string.format("@everyone ⚡ **%s Mendapatkan Withering Core!**", targetPlayer)
-				embedTitle = "💎 Tyo Hub V3 - Core Event Tracker!"
+			if string.find(typeLower, "core") or string.find(typeLower, "aether") then
+				alertContent = string.format("@everyone ⚡ **%s Mendapatkan Item Spesial / Aether Material!**", targetPlayer)
+				embedTitle = "💎 Tyo Hub V3 - Mount Soreya Event Tracker!"
 				embedColor = 16776960
 			end
 			
@@ -121,14 +125,14 @@ local function SendServerWideWebhook(playerName, catchType, position)
 				["embeds"] = {
 					{
 						["title"] = embedTitle,
-						["description"] = string.format("Pemain **%s** di dalam server ini baru saja mendapatkan item spesial!", targetPlayer),
+						["description"] = string.format("Pemain **%s** di dalam server Mount Soreya baru saja mendapatkan item spesial!", targetPlayer),
 						["color"] = embedColor,
 						["fields"] = {
 							{ ["name"] = "👤 Nama Player", ["value"] = targetPlayer, ["inline"] = true },
 							{ ["name"] = "🎯 Tipe Tangkapan", ["value"] = tostring(catchType), ["inline"] = true },
 							{ ["name"] = "📍 Koordinat", ["value"] = posStr, ["inline"] = true }
 						},
-						["footer"] = { ["text"] = "Tyo Hub V3 • Server-Wide Broadcast Monitor" },
+						["footer"] = { ["text"] = "Tyo Hub V3 • Mount Soreya Monitor" },
 						["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
 					}
 				}
@@ -336,9 +340,10 @@ getgenv().SpotLoopConfig = {
 	["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
 }
 getgenv().AutoFavoriteRunning = false
+getgenv().AutoAcceptTradeRunning = false
 getgenv().FavRarities = {
 	["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
-	["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true
+	["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
 }
 getgenv().FavMutations = {
 	["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false,
@@ -633,6 +638,73 @@ local function UnfavoriteByFilter()
 	end)
 end
 
+------------------------------------------------------------------
+-- TRADE UTILITIES (AUTO ADD, REQUEST, ACCEPT)
+------------------------------------------------------------------
+local function GetTradeRemote(actionName)
+	pcall(function()
+		local tradeFolder = ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Trade")
+		if tradeFolder and tradeFolder:FindFirstChild(actionName) then
+			return tradeFolder[actionName]
+		end
+	end)
+	return nil
+end
+
+local function AutoAddAllFishToTrade()
+	pcall(function()
+		local serverData = GetServerFishData()
+		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Trade") and ReplicatedStorage.Remote.Trade:FindFirstChild("TambahItem")
+		for _, fish in ipairs(serverData) do
+			if tradeRemote then
+				if tradeRemote:IsA("RemoteEvent") then
+					tradeRemote:FireServer(fish.UUID)
+				elseif tradeRemote:IsA("RemoteFunction") then
+					tradeRemote:InvokeServer(fish.UUID)
+				end
+				task.wait(0.05)
+			end
+		end
+	end)
+end
+
+local function SendTradeRequestToTarget()
+	pcall(function()
+		local targetName = getgenv().TyoConfig.SelectedTradeTarget
+		if not targetName or targetName == "" then return end
+		local targetPlayer = Players:FindFirstChild(targetName)
+		if targetPlayer then
+			local reqRemote = GetTradeRemote("Request") or GetTradeRemote("SendRequest") or ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Trade") and ReplicatedStorage.Remote.Trade:FindFirstChild("KirimRequest")
+			if reqRemote then
+				if reqRemote:IsA("RemoteEvent") then
+					reqRemote:FireServer(targetPlayer)
+				elseif reqRemote:IsA("RemoteFunction") then
+					reqRemote:InvokeServer(targetPlayer)
+				end
+			end
+		end
+	end)
+end
+
+-- Auto Accept Trade listener
+task.spawn(function()
+	while true do
+		if getgenv().AutoAcceptTradeRunning then
+			pcall(function()
+				local acceptRemote = GetTradeRemote("Accept") or GetTradeRemote("TerimaTrade")
+				if acceptRemote then
+					if acceptRemote:IsA("RemoteEvent") then
+						acceptRemote:FireServer()
+					elseif acceptRemote:IsA("RemoteFunction") then
+						acceptRemote:InvokeServer()
+					end
+				end
+			end)
+		end
+		task.wait(1)
+	end
+end)
+
 pcall(function()
 	local oldGui = PlayerGui:FindFirstChild("TyoHub")
 	if oldGui then oldGui:Destroy() end
@@ -757,7 +829,7 @@ local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Parent = Main
 Sidebar.Size = UDim2.new(0,140,1,0)
 Sidebar.BackgroundColor3 = Color3.fromRGB(15,15,20)
-Sidebar.CanvasSize = UDim2.new(0,0,2.6,0)
+Sidebar.CanvasSize = UDim2.new(0,0,2.8,0)
 Sidebar.ScrollBarThickness = 2
 
 local sbCorner = Instance.new("UICorner")
@@ -768,17 +840,17 @@ HubTitle.Parent = Sidebar
 HubTitle.BackgroundTransparency = 1
 HubTitle.Position = UDim2.new(0, 0, 0, 8)
 HubTitle.Size = UDim2.new(1, 0, 0, 22)
-HubTitle.Text = "TYO HUB"
+HubTitle.Text = "TYO HUB V3"
 HubTitle.Font = Enum.Font.GothamBold
 HubTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
-HubTitle.TextSize = 17
+HubTitle.TextSize = 16
 
 local HubSubTitle = Instance.new("TextLabel")
 HubSubTitle.Parent = Sidebar
 HubSubTitle.BackgroundTransparency = 1
-HubSubTitle.Position = UDim2.new(0, 0, 0, 32)
+HubSubTitle.Position = UDim2.new(0, 0, 0, 30)
 HubSubTitle.Size = UDim2.new(1, 0, 0, 18)
-HubSubTitle.Text = "🔥 No Key Version"
+HubSubTitle.Text = "🏔️ Mount Soreya"
 HubSubTitle.Font = Enum.Font.GothamBold
 HubSubTitle.TextColor3 = Color3.fromRGB(0, 255, 150)
 HubSubTitle.TextSize = 11
@@ -815,17 +887,18 @@ local function CreateNavButton(text, yPos)
 	return btn
 end
 
-local HomeBtn = CreateNavButton("Fishing & Sell", 60)
-local FavoriteBtn = CreateNavButton("⭐ Favorite", 95)
-local GalatamaBtn = CreateNavButton("Galatama", 130)
-local TeleportShopBtn = CreateNavButton("Teleport Shop", 165)
-local SummitBtn = CreateNavButton("Summit", 200)
-local PlayerMenuBtn = CreateNavButton("Player", 235)
-local HaloMenuBtn = CreateNavButton("Halo Kepala", 270)
-local PlayerTpBtn = CreateNavButton("Teleport Player", 305)
-local PrivacyBtn = CreateNavButton("Privacy", 340)
-local SettingsBtn = CreateNavButton("Settings", 375)
-local CreditsBtn = CreateNavButton("Credits", 410)
+local HomeBtn = CreateNavButton("Fishing & Sell", 55)
+local FavoriteBtn = CreateNavButton("⭐ Favorite", 90)
+local TradeBtn = CreateNavButton("🤝 Auto Trade", 125)
+local GalatamaBtn = CreateNavButton("Galatama", 160)
+local TeleportShopBtn = CreateNavButton("Teleport Shop", 195)
+local SummitBtn = CreateNavButton("Summit", 230)
+local PlayerMenuBtn = CreateNavButton("Player", 265)
+local HaloMenuBtn = CreateNavButton("Halo Kepala", 300)
+local PlayerTpBtn = CreateNavButton("Teleport Player", 335)
+local PrivacyBtn = CreateNavButton("Privacy", 370)
+local SettingsBtn = CreateNavButton("Settings", 405)
+local CreditsBtn = CreateNavButton("Credits", 440)
 
 local function MakePage()
 	local f = Instance.new("ScrollingFrame")
@@ -848,6 +921,7 @@ end
 local FishingPage = MakePage()
 FishingPage.Visible = true
 local FavoritePage = MakePage()
+local TradePage = MakePage()
 local GalatamaPage = MakePage()
 local TeleportShopPage = MakePage()
 local SummitPage = MakePage()
@@ -861,6 +935,7 @@ local CreditsPage = MakePage()
 local function HideAll()
 	FishingPage.Visible = false
 	FavoritePage.Visible = false
+	TradePage.Visible = false
 	GalatamaPage.Visible = false
 	TeleportShopPage.Visible = false
 	SummitPage.Visible = false
@@ -874,6 +949,7 @@ end
 
 HomeBtn.MouseButton1Click:Connect(function() HideAll(); FishingPage.Visible = true end)
 FavoriteBtn.MouseButton1Click:Connect(function() HideAll(); FavoritePage.Visible = true end)
+TradeBtn.MouseButton1Click:Connect(function() HideAll(); TradePage.Visible = true end)
 GalatamaBtn.MouseButton1Click:Connect(function() HideAll(); GalatamaPage.Visible = true end)
 TeleportShopBtn.MouseButton1Click:Connect(function() HideAll(); TeleportShopPage.Visible = true end)
 SummitBtn.MouseButton1Click:Connect(function() HideAll(); SummitPage.Visible = true end)
@@ -912,7 +988,7 @@ local TitleFish = Instance.new("TextLabel")
 TitleFish.Parent = FishingPage
 TitleFish.Size = UDim2.new(1,0,0,30)
 TitleFish.BackgroundTransparency = 1
-TitleFish.Text = "🔥 AUTO FISHING & SELL UTILITIES"
+TitleFish.Text = "🔥 AUTO FISHING & SELL (MOUNT SOREYA)"
 TitleFish.TextColor3 = Color3.fromRGB(0,170,255)
 TitleFish.Font = Enum.Font.GothamBold
 TitleFish.TextSize = 13
@@ -1318,20 +1394,20 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 end
 
 ----------------------------------------------------
--- 2. FAVORITE PAGE
+-- 2. FAVORITE PAGE (DENGAN SECRET ACARA & AETHER)
 ----------------------------------------------------
 local TitleFav = Instance.new("TextLabel")
 TitleFav.Parent = FavoritePage
 TitleFav.Size = UDim2.new(1,0,0,25)
 TitleFav.BackgroundTransparency = 1
-TitleFav.Text = "⭐ AUTO FAVORITE FILTER"
+TitleFav.Text = "⭐ AUTO FAVORITE FILTER (BUAT PET AETHER)"
 TitleFav.TextColor3 = Color3.fromRGB(0,170,255)
 TitleFav.Font = Enum.Font.GothamBold
 TitleFav.TextSize = 13
 
-AddToggle(FavoritePage, "AUTO FAVORITE", function(v) getgenv().AutoFavoriteRunning = v end)
+AddToggle(FavoritePage, "AUTO FAVORITE (SECRET & AETHER)", function(v) getgenv().AutoFavoriteRunning = v end)
 
-local rarityList = {"Common", "UnCommon", "Rare", "Epic", "Legendary", "Mythical", "Secret", "Forgotten"}
+local rarityList = {"Common", "UnCommon", "Rare", "Epic", "Legendary", "Mythical", "Secret", "Forgotten", "Aether"}
 local mutationList = {
 	"Galaxy", "Corrupt", "Gemstone", "Ghost", "Lightning", "Fairy Dust", 
 	"Gold", "Midnight", "Radioactive", "Stone", "Holographic", "Albino", "Sandy", "Cosmic", 
@@ -1378,7 +1454,111 @@ uac.Parent = UnfavBtn
 UnfavBtn.MouseButton1Click:Connect(function() UnfavoriteAllFish() end)
 
 ----------------------------------------------------
--- 3. GALATAMA PAGE
+-- 3. AUTO TRADE PAGE (BARU)
+----------------------------------------------------
+local TitleTrade = Instance.new("TextLabel")
+TitleTrade.Parent = TradePage
+TitleTrade.Size = UDim2.new(1,0,0,30)
+TitleTrade.BackgroundTransparency = 1
+TitleTrade.Text = "🤝 AUTO TRADE & MULTI-ACCOUNT UTILITIES"
+TitleTrade.TextColor3 = Color3.fromRGB(0,170,255)
+TitleTrade.Font = Enum.Font.GothamBold
+TitleTrade.TextSize = 13
+
+local TradeTargetDropFrame = Instance.new("Frame")
+TradeTargetDropFrame.Parent = TradePage
+TradeTargetDropFrame.Size = UDim2.new(1,0,0,35)
+TradeTargetDropFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+TradeTargetDropFrame.ClipsDescendants = true
+local ttdc = Instance.new("UICorner")
+ttdc.Parent = TradeTargetDropFrame
+
+local TradeTargetHeader = Instance.new("TextButton")
+TradeTargetHeader.Parent = TradeTargetDropFrame
+TradeTargetHeader.Size = UDim2.new(1,0,0,35)
+TradeTargetHeader.BackgroundTransparency = 1
+TradeTargetHeader.Text = " 🎯 Target Trade: " .. (getgenv().TyoConfig.SelectedTradeTarget ~= "" and getgenv().TyoConfig.SelectedTradeTarget or "Pilih Player") .. " 🔽"
+TradeTargetHeader.TextColor3 = Color3.fromRGB(255, 200, 0)
+TradeTargetHeader.Font = Enum.Font.GothamBold
+TradeTargetHeader.TextSize = 11
+TradeTargetHeader.TextXAlignment = Enum.TextXAlignment.Left
+
+local TradeTargetContainer = Instance.new("ScrollingFrame")
+TradeTargetContainer.Parent = TradeTargetDropFrame
+TradeTargetContainer.Position = UDim2.new(0, 5, 0, 35)
+TradeTargetContainer.Size = UDim2.new(1, -10, 0, 110)
+TradeTargetContainer.BackgroundTransparency = 1
+TradeTargetContainer.CanvasSize = UDim2.new(0,0,2,0)
+TradeTargetContainer.ScrollBarThickness = 3
+
+local TradeListLayout = Instance.new("UIListLayout")
+TradeListLayout.Parent = TradeTargetContainer
+TradeListLayout.Padding = UDim.new(0, 4)
+
+local isTradeDropOpen = false
+TradeTargetHeader.MouseButton1Click:Connect(function()
+	isTradeDropOpen = not isTradeDropOpen
+	TradeTargetDropFrame:TweenSize(isTradeDropOpen and UDim2.new(1,0,0,150) or UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+end)
+
+local function RefreshTradeTargets()
+	for _, child in ipairs(TradeTargetContainer:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer then
+			local btn = Instance.new("TextButton")
+			btn.Parent = TradeTargetContainer
+			btn.Size = UDim2.new(1,0,0,28)
+			btn.BackgroundColor3 = Color3.fromRGB(40,40,50)
+			btn.Text = " 👤 " .. plr.Name
+			btn.TextColor3 = Color3.new(1,1,1)
+			btn.Font = Enum.Font.Gotham
+			btn.TextSize = 11
+			btn.TextXAlignment = Enum.TextXAlignment.Left
+			local bc = Instance.new("UICorner")
+			bc.Parent = btn
+			btn.MouseButton1Click:Connect(function()
+				getgenv().TyoConfig.SelectedTradeTarget = plr.Name
+				TradeTargetHeader.Text = " 🎯 Target Trade: " .. plr.Name .. " 🔽"
+				isTradeDropOpen = false
+				TradeTargetDropFrame:TweenSize(UDim2.new(1,0,0,35), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+				SaveConfig()
+			end)
+		end
+	end
+end
+
+RefreshTradeTargets()
+Players.PlayerAdded:Connect(RefreshTradeTargets)
+Players.PlayerRemoving:Connect(RefreshTradeTargets)
+
+local AddAllTradeBtn = Instance.new("TextButton")
+AddAllTradeBtn.Parent = TradePage
+AddAllTradeBtn.Size = UDim2.new(1,0,0,38)
+AddAllTradeBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+AddAllTradeBtn.Text = "📦 Auto Add All Ikan ke Trade"
+AddAllTradeBtn.TextColor3 = Color3.new(1,1,1)
+AddAllTradeBtn.Font = Enum.Font.GothamBold
+AddAllTradeBtn.TextSize = 12
+local aatc = Instance.new("UICorner")
+aatc.Parent = AddAllTradeBtn
+AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddAllFishToTrade() end)
+
+local SendTradeReqBtn = Instance.new("TextButton")
+SendTradeReqBtn.Parent = TradePage
+SendTradeReqBtn.Size = UDim2.new(1,0,0,38)
+SendTradeReqBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 120)
+SendTradeReqBtn.Text = "🚀 Kirim Request Trade ke Target"
+SendTradeReqBtn.TextColor3 = Color3.new(1,1,1)
+SendTradeReqBtn.Font = Enum.Font.GothamBold
+SendTradeReqBtn.TextSize = 12
+local strc = Instance.new("UICorner")
+strc.Parent = SendTradeReqBtn
+SendTradeReqBtn.MouseButton1Click:Connect(function() SendTradeRequestToTarget() end)
+
+AddToggle(TradePage, "Auto Accept Trade (Terima Otomatis)", function(v) getgenv().AutoAcceptTradeRunning = v end)
+
+----------------------------------------------------
+-- 4. GALATAMA PAGE
 ----------------------------------------------------
 local TitleGal = Instance.new("TextLabel")
 TitleGal.Parent = GalatamaPage
@@ -1481,7 +1661,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 4. TELEPORT SHOP PAGE
+-- 5. TELEPORT SHOP PAGE
 ----------------------------------------------------
 local TitleShop = Instance.new("TextLabel")
 TitleShop.Parent = TeleportShopPage
@@ -1514,7 +1694,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 5. SUMMIT PAGE
+-- 6. SUMMIT PAGE
 ----------------------------------------------------
 local TitleSum = Instance.new("TextLabel")
 TitleSum.Parent = SummitPage
@@ -1709,7 +1889,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 6. PLAYER PAGE
+-- 7. PLAYER PAGE
 ----------------------------------------------------
 local TitlePly = Instance.new("TextLabel")
 TitlePly.Parent = PlayerPage
@@ -1811,7 +1991,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. HALO PAGE
+-- 8. HALO PAGE
 ----------------------------------------------------
 local TitleHalo = Instance.new("TextLabel")
 TitleHalo.Parent = HaloPage
@@ -1897,7 +2077,7 @@ pcall(function()
 end)
 
 ----------------------------------------------------
--- 8. TELEPORT PLAYER PAGE
+-- 9. TELEPORT PLAYER PAGE
 ----------------------------------------------------
 local TitleTpPly = Instance.new("TextLabel")
 TitleTpPly.Parent = PlayerTpPage
@@ -1959,7 +2139,7 @@ RefreshPlayerBtn.MouseButton1Click:Connect(ScanAndDisplayPlayers)
 task.spawn(function() task.wait(2); ScanAndDisplayPlayers() end)
 
 ----------------------------------------------------
--- 9. PRIVACY & ANTI-ADMIN PAGE
+-- 10. PRIVACY & ANTI-ADMIN PAGE
 ----------------------------------------------------
 local TitlePrv = Instance.new("TextLabel")
 TitlePrv.Parent = PrivacyPage
@@ -2039,7 +2219,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 10. SETTINGS & WEBHOOK PAGE
+-- 11. SETTINGS & WEBHOOK PAGE
 ----------------------------------------------------
 local TitleSet = Instance.new("TextLabel")
 TitleSet.Parent = SettingsPage
@@ -2061,7 +2241,6 @@ local alc = Instance.new("UICorner")
 alc.Parent = AntiLagBtn
 AntiLagBtn.MouseButton1Click:Connect(function()
 	pcall(function()
-		-- Matikan fitur berat di Lighting
 		Lighting.GlobalShadows = false
 		Lighting.FogEnd = 999999
 		Lighting.Brightness = 2
@@ -2070,8 +2249,6 @@ AntiLagBtn.MouseButton1Click:Connect(function()
 				v:Destroy()
 			end
 		end
-		
-		-- Hapus semua partikel, trail, dan beam
 		for _, v in ipairs(workspace:GetDescendants()) do
 			if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
 				v:Destroy()
@@ -2083,19 +2260,14 @@ AntiLagBtn.MouseButton1Click:Connect(function()
 				v:Destroy()
 			end
 		end
-		
-		-- Optimasi Terrain/Air agar super ringan
 		if workspace:FindFirstChildOfClass("Terrain") then
 			local terrain = workspace:FindFirstChildOfClass("Terrain")
 			terrain.WaterWaveSize = 0
 			terrain.WaterWaveSpeed = 0
 			terrain.WaterTransparency = 1
 			terrain.WaterReflectance = 0
-			pcall(function()
-				sethiddenproperty(terrain, "Decoration", false)
-			end)
+			pcall(function() sethiddenproperty(terrain, "Decoration", false) end)
 		end
-		
 		AntiLagBtn.Text = "⚡ Super Potato Graphics Aktif!"
 		AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
 	end)
@@ -2206,7 +2378,6 @@ TestWebhookBtn.MouseButton1Click:Connect(function()
 			TestWebhookBtn.Text = "🧪 Test Kirim Webhook ke Discord"
 			return
 		end
-		
 		local requestFunc = (syn and syn.request) or (http and http.request) or request or (fluxus and fluxus.request)
 		if requestFunc then
 			requestFunc({
@@ -2214,7 +2385,7 @@ TestWebhookBtn.MouseButton1Click:Connect(function()
 				Method = "POST",
 				Headers = { ["Content-Type"] = "application/json" },
 				Body = HttpService:JSONEncode({
-					["content"] = "✅ **Tyo Hub V3 Server-Wide Webhook Test Berhasil!**"
+					["content"] = "✅ **Tyo Hub V3 Mount Soreya Webhook Test Berhasil!**"
 				})
 			})
 			TestWebhookBtn.Text = "✅ Pesan Test Berhasil Dikirim!"
@@ -2262,13 +2433,13 @@ local CredLbl = Instance.new("TextLabel")
 CredLbl.Parent = CreditsPage
 CredLbl.Size = UDim2.new(1,0,1,0)
 CredLbl.BackgroundTransparency = 1
-CredLbl.Text = "Created By TYO"
+CredLbl.Text = "Created By TYO\nMap: Mount Soreya"
 CredLbl.TextColor3 = Color3.new(1,1,1)
 CredLbl.Font = Enum.Font.GothamBold
 CredLbl.TextSize = 20
 
 ----------------------------------------------------
--- 11. BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
+-- 12. BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
 ----------------------------------------------------
 local StatPanel = Instance.new("Frame")
 StatPanel.Parent = Main
