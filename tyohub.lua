@@ -2050,49 +2050,54 @@ TitleSet.TextColor3 = Color3.fromRGB(0,170,255)
 TitleSet.Font = Enum.Font.GothamBold
 TitleSet.TextSize = 13
 
--- FITUR NO RENDER PLAYER LAIN
-getgenv().NoRenderPlayersEnabled = false
-local function ApplyNoRenderPlayers(state)
-	getgenv().NoRenderPlayersEnabled = state
-	pcall(function()
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr ~= LocalPlayer and plr.Character then
-				plr.Character.Parent = state and nil or Workspace
-			end
-		end
-	end)
-end
-
-Players.PlayerAdded:Connect(function(plr)
-	plr.CharacterAdded:Connect(function(char)
-		if getgenv().NoRenderPlayersEnabled and plr ~= LocalPlayer then
-			task.wait(0.5)
-			pcall(function()
-				char.Parent = nil
-			end)
-		end
-	end)
-end)
-
-AddToggle(SettingsPage, "👥 Sembunyikan Player Lain (No Render)", function(v)
-	ApplyNoRenderPlayers(v)
-end)
-
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
 AntiLagBtn.Size = UDim2.new(1,0,0,35)
 AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 180)
-AntiLagBtn.Text = "⚡ Aktifkan Anti-Lag (Boost FPS)"
+AntiLagBtn.Text = "⚡ Super Potato Graphics (No Render)"
 AntiLagBtn.TextColor3 = Color3.new(1,1,1)
 AntiLagBtn.Font = Enum.Font.GothamBold
 local alc = Instance.new("UICorner")
 alc.Parent = AntiLagBtn
 AntiLagBtn.MouseButton1Click:Connect(function()
 	pcall(function()
+		-- Matikan fitur berat di Lighting
 		Lighting.GlobalShadows = false
 		Lighting.FogEnd = 999999
-		for _, v in ipairs(workspace:GetDescendants()) do if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then v.Enabled = false end end
-		AntiLagBtn.Text = "⚡ Anti-Lag Aktif!"
+		Lighting.Brightness = 2
+		for _, v in ipairs(Lighting:GetChildren()) do
+			if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("SunRaysEffect") then
+				v:Destroy()
+			end
+		end
+		
+		-- Hapus semua partikel, trail, dan beam
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+				v:Destroy()
+			elseif v:IsA("BasePart") then
+				v.Material = Enum.Material.SmoothPlastic
+				v.Reflectance = 0
+				v.CastShadow = false
+			elseif v:IsA("Decal") or v:IsA("Texture") then
+				v:Destroy()
+			end
+		end
+		
+		-- Optimasi Terrain/Air agar super ringan
+		if workspace:FindFirstChildOfClass("Terrain") then
+			local terrain = workspace:FindFirstChildOfClass("Terrain")
+			terrain.WaterWaveSize = 0
+			terrain.WaterWaveSpeed = 0
+			terrain.WaterTransparency = 1
+			terrain.WaterReflectance = 0
+			pcall(function()
+				sethiddenproperty(terrain, "Decoration", false)
+			end)
+		end
+		
+		AntiLagBtn.Text = "⚡ Super Potato Graphics Aktif!"
+		AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
 	end)
 end)
 
