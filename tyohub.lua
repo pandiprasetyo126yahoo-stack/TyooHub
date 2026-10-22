@@ -24,14 +24,13 @@ getgenv().SessionStartTime = os.time()
 ------------------------------------------------------------------
 -- CONFIGURATION & FILE SAVE SYSTEM (SAFE FOR MULTI-ACCOUNT)
 ------------------------------------------------------------------
--- Menggunakan UserId agar tidak bentrok antar akun di banyak device/Redfinger
 local SAFE_NAME = tostring(LocalPlayer.UserId or LocalPlayer.Name)
 local CONFIG_FILE = "TyoHubV3_Config_" .. SAFE_NAME .. ".json"
 
 getgenv().TyoConfig = {
 	BiteDelay = "0.5",
 	TapDelay = "0.12",
-	MinigameMode = "Legit", -- "Legit" / "Instant"
+	MinigameMode = "Legit",
 	SelectedSpot = "Spot Mancing Jembatan",
 	AutoSellTimer = "5",
 	AntiAdminEnabled = false,
@@ -2230,7 +2229,7 @@ local CredLbl = Instance.new("TextLabel")
 CredLbl.Parent = CreditsPage
 CredLbl.Size = UDim2.new(1,0,1,0)
 CredLbl.BackgroundTransparency = 1
-CredLbl.Text = "Created By TYO & UBEY"
+CredLbl.Text = "Created By TYO"
 CredLbl.TextColor3 = Color3.new(1,1,1)
 CredLbl.Font = Enum.Font.GothamBold
 CredLbl.TextSize = 20
@@ -2283,17 +2282,27 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- FLOATING BUTTON (LANGSUNG BUKA MAIN UI TANPA KEY)
+-- FLOATING BUTTON (TYO HUB TEXT BUTTON)
 ----------------------------------------------------
-local Float = Instance.new("ImageButton")
+local Float = Instance.new("TextButton")
 Float.Parent = Gui
-Float.Size = UDim2.new(0,65,0,65)
-Float.Position = UDim2.new(0,20,0,120)
-Float.Image = "rbxassetid://90770802417381"
-Float.BackgroundColor3 = Color3.fromRGB(20,20,25)
+Float.Size = UDim2.new(0, 55, 0, 55)
+Float.Position = UDim2.new(0, 20, 0, 120)
+Float.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+Float.Text = "TYO\nHUB"
+Float.TextColor3 = Color3.new(1, 1, 1)
+Float.Font = Enum.Font.GothamBold
+Float.TextSize = 12
+
 local flCorner = Instance.new("UICorner")
-flCorner.CornerRadius = UDim.new(1,0)
+flCorner.CornerRadius = UDim.new(1, 0)
 flCorner.Parent = Float
+
+local flStroke = Instance.new("UIStroke")
+flStroke.Parent = Float
+flStroke.Color = Color3.fromRGB(255, 255, 255)
+flStroke.Thickness = 2
+
 MakeDraggable(Float)
 
 Float.MouseButton1Click:Connect(function()
