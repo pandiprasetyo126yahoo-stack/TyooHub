@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 | VIP FULL SCRIPT (NO-KEY & MULTI-DEVICE / MULTI-ACCOUNT SAFE)
--- MAP: MOUNT SOREYA UPDATE
+-- MAP: MOUNT SOREYA UPDATE (WITH AUTO NO-RENDER & TRADE REFRESH)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -1394,7 +1394,7 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 end
 
 ----------------------------------------------------
--- 2. FAVORITE PAGE (DENGAN SECRET ACARA & AETHER)
+-- 2. FAVORITE PAGE
 ----------------------------------------------------
 local TitleFav = Instance.new("TextLabel")
 TitleFav.Parent = FavoritePage
@@ -1454,7 +1454,7 @@ uac.Parent = UnfavBtn
 UnfavBtn.MouseButton1Click:Connect(function() UnfavoriteAllFish() end)
 
 ----------------------------------------------------
--- 3. AUTO TRADE PAGE (BARU)
+-- 3. AUTO TRADE PAGE (DENGAN TOMBOL REFRESH PLAYER)
 ----------------------------------------------------
 local TitleTrade = Instance.new("TextLabel")
 TitleTrade.Parent = TradePage
@@ -1464,6 +1464,17 @@ TitleTrade.Text = "🤝 AUTO TRADE & MULTI-ACCOUNT UTILITIES"
 TitleTrade.TextColor3 = Color3.fromRGB(0,170,255)
 TitleTrade.Font = Enum.Font.GothamBold
 TitleTrade.TextSize = 13
+
+local RefreshTradePlayersBtn = Instance.new("TextButton")
+RefreshTradePlayersBtn.Parent = TradePage
+RefreshTradePlayersBtn.Size = UDim2.new(1,0,0,35)
+RefreshTradePlayersBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+RefreshTradePlayersBtn.Text = "🔄 Refresh Player di Trade"
+RefreshTradePlayersBtn.TextColor3 = Color3.new(1,1,1)
+RefreshTradePlayersBtn.Font = Enum.Font.GothamBold
+RefreshTradePlayersBtn.TextSize = 12
+local rtpb = Instance.new("UICorner")
+rtpb.Parent = RefreshTradePlayersBtn
 
 local TradeTargetDropFrame = Instance.new("Frame")
 TradeTargetDropFrame.Parent = TradePage
@@ -1528,6 +1539,13 @@ local function RefreshTradeTargets()
 end
 
 RefreshTradeTargets()
+RefreshTradePlayersBtn.MouseButton1Click:Connect(function()
+	RefreshTradeTargets()
+	RefreshTradePlayersBtn.Text = "✅ Daftar Player Diperbarui!"
+	task.wait(1)
+	RefreshTradePlayersBtn.Text = "🔄 Refresh Player di Trade"
+end)
+
 Players.PlayerAdded:Connect(RefreshTradeTargets)
 Players.PlayerRemoving:Connect(RefreshTradeTargets)
 
@@ -2219,7 +2237,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 11. SETTINGS & WEBHOOK PAGE
+-- 11. SETTINGS & PERFORMANCE BOOST (DENGAN AUTO MATIKAN RENDER KECUALI MODE FOTO / POTRET)
 ----------------------------------------------------
 local TitleSet = Instance.new("TextLabel")
 TitleSet.Parent = SettingsPage
@@ -2239,7 +2257,8 @@ AntiLagBtn.TextColor3 = Color3.new(1,1,1)
 AntiLagBtn.Font = Enum.Font.GothamBold
 local alc = Instance.new("UICorner")
 alc.Parent = AntiLagBtn
-AntiLagBtn.MouseButton1Click:Connect(function()
+
+local function ApplyNoRender()
 	pcall(function()
 		Lighting.GlobalShadows = false
 		Lighting.FogEnd = 999999
@@ -2268,9 +2287,41 @@ AntiLagBtn.MouseButton1Click:Connect(function()
 			terrain.WaterReflectance = 0
 			pcall(function() sethiddenproperty(terrain, "Decoration", false) end)
 		end
-		AntiLagBtn.Text = "⚡ Super Potato Graphics Aktif!"
-		AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
 	end)
+end
+
+AntiLagBtn.MouseButton1Click:Connect(function()
+	ApplyNoRender()
+	AntiLagBtn.Text = "⚡ Super Potato Graphics Aktif!"
+	AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+end)
+
+-- Auto Aktifkan No-Render (Kecuali Mode Foto / Mode Potret aktif)
+task.spawn(function()
+	while true do
+		pcall(function()
+			local isPhotoOrPortraitActive = false
+			
+			-- Deteksi apakah Mode Foto / Potret atau Sembunyikan UI sedang aktif dari PlayerGui game
+			for _, gui in ipairs(PlayerGui:GetDescendants()) do
+				if gui:IsA("TextLabel") or gui:IsA("TextButton") then
+					local text = string.lower(gui.Text or "")
+					if string.find(text, "mode foto") or string.find(text, "mode potret") or string.find(text, "sembunyikan ui") then
+						-- Cek apakah tombol/setting tersebut menyala (misalnya dicek melalui warna background atau status induknya)
+						if gui.Parent and (gui.Parent.BackgroundColor3 == Color3.fromRGB(0, 170, 0) or gui.Parent.BackgroundColor3 == Color3.fromRGB(0, 255, 0)) then
+							isPhotoOrPortraitActive = true
+						end
+					end
+				end
+			end
+			
+			-- Jika Mode Foto atau Potret TIDAK aktif, jalankan fitur matikan render secara otomatis
+			if not isPhotoOrPortraitActive then
+				ApplyNoRender()
+			end
+		end)
+		task.wait(10) -- Cek setiap 10 detik secara otomatis
+	end
 end)
 
 local BlackScreenGui = nil
