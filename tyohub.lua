@@ -2399,7 +2399,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 11. SETTINGS & PERFORMANCE PAGE
+-- 11. SETTINGS & PERFORMANCE PAGE (SUPER DUPER SMOOTH OPTIMIZED)
 ----------------------------------------------------
 local SettingsPage = pages["Settings"]
 
@@ -2414,9 +2414,9 @@ TitleSet.TextSize = 11
 
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
-AntiLagBtn.Size = UDim2.new(1, -5, 0, 30)
+AntiLagBtn.Size = UDim2.new(1, -5, 0, 32)
 AntiLagBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
-AntiLagBtn.Text = "⚡ Ultra Potato Graphics (Max No-Render)"
+AntiLagBtn.Text = "⚡ Super Duper Smooth (Max Potato & No-Render)"
 AntiLagBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AntiLagBtn.Font = Enum.Font.GothamBold
 AntiLagBtn.TextSize = 11
@@ -2424,53 +2424,60 @@ local alc = Instance.new("UICorner")
 alc.CornerRadius = UDim.new(0, 4)
 alc.Parent = AntiLagBtn
 
-local function ApplyUltraNoRender()
+local function ApplySuperDuperSmooth()
 	pcall(function()
+		-- 1. Optimasi Lighting & Rendering Dasar
 		Lighting.GlobalShadows = false
 		Lighting.FogEnd = 999999
 		Lighting.Brightness = 1
 		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-		
+		UserSettings():GetService("UserGameSettings").MasterVolume = 0.5
+
+		-- 2. Hapus Efek Visual / Post-Processing yang Memberatkan GPU
 		for _, v in ipairs(Lighting:GetChildren()) do
 			if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("SunRaysEffect") then
 				v:Destroy()
 			end
 		end
-		
+
+		-- 3. Hapus Partikel, Jejak, Api, Asap, Efek Khusus di Seluruh Workspace
 		for _, v in ipairs(workspace:GetDescendants()) do
-			if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") or v:IsA("Explosion") or v:IsA("Highlight") then
+			if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") or v:IsA("Explosion") or v:IsA("Highlight") or v:IsA("Decal") or v:IsA("Texture") then
 				v:Destroy()
 			elseif v:IsA("BasePart") then
 				v.Material = Enum.Material.SmoothPlastic
 				v.Reflectance = 0
 				v.CastShadow = false
-			elseif v:IsA("Decal") or v:IsA("Texture") then
-				v:Destroy()
-			elseif v:IsA("Model") and not v:IsDescendantOf(LocalPlayer.Character) then
-				pcall(function()
-					for _, d in ipairs(v:GetDescendants()) do
-						if d:IsA("ParticleEmitter") or d:IsA("Trail") or d:IsA("Beam") then
-							d:Destroy()
-						end
-					end
-				end)
 			end
 		end
-		
-		if workspace:FindFirstChildOfClass("Terrain") then
-			local terrain = workspace:FindFirstChildOfClass("Terrain")
+
+		-- 4. Matikan Efek Air & Dekorasi Terrain
+		local terrain = workspace:FindFirstChildOfClass("Terrain")
+		if terrain then
 			terrain.WaterWaveSize = 0
 			terrain.WaterWaveSpeed = 0
 			terrain.WaterTransparency = 1
 			terrain.WaterReflectance = 0
 			pcall(function() sethiddenproperty(terrain, "Decoration", false) end)
 		end
+
+		-- 5. Auto Hapus Partikel Baru yang Masuk (Real-time Booster)
+		workspace.DescendantAdded:Connect(function(v)
+			pcall(function()
+				if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") or v:IsA("Explosion") or v:IsA("Decal") or v:IsA("Texture") then
+					v:Destroy()
+				elseif v:IsA("BasePart") then
+					v.Material = Enum.Material.SmoothPlastic
+					v.CastShadow = false
+				end
+			end)
+		end)
 	end)
 end
 
 AntiLagBtn.MouseButton1Click:Connect(function()
-	ApplyUltraNoRender()
-	AntiLagBtn.Text = "⚡ Ultra Potato Graphics Aktif!"
+	ApplySuperDuperSmooth()
+	AntiLagBtn.Text = "⚡ Super Duper Smooth Aktif (Super Ngebut!)"
 	AntiLagBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
 end)
 
