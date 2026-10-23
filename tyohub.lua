@@ -603,7 +603,7 @@ local function UnfavoriteAllFish()
 	task.spawn(function()
 		pcall(function()
 			local tandaiRemote = GetInventoryRemote()
-			if not tandaiRemote then return end
+			if not tandaiRemote means return end
 			local serverData = GetServerFishData()
 			for _, fish in ipairs(serverData) do
 				tandaiRemote:FireServer(fish.UUID, false)
@@ -715,22 +715,16 @@ Gui.Parent = PlayerGui
 Gui.ResetOnSpawn = false
 
 ----------------------------------------------------
--- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
+-- DRAGGABLE FUNCTION UNTUK MAIN FRAME
 ----------------------------------------------------
-local function MakeDraggable(guiObject, handleObject)
+local function MakeMainDraggable(guiObject, handleObject)
 	handleObject = handleObject or guiObject
 	local dragging = false
-	local dragInput = nil
 	local dragStart = Vector3.zero
 	local startPos = UDim2.new()
-	local isClick = true
-	local clickTimeStart = 0
 
 	local function update(input)
 		local delta = input.Position - dragStart
-		if delta.Magnitude > 6 then
-			isClick = false
-		end
 		guiObject.Position = UDim2.new(
 			startPos.X.Scale, startPos.X.Offset + delta.X,
 			startPos.Y.Scale, startPos.Y.Offset + delta.Y
@@ -740,8 +734,6 @@ local function MakeDraggable(guiObject, handleObject)
 	handleObject.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
-			isClick = true
-			clickTimeStart = tick()
 			dragStart = input.Position
 			startPos = guiObject.Position
 
@@ -753,21 +745,11 @@ local function MakeDraggable(guiObject, handleObject)
 		end
 	end)
 
-	handleObject.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
 	UIS.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			update(input)
 		end
 	end)
-
-	return function()
-		return isClick and (tick() - clickTimeStart < 0.3)
-	end
 end
 
 ----------------------------------------------------
@@ -800,7 +782,7 @@ local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 10)
 TopCorner.Parent = TopBar
 
-MakeDraggable(Main, TopBar)
+MakeMainDraggable(Main, TopBar)
 
 local HubTitle = Instance.new("TextLabel")
 HubTitle.Parent = TopBar
@@ -1729,7 +1711,7 @@ local TitleCoreEvent = Instance.new("TextLabel")
 TitleCoreEvent.Parent = GalatamaPage
 TitleCoreEvent.Size = UDim2.new(1, -5, 0, 25)
 TitleCoreEvent.BackgroundTransparency = 1
-TitleCoreEvent.Text = "💎 AUTO DETECT WITHHERING CORE EVENT"
+TitleCoreEvent.Text = "💎 AUTO DETECT WITHERING CORE EVENT"
 TitleCoreEvent.TextColor3 = Color3.fromRGB(255, 200, 0)
 TitleCoreEvent.Font = Enum.Font.GothamBold
 TitleCoreEvent.TextSize = 12
@@ -2743,7 +2725,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- FLOATING BUTTON (BISA DIGESER & DIPENCET DIMANA SAJA)
+-- FLOATING BUTTON (FIXED DRAG & CLICK BUG)
 ----------------------------------------------------
 local Float = Instance.new("ImageButton")
 Float.Parent = Gui
@@ -2752,9 +2734,58 @@ Float.Position = UDim2.new(0, 20, 0, 120)
 Float.BackgroundColor3 = Color3.fromRGB(20, 16, 28)
 Float.Image = "rbxassetid://137785805499299"
 Float.ScaleType = Enum.ScaleType.Crop
+Float.Active = true
 
 local flCorner = Instance.new("UICorner")
 flCorner.CornerRadius = UDim.new(1, 0)
 flCorner.Parent = Float
 
-print("Aemeath WuWa Hub V3 Loaded Successfully!")
+local flStroke = Instance.new("UIStroke")
+flStroke.Parent = Float
+flStroke.Color = Color3.fromRGB(140, 60, 255)
+flStroke.Thickness = 2
+
+-- Logika Geser & Klik yang Stabil untuk Mobile / PC
+local floatDragging = false
+local floatDragStart = Vector3.zero
+local floatStartPos = UDim2.new()
+local isMoved = false
+
+Float.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		floatDragging = true
+		isMoved = false
+		floatDragStart = input.Position
+		floatStartPos = Float.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if floatDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - floatDragStart
+		if delta.Magnitude > 5 then
+			isMoved = true
+		end
+		Float.Position = UDim2.new(
+			floatStartPos.X.Scale, floatStartPos.X.Offset + delta.X,
+			floatStartPos.Y.Scale, floatStartPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		if floatDragging then
+			floatDragging = false
+		end
+	end
+end)
+
+-- Klik murni (jika tidak ditarik/digeser) untuk buka/tutup menu
+Float.MouseButton1Click:Connect(function()
+	if not isMoved then
+		Main.Visible = not Main.Visible
+	end
+end)
+
+print("Aemeath WuWa Hub V3 Fixed Floating Button Loaded!")
