@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 (SPEED HUB AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
--- MAP: MOUNT SOREYA UPDATE (ULTRA POTATO & MAX PERFORMANCE BOOST)
+-- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -716,7 +716,6 @@ Gui.ResetOnSpawn = false
 
 ----------------------------------------------------
 -- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
--- (BISA TELEPORT & DIGESER DI MANA SAJA SECARA BERSAMAAN)
 ----------------------------------------------------
 local function MakeDraggable(guiObject, handleObject)
 	handleObject = handleObject or guiObject
@@ -1730,7 +1729,7 @@ local TitleCoreEvent = Instance.new("TextLabel")
 TitleCoreEvent.Parent = GalatamaPage
 TitleCoreEvent.Size = UDim2.new(1, -5, 0, 25)
 TitleCoreEvent.BackgroundTransparency = 1
-TitleCoreEvent.Text = "💎 AUTO DETECT WITHERING CORE EVENT"
+TitleCoreEvent.Text = "💎 AUTO DETECT WITHHERING CORE EVENT"
 TitleCoreEvent.TextColor3 = Color3.fromRGB(255, 200, 0)
 TitleCoreEvent.Font = Enum.Font.GothamBold
 TitleCoreEvent.TextSize = 12
@@ -2430,7 +2429,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 11. SETTINGS & PERFORMANCE PAGE
+-- 11. SETTINGS & PERFORMANCE PAGE (EXTREME OPTIMIZATION)
 ----------------------------------------------------
 local SettingsPage = pages["Settings"]
 
@@ -2446,46 +2445,54 @@ TitleSet.TextSize = 12
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
 AntiLagBtn.Size = UDim2.new(1, -5, 0, 34)
-AntiLagBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
-AntiLagBtn.Text = "⚡ Ultra Potato Graphics (Max No-Render)"
-AntiLagBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiLagBtn.BackgroundColor3 = Color3.fromRGB(23, 255, 151)
+AntiLagBtn.Text = "⚡ EXTREME POTATO: Hapus Tembok & Min Render"
+AntiLagBtn.TextColor3 = Color3.fromRGB(15, 12, 22)
 AntiLagBtn.Font = Enum.Font.GothamBold
 AntiLagBtn.TextSize = 11
 local alc = Instance.new("UICorner")
 alc.CornerRadius = UDim.new(0, 6)
 alc.Parent = AntiLagBtn
 
-local function ApplyUltraNoRender()
+local function ApplyExtremePotatoAndNoWalls()
 	pcall(function()
+		-- 1. Minimalkan Jarak Render (Fog & Camera Distance)
 		Lighting.GlobalShadows = false
-		Lighting.FogEnd = 999999
-		Lighting.Brightness = 1
+		Lighting.FogEnd = 100 -- Sangat dekat agar tidak merender objek jauh
+		Lighting.FogStart = 0
+		Lighting.Brightness = 2
 		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 		
+		pcall(function()
+			Workspace.CurrentCamera.CFrame = Workspace.CurrentCamera.CFrame
+			LocalPlayer.CameraMaxZoomDistance = 30
+			LocalPlayer.CameraMinZoomDistance = 5
+		end)
+		
+		-- Hapus Efek Berat
 		for _, v in ipairs(Lighting:GetChildren()) do
 			if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("SunRaysEffect") then
 				v:Destroy()
 			end
 		end
 		
+		-- 2. Hapus Tembok, Dinding, dan Objek Fisik Berat
 		for _, v in ipairs(workspace:GetDescendants()) do
-			if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") or v:IsA("Explosion") or v:IsA("Highlight") then
-				v:Destroy()
-			elseif v:IsA("BasePart") then
-				v.Material = Enum.Material.SmoothPlastic
-				v.Reflectance = 0
-				v.CastShadow = false
-			elseif v:IsA("Decal") or v:IsA("Texture") then
-				v:Destroy()
-			elseif v:IsA("Model") and not v:IsDescendantOf(LocalPlayer.Character) then
-				pcall(function()
-					for _, d in ipairs(v:GetDescendants()) do
-						if d:IsA("ParticleEmitter") or d:IsA("Trail") or d:IsA("Beam") then
-							d:Destroy()
-						end
+			pcall(function()
+				local nameLower = string.lower(v.Name)
+				if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") or v:IsA("Explosion") or v:IsA("Highlight") or v:IsA("Decal") or v:IsA("Texture") then
+					v:Destroy()
+				elseif v:IsA("BasePart") then
+					-- Jika terdeteksi sebagai tembok, dinding, bangunan, atau bagian map non-esensial, hapus total
+					if string.find(nameLower, "wall") or string.find(nameLower, "tembok") or string.find(nameLower, "dinding") or string.find(nameLower, "building") or string.find(nameLower, "house") or string.find(nameLower, "prop") or string.find(nameLower, "rock") or string.find(nameLower, "tree") then
+						v:Destroy()
+					else
+						v.Material = Enum.Material.SmoothPlastic
+						v.Reflectance = 0
+						v.CastShadow = false
 					end
-				end)
-			end
+				end
+			end)
 		end
 		
 		if workspace:FindFirstChildOfClass("Terrain") then
@@ -2500,9 +2507,10 @@ local function ApplyUltraNoRender()
 end
 
 AntiLagBtn.MouseButton1Click:Connect(function()
-	ApplyUltraNoRender()
-	AntiLagBtn.Text = "⚡ Ultra Potato Graphics Aktif!"
-	AntiLagBtn.BackgroundColor3 = Color3.fromRGB(23, 255, 151)
+	ApplyExtremePotatoAndNoWalls()
+	AntiLagBtn.Text = "⚡ Tembok Dihapus & Render Diminimalkan!"
+	AntiLagBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
+	AntiLagBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 end)
 
 local BlackScreenGui = nil
@@ -2749,17 +2757,4 @@ local flCorner = Instance.new("UICorner")
 flCorner.CornerRadius = UDim.new(1, 0)
 flCorner.Parent = Float
 
-local flStroke = Instance.new("UIStroke")
-flStroke.Parent = Float
-flStroke.Color = Color3.fromRGB(140, 60, 255)
-flStroke.Thickness = 2
-
-local CheckFloatClick = MakeDraggable(Float, Float)
-
-Float.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		if CheckFloatClick() then
-			Main.Visible = not Main.Visible
-		end
-	end
-end)
+print("Aemeath WuWa Hub V3 Loaded Successfully!")
