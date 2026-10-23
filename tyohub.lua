@@ -1,5 +1,5 @@
 --[========================================================================]--
--- Ubey Hub V3 - Optimized Edition (Multi-Device & Super Anti-Lag + Clear Roof)
+-- Ubey Hub V3 - No Key Edition (Multi-Device & Super Anti-Lag)
 --[========================================================================]--
 
 local HttpService = game:GetService("HttpService")
@@ -12,7 +12,6 @@ local UIS = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
-local RbxAnalyticsService = game:GetService("RbxAnalyticsService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -21,7 +20,6 @@ getgenv().TotalFishCaught = 0
 getgenv().SessionStartTime = os.time()
 
 local CONFIG_FILE = "UbeyHubV3_Config.json"
-local KEY_FILE = "UbeyHubV3_SavedKey.txt"
 
 getgenv().UbeyConfig = {
     BiteDelay = "0.5",
@@ -82,32 +80,13 @@ local function ResetConfig()
         getgenv().BiteDelayInput = getgenv().UbeyConfig.BiteDelay
         getgenv().AutoSellTimerInput = getgenv().UbeyConfig.AutoSellTimer
         getgenv().SelectedFishingSpot = getgenv().UbeyConfig.SelectedSpot
-        getgenv().KeyVerified = false
-        if delfile and isfile then
-            if isfile(CONFIG_FILE) then delfile(CONFIG_FILE) end
-            if isfile(KEY_FILE) then delfile(KEY_FILE) end
+        if delfile and isfile and isfile(CONFIG_FILE) then
+            delfile(CONFIG_FILE)
         end
     end)
 end
 
 LoadConfig()
-
-local SUPABASE_URL = "https://vwwxvemxeztfiyuurhro.supabase.co/rest/v1/Ubey_Project?key_value=eq."
-local SUPABASE_ANON_KEY = "sb_publishable_rMWL7Qrjw9iG0c29vGZ0bw_O3swXT6n"
-
-local function GetDeviceHWID()
-    local hwid = nil
-    pcall(function()
-        if gethwid then
-            hwid = gethwid()
-        elseif RbxAnalyticsService then
-            hwid = RbxAnalyticsService:GetClientId()
-        end
-    end)
-    return tostring(hwid or ("UNKNOWN_DEVICE_" .. tostring(LocalPlayer.UserId)))
-end
-
-local CurrentHWID = GetDeviceHWID()
 
 local function SendServerWideWebhook(playerName, catchType, position)
     pcall(function()
@@ -329,7 +308,6 @@ getgenv().AntiAFKRunning = false
 getgenv().HideNameRunning = false
 getgenv().FakeNameInput = "UBEY HUB"
 getgenv().CurrentSelectedHalo = nil
-getgenv().KeyVerified = false
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
 getgenv().SpotLoopConfig = {
@@ -641,84 +619,9 @@ local function MakeDraggable(guiObject, handleObject)
     end)
 end
 
-local KeyFrame = Instance.new("Frame")
-KeyFrame.Parent = Gui
-KeyFrame.Size = UDim2.new(0, 380, 0, 185)
-KeyFrame.Position = UDim2.new(0.5, -190, 0.5, -92)
-KeyFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-KeyFrame.Visible = false
-MakeDraggable(KeyFrame)
-
-local keyCorner = Instance.new("UICorner")
-keyCorner.CornerRadius = UDim.new(0, 15)
-keyCorner.Parent = KeyFrame
-
-local KeyStroke = Instance.new("UIStroke")
-KeyStroke.Parent = KeyFrame
-KeyStroke.Color = Color3.fromRGB(0, 170, 255)
-
-local KeyTitle = Instance.new("TextLabel")
-KeyTitle.Parent = KeyFrame
-KeyTitle.Size = UDim2.new(1, 0, 0, 50)
-KeyTitle.BackgroundTransparency = 1
-KeyTitle.Text = "UBEY HUB V3 - KEY & ROBLOX USERNAME SYSTEM"
-KeyTitle.Font = Enum.Font.GothamBold
-KeyTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
-KeyTitle.TextSize = 13
-
-local KeyBox = Instance.new("TextBox")
-KeyBox.Parent = KeyFrame
-KeyBox.Size = UDim2.new(0, 340, 0, 38)
-KeyBox.Position = UDim2.new(0, 20, 0, 60)
-KeyBox.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-KeyBox.PlaceholderText = "Masukkan Key dari Bot Discord..."
-KeyBox.Text = ""
-KeyBox.TextColor3 = Color3.new(1, 1, 1)
-KeyBox.Font = Enum.Font.Gotham
-KeyBox.TextSize = 13
-
-local kbCorner = Instance.new("UICorner")
-kbCorner.Parent = KeyBox
-
-local SubmitKeyBtn = Instance.new("TextButton")
-SubmitKeyBtn.Parent = KeyFrame
-SubmitKeyBtn.Size = UDim2.new(0, 165, 0, 35)
-SubmitKeyBtn.Position = UDim2.new(0, 20, 0, 110)
-SubmitKeyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 180)
-SubmitKeyBtn.Text = "Verifikasi Key"
-SubmitKeyBtn.TextColor3 = Color3.new(1, 1, 1)
-SubmitKeyBtn.Font = Enum.Font.GothamBold
-SubmitKeyBtn.TextSize = 12
-
-local skCorner = Instance.new("UICorner")
-skCorner.Parent = SubmitKeyBtn
-
-local GetKeyDiscordBtn = Instance.new("TextButton")
-GetKeyDiscordBtn.Parent = KeyFrame
-GetKeyDiscordBtn.Size = UDim2.new(0, 165, 0, 35)
-GetKeyDiscordBtn.Position = UDim2.new(0, 195, 0, 110)
-GetKeyDiscordBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-GetKeyDiscordBtn.Text = "Get Key via Discord"
-GetKeyDiscordBtn.TextColor3 = Color3.new(1, 1, 1)
-GetKeyDiscordBtn.Font = Enum.Font.GothamBold
-GetKeyDiscordBtn.TextSize = 12
-
-local gkCorner = Instance.new("UICorner")
-gkCorner.Parent = GetKeyDiscordBtn
-
-local StatusKey = Instance.new("TextLabel")
-StatusKey.Parent = KeyFrame
-StatusKey.Size = UDim2.new(1, 0, 0, 20)
-StatusKey.Position = UDim2.new(0, 0, 0, 155)
-StatusKey.BackgroundTransparency = 1
-StatusKey.Text = ""
-StatusKey.Font = Enum.Font.Gotham
-StatusKey.TextColor3 = Color3.fromRGB(255, 50, 50)
-StatusKey.TextSize = 12
-
 local Main = Instance.new("Frame")
 Main.Parent = Gui
-Main.Visible = false
+Main.Visible = true
 Main.Size = UDim2.new(0, 550, 0, 320)
 Main.Position = UDim2.new(0.5, -275, 0.5, -160)
 Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
@@ -821,9 +724,9 @@ HubSubTitle.Parent = Sidebar
 HubSubTitle.BackgroundTransparency = 1
 HubSubTitle.Position = UDim2.new(0, 0, 0, 32)
 HubSubTitle.Size = UDim2.new(1, 0, 0, 18)
-HubSubTitle.Text = "👑 Multi-Device"
+HubSubTitle.Text = "⚡ Free / No Key"
 HubSubTitle.Font = Enum.Font.GothamBold
-HubSubTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+HubSubTitle.TextColor3 = Color3.fromRGB(0, 255, 150)
 HubSubTitle.TextSize = 12
 
 local Content = Instance.new("Frame")
@@ -950,158 +853,6 @@ local function AddToggle(parent, text, callback)
         callback(state)
     end)
 end
-
-GetKeyDiscordBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        if setclipboard then setclipboard("https://discord.gg/YXuYeEpnXE") end
-    end)
-    StatusKey.TextColor3 = Color3.fromRGB(0, 170, 255)
-    StatusKey.Text = "Link Discord disalin!"
-end)
-
-local function CheckUsernameInList(allowedUsersStr, currentUsername)
-    if not allowedUsersStr or (allowedUsersStr == "") then return false end
-    for name in string.gmatch(allowedUsersStr, "[^,%s]+") do
-        if string.lower(name) == string.lower(currentUsername) then return true end
-    end
-    return false
-end
-
-local function ValidateKey(enteredKey, isAutoLogin)
-    if enteredKey == "" then
-        if not isAutoLogin then
-            StatusKey.TextColor3 = Color3.fromRGB(255, 50, 50)
-            StatusKey.Text = "Masukkan Key terlebih dahulu!"
-        end
-        KeyFrame.Visible = true
-        return
-    end
-    if not isAutoLogin then
-        StatusKey.TextColor3 = Color3.fromRGB(255, 200, 0)
-        StatusKey.Text = "Memeriksa Validasi Akun & Key..."
-    end
-    task.spawn(function()
-        local requestFunc = (syn and syn.request) or (http and http.request) or request or (fluxus and fluxus.request)
-        local success, response = pcall(function()
-            if requestFunc then
-                local res = requestFunc({
-                    Url = SUPABASE_URL .. HttpService:UrlEncode(enteredKey),
-                    Method = "GET",
-                    Headers = {
-                        apikey = SUPABASE_ANON_KEY,
-                        Authorization = "Bearer " .. SUPABASE_ANON_KEY,
-                        ["Content-Type"] = "application/json"
-                    }
-                })
-                return res.Body
-            else
-                return HttpService:GetAsync(SUPABASE_URL .. HttpService:UrlEncode(enteredKey), false, {
-                    apikey = SUPABASE_ANON_KEY,
-                    Authorization = "Bearer " .. SUPABASE_ANON_KEY
-                })
-            end
-        end)
-        if success and response then
-            local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(response) end)
-            if decodeSuccess and data and (#data > 0) then
-                local record = data[1]
-                local currentRobloxUser = LocalPlayer.Name
-                if (record.status == false) or (record.status == "inactive") or (record.status == "used") then
-                    if not isAutoLogin then
-                        StatusKey.TextColor3 = Color3.fromRGB(255, 50, 50)
-                        StatusKey.Text = "Key sudah tidak aktif / kadaluwarsa!"
-                    end
-                    KeyFrame.Visible = true
-                    return
-                end
-                if record.roblox_username and (record.roblox_username ~= "") then
-                    if not CheckUsernameInList(record.roblox_username, currentRobloxUser) then
-                        if not isAutoLogin then
-                            StatusKey.TextColor3 = Color3.fromRGB(255, 50, 50)
-                            StatusKey.Text = "Username (" .. currentRobloxUser .. ") tidak terdaftar pada Key ini!"
-                        end
-                        KeyFrame.Visible = true
-                        return
-                    end
-                else
-                    pcall(function()
-                        if requestFunc then
-                            requestFunc({
-                                Url = SUPABASE_URL .. HttpService:UrlEncode(enteredKey),
-                                Method = "PATCH",
-                                Headers = {
-                                    apikey = SUPABASE_ANON_KEY,
-                                    Authorization = "Bearer " .. SUPABASE_ANON_KEY,
-                                    ["Content-Type"] = "application/json"
-                                },
-                                Body = HttpService:JSONEncode({roblox_username = currentRobloxUser})
-                            })
-                        end
-                    end)
-                end
-                if record.hwid_value and (record.hwid_value ~= "") then
-                    if record.hwid_value ~= CurrentHWID then
-                        if not isAutoLogin then
-                            StatusKey.TextColor3 = Color3.fromRGB(255, 50, 50)
-                            StatusKey.Text = "Key terikat di perangkat (HWID) lain!"
-                        end
-                        KeyFrame.Visible = true
-                        return
-                    end
-                else
-                    pcall(function()
-                        if requestFunc then
-                            requestFunc({
-                                Url = SUPABASE_URL .. HttpService:UrlEncode(enteredKey),
-                                Method = "PATCH",
-                                Headers = {
-                                    apikey = SUPABASE_ANON_KEY,
-                                    Authorization = "Bearer " .. SUPABASE_ANON_KEY,
-                                    ["Content-Type"] = "application/json"
-                                },
-                                Body = HttpService:JSONEncode({hwid_value = CurrentHWID})
-                            })
-                        end
-                    end)
-                end
-                pcall(function() if writefile then writefile(KEY_FILE, enteredKey) end end)
-                getgenv().KeyVerified = true
-                KeyFrame.Visible = false
-                Main.Visible = true
-            else
-                if not isAutoLogin then
-                    StatusKey.TextColor3 = Color3.fromRGB(255, 50, 50)
-                    StatusKey.Text = "Key tidak ditemukan / invalid!"
-                end
-                KeyFrame.Visible = true
-            end
-        else
-            if not isAutoLogin then
-                StatusKey.TextColor3 = Color3.fromRGB(255, 50, 50)
-                StatusKey.Text = "Gagal terhubung ke database verifikasi."
-            end
-            KeyFrame.Visible = true
-        end
-    end)
-end
-
-SubmitKeyBtn.MouseButton1Click:Connect(function()
-    ValidateKey(KeyBox.Text, false)
-end)
-
-task.spawn(function()
-    if readfile and isfile and isfile(KEY_FILE) then
-        local savedKey = readfile(KEY_FILE)
-        if savedKey and (savedKey ~= "") then
-            KeyBox.Text = savedKey
-            ValidateKey(savedKey, true)
-        else
-            KeyFrame.Visible = true
-        end
-    else
-        KeyFrame.Visible = true
-    end
-end)
 
 local TitleFish = Instance.new("TextLabel")
 TitleFish.Parent = FishingPage
@@ -2256,7 +2007,6 @@ TitleSet.TextColor3 = Color3.fromRGB(0, 170, 255)
 TitleSet.Font = Enum.Font.GothamBold
 TitleSet.TextSize = 13
 
--- [FITUR UTAMA BARU] Anti-Lag Super + Hapus Atap dan Gunung untuk Fokus Mancing Core
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
 AntiLagBtn.Size = UDim2.new(1, 0, 0, 35)
@@ -2276,7 +2026,6 @@ AntiLagBtn.MouseButton1Click:Connect(function()
                 v.Enabled = false
             elseif v:IsA("MeshPart") or v:IsA("Part") or v:IsA("UnionOperation") then
                 local name = string.lower(v.Name)
-                -- Menghapus atap, bangunan, atau gunung/objek berat yang menghalangi pandangan mancing core
                 if string.find(name, "roof") or string.find(name, "atap") or string.find(name, "mountain") or string.find(name, "gunung") or string.find(name, "cliff") or string.find(name, "wall") then
                     v:Destroy()
                 end
@@ -2423,7 +2172,7 @@ local ResetConfigBtn = Instance.new("TextButton")
 ResetConfigBtn.Parent = SettingsPage
 ResetConfigBtn.Size = UDim2.new(1, 0, 0, 35)
 ResetConfigBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-ResetConfigBtn.Text = "🔄 Reset Konfigurasi & Clear Key"
+ResetConfigBtn.Text = "🔄 Reset Konfigurasi"
 ResetConfigBtn.TextColor3 = Color3.new(1, 1, 1)
 ResetConfigBtn.Font = Enum.Font.GothamBold
 local rcc = Instance.new("UICorner")
@@ -2432,14 +2181,14 @@ ResetConfigBtn.MouseButton1Click:Connect(function()
     ResetConfig()
     ResetConfigBtn.Text = "🔄 Config Direset!"
     task.wait(1.5)
-    ResetConfigBtn.Text = "🔄 Reset Konfigurasi & Clear Key"
+    ResetConfigBtn.Text = "🔄 Reset Konfigurasi"
 end)
 
 local CredLbl = Instance.new("TextLabel")
 CredLbl.Parent = CreditsPage
 CredLbl.Size = UDim2.new(1, 0, 1, 0)
 CredLbl.BackgroundTransparency = 1
-CredLbl.Text = "Created By UBEY\nOptimized for Multi-Device & Core Farming"
+CredLbl.Text = "Created By UBEY\nNo Key Edition • Free & Multi-Device"
 CredLbl.TextColor3 = Color3.new(1, 1, 1)
 CredLbl.Font = Enum.Font.GothamBold
 CredLbl.TextSize = 16
@@ -2498,11 +2247,5 @@ flCorner.Parent = Float
 MakeDraggable(Float)
 
 Float.MouseButton1Click:Connect(function()
-    if not getgenv().KeyVerified then
-        KeyFrame.Visible = not KeyFrame.Visible
-        Main.Visible = false
-    else
-        Main.Visible = not Main.Visible
-        KeyFrame.Visible = false
-    end
+    Main.Visible = not Main.Visible
 end)
