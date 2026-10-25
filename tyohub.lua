@@ -38,10 +38,12 @@ getgenv().TyoConfig = {
 	TargetGroupId = 7019573,
 	WebhookEnabled = false,
 	WebhookUrl = "",
-	SelectedTradeTarget = ""
+	SelectedTradeTarget = "",
+	AutoSaveEnabled = true -- Fitur Auto Save On/Off
 }
 
 local function SaveConfig()
+	if not getgenv().TyoConfig.AutoSaveEnabled then return end
 	pcall(function()
 		if writefile then
 			local data = HttpService:JSONEncode(getgenv().TyoConfig)
@@ -66,6 +68,7 @@ local function LoadConfig()
 				if data.WebhookEnabled ~= nil then getgenv().TyoConfig.WebhookEnabled = data.WebhookEnabled end
 				if data.WebhookUrl then getgenv().TyoConfig.WebhookUrl = data.WebhookUrl end
 				if data.SelectedTradeTarget then getgenv().TyoConfig.SelectedTradeTarget = data.SelectedTradeTarget end
+				if data.AutoSaveEnabled ~= nil then getgenv().TyoConfig.AutoSaveEnabled = data.AutoSaveEnabled end
 			end
 		end
 	end)
@@ -83,7 +86,8 @@ local function ResetConfig()
 			TargetGroupId = 7019573,
 			WebhookEnabled = false,
 			WebhookUrl = "",
-			SelectedTradeTarget = ""
+			SelectedTradeTarget = "",
+			AutoSaveEnabled = true
 		}
 		if delfile and isfile then
 			if isfile(CONFIG_FILE) then delfile(CONFIG_FILE) end
@@ -713,6 +717,7 @@ local Gui = Instance.new("ScreenGui")
 Gui.Name = "TyoHub"
 Gui.Parent = PlayerGui
 Gui.ResetOnSpawn = false
+Gui.DisplayOrder = 99999 -- Pastikan ScreenGui selalu berada di atas UI Trade game
 
 ----------------------------------------------------
 -- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
@@ -995,7 +1000,7 @@ navButtons["Fishing & Sell"].Indicator.Visible = true
 ----------------------------------------------------
 -- SPEED HUB STYLE TOGGLE BUILDER
 ----------------------------------------------------
-local function AddToggle(parent, text, callback)
+local function AddToggle(parent, text, callback, initialValue)
 	local frame = Instance.new("Frame")
 	frame.Parent = parent
 	frame.Size = UDim2.new(1, -5, 0, 36)
@@ -1037,7 +1042,13 @@ local function AddToggle(parent, text, callback)
 	kc.CornerRadius = UDim.new(1, 0)
 	kc.Parent = knob
 	
-	local state = false
+	local state = initialValue or false
+	if state then
+		knob.Position = UDim2.new(1, -16, 0.5, -7)
+		switchBg.BackgroundColor3 = Color3.fromRGB(140, 60, 255)
+		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	end
+	
 	switchBg.MouseButton1Click:Connect(function()
 		state = not state
 		if state then
@@ -2442,6 +2453,12 @@ TitleSet.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleSet.Font = Enum.Font.GothamBold
 TitleSet.TextSize = 12
 
+-- FITUR BARU: AUTO SAVE TOGGLE
+AddToggle(SettingsPage, "Auto Save Config", function(v)
+	getgenv().TyoConfig.AutoSaveEnabled = v
+	if v then SaveConfig() end
+end, getgenv().TyoConfig.AutoSaveEnabled)
+
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
 AntiLagBtn.Size = UDim2.new(1, -5, 0, 34)
@@ -2456,9 +2473,8 @@ alc.Parent = AntiLagBtn
 
 local function ApplyExtremePotatoAndNoWalls()
 	pcall(function()
-		-- 1. Minimalkan Jarak Render (Fog & Camera Distance)
 		Lighting.GlobalShadows = false
-		Lighting.FogEnd = 100 -- Sangat dekat agar tidak merender objek jauh
+		Lighting.FogEnd = 100
 		Lighting.FogStart = 0
 		Lighting.Brightness = 2
 		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
@@ -2469,21 +2485,18 @@ local function ApplyExtremePotatoAndNoWalls()
 			LocalPlayer.CameraMinZoomDistance = 5
 		end)
 		
-		-- Hapus Efek Berat
 		for _, v in ipairs(Lighting:GetChildren()) do
 			if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("SunRaysEffect") then
 				v:Destroy()
 			end
 		end
 		
-		-- 2. Hapus Tembok, Dinding, dan Objek Fisik Berat
 		for _, v in ipairs(workspace:GetDescendants()) do
 			pcall(function()
 				local nameLower = string.lower(v.Name)
 				if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") or v:IsA("Explosion") or v:IsA("Highlight") or v:IsA("Decal") or v:IsA("Texture") then
 					v:Destroy()
 				elseif v:IsA("BasePart") then
-					-- Jika terdeteksi sebagai tembok, dinding, bangunan, atau bagian map non-esensial, hapus total
 					if string.find(nameLower, "wall") or string.find(nameLower, "tembok") or string.find(nameLower, "dinding") or string.find(nameLower, "building") or string.find(nameLower, "house") or string.find(nameLower, "prop") or string.find(nameLower, "rock") or string.find(nameLower, "tree") then
 						v:Destroy()
 					else
@@ -2658,7 +2671,10 @@ local scc = Instance.new("UICorner")
 scc.CornerRadius = UDim.new(0, 6)
 scc.Parent = SaveConfigBtn
 SaveConfigBtn.MouseButton1Click:Connect(function()
+	local oldState = getgenv().TyoConfig.AutoSaveEnabled
+	getgenv().TyoConfig.AutoSaveEnabled = true
 	SaveConfig()
+	getgenv().TyoConfig.AutoSaveEnabled = oldState
 	SaveConfigBtn.Text = "✅ Config Berhasil Disimpan!"
 	task.wait(1.5)
 	SaveConfigBtn.Text = "💾 Simpan Konfigurasi"
@@ -2754,7 +2770,7 @@ Float.Image = "rbxassetid://137785805499299"
 Float.ScaleType = Enum.ScaleType.Crop
 Float.Active = true
 Float.Selectable = true
-Float.ZIndex = 999999
+Float.ZIndex = 9999999 -- Diatur sangat tinggi agar tidak tertutup menu trade game apapun
 
 local flCorner = Instance.new("UICorner")
 flCorner.CornerRadius = UDim.new(1, 0)
@@ -2773,4 +2789,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath WuWa Hub V3 Loaded Successfully with Clickable Floating Logo!")
+print("Aemeath WuWa Hub V3 Loaded Successfully with Auto Save Toggle & Anti-Trade Overlay Logo!")
