@@ -39,7 +39,7 @@ getgenv().TyoConfig = {
 	WebhookEnabled = false,
 	WebhookUrl = "",
 	SelectedTradeTarget = "",
-	AutoSaveEnabled = true -- Fitur Auto Save On/Off
+	AutoSaveEnabled = true
 }
 
 local function SaveConfig()
@@ -345,6 +345,9 @@ getgenv().SpotLoopConfig = {
 }
 getgenv().AutoFavoriteRunning = false
 getgenv().AutoAcceptTradeRunning = false
+getgenv().InvisibleRunning = false
+getgenv().NetworkBoostRunning = false
+
 getgenv().FavRarities = {
 	["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 	["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -717,7 +720,7 @@ local Gui = Instance.new("ScreenGui")
 Gui.Name = "TyoHub"
 Gui.Parent = PlayerGui
 Gui.ResetOnSpawn = false
-Gui.DisplayOrder = 99999 -- Pastikan ScreenGui selalu berada di atas UI Trade game
+Gui.DisplayOrder = 99999
 
 ----------------------------------------------------
 -- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
@@ -887,7 +890,7 @@ Sidebar.Parent = Main
 Sidebar.Position = UDim2.new(0, 8, 0, 42)
 Sidebar.Size = UDim2.new(0, 135, 1, -50)
 Sidebar.BackgroundColor3 = Color3.fromRGB(20, 16, 28)
-Sidebar.CanvasSize = UDim2.new(0, 0, 2.8, 0)
+Sidebar.CanvasSize = UDim2.new(0, 0, 3.2, 0)
 Sidebar.ScrollBarThickness = 0
 
 local sbCorner = Instance.new("UICorner")
@@ -2030,7 +2033,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE
+-- 7. PLAYER PAGE (DITAMBAH FITUR INVISIBLE & JARINGAN)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2059,6 +2062,49 @@ spc.Parent = SpeedBox
 SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
+end)
+
+-- FITUR BARU: INVISIBLE / GHOST MODE SUPAYA TIDAK BISA DILIHAT PLAYER LAIN
+AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain)", function(v)
+	getgenv().InvisibleRunning = v
+	pcall(function()
+		local char = LocalPlayer.Character
+		if not char then return end
+		for _, part in ipairs(char:GetDescendants()) do
+			if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+				part.Transparency = v and 1 or 0
+			elseif part:IsA("Decal") then
+				part.Transparency = v and 1 or 0
+			end
+		end
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			local displayDistance = hum.DisplayDistanceType
+			hum.DisplayDistanceType = v and Enum.HumanoidDisplayDistanceType.None or displayDistance
+		end
+	end)
+end)
+
+-- FITUR BARU: PENINGKATAN JARINGAN (OPTIMASI PAKET DATA / REDUCER LAG)
+AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
+	getgenv().NetworkBoostRunning = v
+	task.spawn(function()
+		while getgenv().NetworkBoostRunning do
+			pcall(function()
+				settings():GetService("NetworkSettings").IncomingReplicationLag = 0
+				for _, p in ipairs(Players:GetPlayers()) do
+					if p ~= LocalPlayer and p.Character then
+						for _, part in ipairs(p.Character:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.CastShadow = false
+							end
+						end
+					end
+				end
+			end)
+			task.wait(2)
+		end
+	end)
 end)
 
 AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end)
@@ -2453,7 +2499,6 @@ TitleSet.TextColor3 = Color3.fromRGB(160, 80, 255)
 TitleSet.Font = Enum.Font.GothamBold
 TitleSet.TextSize = 12
 
--- FITUR BARU: AUTO SAVE TOGGLE
 AddToggle(SettingsPage, "Auto Save Config", function(v)
 	getgenv().TyoConfig.AutoSaveEnabled = v
 	if v then SaveConfig() end
@@ -2739,7 +2784,7 @@ task.spawn(function()
 	while true do
 		pcall(function()
 			local elapsed = os.time() - getgenv().SessionStartTime
-			local hours = math.floor(elapsed / 3600)
+			const hours = math.floor(elapsed / 3600)
 			local mins = math.floor((elapsed % 3600) / 60)
 			local secs = elapsed % 60
 			
@@ -2759,7 +2804,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- FLOATING BUTTON (BISA DIGESER & DIPENCET DIMANA SAJA)
+-- FLOATING BUTTON
 ----------------------------------------------------
 local Float = Instance.new("ImageButton")
 Float.Parent = Gui
@@ -2770,7 +2815,7 @@ Float.Image = "rbxassetid://137785805499299"
 Float.ScaleType = Enum.ScaleType.Crop
 Float.Active = true
 Float.Selectable = true
-Float.ZIndex = 9999999 -- Diatur sangat tinggi agar tidak tertutup menu trade game apapun
+Float.ZIndex = 9999999
 
 local flCorner = Instance.new("UICorner")
 flCorner.CornerRadius = UDim.new(1, 0)
@@ -2789,4 +2834,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath WuWa Hub V3 Loaded Successfully with Auto Save Toggle & Anti-Trade Overlay Logo!")
+print("Aemeath WuWa Hub V3 Loaded Successfully with Invisible & Network Boost Features!")
