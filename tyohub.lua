@@ -639,22 +639,23 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- TRADE UTILITIES
+-- TRADE UTILITIES (PERBAIKAN UTUH)
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
+	local res = nil
 	pcall(function()
 		local tradeFolder = ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Trade")
-		if tradeFolder and tradeFolder:FindFirstChild(actionName) then
-			return tradeFolder[actionName]
+		if tradeFolder then
+			res = tradeFolder:FindFirstChild(actionName)
 		end
 	end)
-	return nil
+	return res
 end
 
 local function AutoAddAllFishToTrade()
 	pcall(function()
 		local serverData = GetServerFishData()
-		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Trade") and ReplicatedStorage.Remote.Trade:FindFirstChild("TambahItem")
+		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or GetTradeRemote("TambahItem")
 		for _, fish in ipairs(serverData) do
 			if tradeRemote then
 				if tradeRemote:IsA("RemoteEvent") then
@@ -674,7 +675,7 @@ local function SendTradeRequestToTarget()
 		if not targetName or targetName == "" then return end
 		local targetPlayer = Players:FindFirstChild(targetName)
 		if targetPlayer then
-			local reqRemote = GetTradeRemote("Request") or GetTradeRemote("SendRequest") or ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Trade") and ReplicatedStorage.Remote.Trade:FindFirstChild("KirimRequest")
+			local reqRemote = GetTradeRemote("Request") or GetTradeRemote("SendRequest") or GetTradeRemote("KirimRequest")
 			if reqRemote then
 				if reqRemote:IsA("RemoteEvent") then
 					reqRemote:FireServer(targetPlayer)
@@ -713,7 +714,7 @@ local Gui = Instance.new("ScreenGui")
 Gui.Name = "TyoHub"
 Gui.Parent = PlayerGui
 Gui.ResetOnSpawn = false
-Gui.DisplayOrder = 2147483647 -- Diatur ke nilai maksimum agar selalu di atas semua UI Roblox
+Gui.DisplayOrder = 2147483647
 
 ----------------------------------------------------
 -- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
@@ -2082,7 +2083,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (INVISIBLE + ROD + NETWORK BOOST)
+-- 7. PLAYER PAGE (SERVER-SIDE INVISIBLE + ROD + NETWORK BOOST)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2115,31 +2116,49 @@ SpeedBox.FocusLost:Connect(function()
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
 
--- INVISIBLE MODE (TERMASUK ROD / TOOL YANG DIPEGANG)
-AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat + Rod Hilang)", function(v)
+-- TRUE INVISIBLE MODE (SERVER-SIDE HIDE - PLAYER LAIN TIDAK BISA MELIHAT)
+AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
 	getgenv().InvisibleRunning = v
 	pcall(function()
 		local char = LocalPlayer.Character
 		if not char then return end
 		
-		-- Sembunyikan karakter & tool yang dipegang
-		for _, part in ipairs(char:GetDescendants()) do
-			if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-				part.Transparency = v and 1 or 0
-			elseif part:IsA("Decal") then
-				part.Transparency = v and 1 or 0
+		if v then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.CFrame = CFrame.new(0, -9999, 0)
 			end
-		end
-		
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then
-			local displayDistance = hum.DisplayDistanceType
-			hum.DisplayDistanceType = v and Enum.HumanoidDisplayDistanceType.None or displayDistance
+			
+			for _, part in ipairs(char:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Transparency = 1
+					part.CanCollide = false
+				elseif part:IsA("Decal") then
+					part.Transparency = 1
+				end
+			end
+			
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+			end
+		else
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.CFrame = FishingSpots["Spot Mancing Jembatan"] + Vector3.new(0, 5, 0)
+			end
+			for _, part in ipairs(char:GetDescendants()) do
+				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+					part.Transparency = 0
+					part.CanCollide = true
+				elseif part:IsA("Decal") then
+					part.Transparency = 0
+				end
+			end
 		end
 	end)
 end)
 
--- Loop tambahan untuk memastikan alat pancing/rod yang baru ditarik tetap transparan jika Invisible Mode aktif
 task.spawn(function()
 	while true do
 		if getgenv().InvisibleRunning then
@@ -2151,6 +2170,7 @@ task.spawn(function()
 							for _, p in ipairs(tool:GetDescendants()) do
 								if p:IsA("BasePart") then
 									p.Transparency = 1
+									p.CanCollide = false
 								end
 							end
 						end
@@ -2158,7 +2178,7 @@ task.spawn(function()
 				end
 			end)
 		end
-		task.wait(0.5)
+		task.wait(0.3)
 	end
 end)
 
@@ -2357,7 +2377,7 @@ pcall(function()
 end)
 
 ----------------------------------------------------
--- 9. TELEPORT PLAYER PAGE
+-- 9. TELEPORT PLAYER PAGE (PERBAIKAN UTUH DENGAN STREAMING & LOOP CRAME)
 ----------------------------------------------------
 local PlayerTpPage = pages["Teleport Player"]
 
@@ -2460,16 +2480,35 @@ local function ScanAndDisplayPlayers()
 						local myPart = GetCharacterRootPart(myChar)
 						
 						if targetPart and myPart then
-							pcall(function() LocalPlayer:RequestStreamAroundAsync(targetPart.Position, 5) end)
+							-- 1. Stream area target (Mengatasi StreamingEnabled)
+							pcall(function()
+								LocalPlayer:RequestStreamAroundAsync(targetPart.Position, 10)
+							end)
+							task.wait(0.2)
+							
+							-- 2. Hentikan kecepatan fisik sementara agar tidak mental
 							if myPart:IsA("BasePart") then
 								myPart.Anchored = false
 								myPart.AssemblyLinearVelocity = Vector3.zero
+								myPart.AssemblyAngularVelocity = Vector3.zero
 							end
-							local destinationCFrame = targetPart.CFrame * CFrame.new(0, 3, 2)
-							for i = 1, 3 do
-								if myChar and myPart then myPart.CFrame = destinationCFrame end
+							
+							-- 3. Lakukan perpindahan bertahap agar lolos dari anti-teleport
+							local targetCFrame = targetPart.CFrame * CFrame.new(0, 3, 2)
+							for i = 1, 5 do
+								if myChar and myPart and targetPart.Parent then
+									myPart.CFrame = targetCFrame
+								end
 								task.wait(0.05)
 							end
+							
+							tpBtn.Text = "Berhasil!"
+							task.wait(1)
+							tpBtn.Text = "Teleport"
+						else
+							tpBtn.Text = "Gagal!"
+							task.wait(1)
+							tpBtn.Text = "Teleport"
 						end
 					end)
 				end)
@@ -2916,7 +2955,7 @@ Float.Image = "rbxassetid://137785805499299"
 Float.ScaleType = Enum.ScaleType.Crop
 Float.Active = true
 Float.Selectable = true
-Float.ZIndex = 2147483647 -- Diatur ke tingkat tertinggi agar tidak tertutup overlay trade/game lain
+Float.ZIndex = 2147483647
 
 local flCorner = Instance.new("UICorner")
 flCorner.CornerRadius = UDim.new(1, 0)
@@ -2935,4 +2974,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath WuWa Hub V3 Loaded Successfully with Fixed Auto Save, Invisible Rod, and Always-On-Top Logo!")
+print("Aemeath WuWa Hub V3 Loaded Successfully with Fixed Trade & Teleport Player!")
