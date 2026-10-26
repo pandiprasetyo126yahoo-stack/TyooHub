@@ -13,7 +13,6 @@ local TeleportService = game:GetService("TeleportService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -24,7 +23,7 @@ getgenv().TotalFishCaught = 0
 getgenv().SessionStartTime = os.time()
 
 ------------------------------------------------------------------
--- CONFIGURATION & FILE SAVE SYSTEM (AUTO SAVE & AUTO LOAD)
+-- CONFIGURATION & FILE SAVE SYSTEM (AUTO SAVE & AUTO LOAD FIXED)
 ------------------------------------------------------------------
 local SAFE_NAME = tostring(LocalPlayer.UserId or LocalPlayer.Name)
 local CONFIG_FILE = "AemeathHubV3_Config_" .. SAFE_NAME .. ".json"
@@ -73,10 +72,12 @@ local function LoadConfig()
 	end)
 end
 
+-- Jalankan Auto Load saat script pertama kali dieksekusi jika diaktifkan
 if getgenv().TyoConfig.AutoLoadEnabled then
 	LoadConfig()
 end
 
+-- Sistem Auto Save Berkala (Setiap 30 detik jika ada perubahan)
 task.spawn(function()
 	while true do
 		task.wait(30)
@@ -110,7 +111,7 @@ local function ResetConfig()
 end
 
 ------------------------------------------------------------------
--- DISCORD WEBHOOK SYSTEM
+-- DISCORD WEBHOOK SYSTEM (SERVER-WIDE CUTSCENE BROADCAST)
 ------------------------------------------------------------------
 local function SendServerWideWebhook(playerName, catchType, position)
 	pcall(function()
@@ -361,12 +362,6 @@ getgenv().AutoAcceptTradeRunning = false
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
 
--- FLY & LONG JUMP STATES
-getgenv().FlyRunning = false
-getgenv().FlySpeed = 50
-getgenv().LongJumpRunning = false
-getgenv().JumpPowerMultiplier = 3
-
 getgenv().FavRarities = {
 	["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 	["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -409,69 +404,6 @@ local function GetEquippedRod()
 	end
 	return nil
 end
-
-------------------------------------------------------------------
--- FLY SYSTEM
-------------------------------------------------------------------
-local flyConn = nil
-local function StartFly()
-	if flyConn then flyConn:Disconnect() end
-	local cam = Workspace.CurrentCamera
-	flyConn = RunService.RenderStepped:Connect(function()
-		if not getgenv().FlyRunning then return end
-		pcall(function()
-			local char = LocalPlayer.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local hum = char and char:FindFirstChildOfClass("Humanoid")
-			if hrp and hum then
-				hum.PlatformStand = true
-				local moveDir = hum.MoveDirection
-				local camCF = cam.CFrame
-				local velocity = Vector3.zero
-				
-				if moveDir.Magnitude > 0 then
-					local moveV = (camCF.RightVector * moveDir.X + camCF.LookVector * moveDir.Z)
-					velocity = Vector3.new(moveV.X, 0, moveV.Z).Unit * getgenv().FlySpeed
-				end
-				
-				if UIS:IsKeyDown(Enum.KeyCode.Space) or UIS:IsKeyDown(Enum.KeyCode.ButtonR2) then
-					velocity = velocity + Vector3.new(0, getgenv().FlySpeed, 0)
-				elseif UIS:IsKeyDown(Enum.KeyCode.LeftShift) or UIS:IsKeyDown(Enum.KeyCode.ButtonL2) then
-					velocity = velocity - Vector3.new(0, getgenv().FlySpeed, 0)
-				end
-				
-				hrp.AssemblyLinearVelocity = velocity
-			end
-		end)
-	end)
-end
-
-local function StopFly()
-	if flyConn then flyConn:Disconnect(); flyConn = nil end
-	pcall(function()
-		local char = LocalPlayer.Character
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		local hrp = char and char:FindFirstChild("HumanoidRootPart")
-		if hum then hum.PlatformStand = false end
-		if hrp then hrp.AssemblyLinearVelocity = Vector3.zero end
-	end)
-end
-
-------------------------------------------------------------------
--- LONG JUMP / SUPER JUMP SYSTEM
-------------------------------------------------------------------
-UIS.JumpRequest:Connect(function()
-	if not getgenv().LongJumpRunning then return end
-	pcall(function()
-		local char = LocalPlayer.Character
-		local hrp = char and char:FindFirstChild("HumanoidRootPart")
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		if hrp and hum and hum.FloorMaterial ~= Enum.Material.Air then
-			local jumpPower = (hum.JumpPower > 0 and hum.JumpPower) or (hum.JumpHeight * 50) or 50
-			hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X, jumpPower * (getgenv().JumpPowerMultiplier or 3), hrp.AssemblyLinearVelocity.Z)
-		end
-	end)
-end)
 
 ------------------------------------------------------------------
 -- ROD SETTINGS
@@ -1969,7 +1901,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FAST TP)
+-- 6. SUMMIT PAGE
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -1977,13 +1909,13 @@ local TitleSum = Instance.new("TextLabel")
 TitleSum.Parent = SummitPage
 TitleSum.Size = UDim2.new(1, -5, 0, 25)
 TitleSum.BackgroundTransparency = 1
-TitleSum.Text = "⛰️ AUTO SUMMIT FARM (INSTANT FAST TP)"
+TitleSum.Text = "⛰️ AUTO SUMMIT FARM (INSTANT TP)"
 TitleSum.TextColor3 = Color3.fromRGB(80, 150, 255)
 TitleSum.Font = Enum.Font.GothamBold
 TitleSum.TextSize = 12
 TitleSum.ZIndex = 13
 
-getgenv().SummitDelay = 0.2
+getgenv().SummitDelay = 1
 getgenv().SummitCpHeight = 1.5
 getgenv().SummitUseRemote = false
 getgenv().SummitHeight = 6
@@ -2037,7 +1969,7 @@ local function SetPlatformStand(state)
 	end)
 end
 
-AddToggle(SummitPage, "Auto Summit Loop (Fast TP)", function(v)
+AddToggle(SummitPage, "Auto Summit Loop (Instant TP)", function(v)
 	getgenv().AutoSummitRunning = v
 	if not v then
 		SetPlatformStand(false)
@@ -2075,27 +2007,28 @@ end
 AddSummitBox("Tinggi di titik Tengah (Cth: 6)", 6, function(n) getgenv().SummitHeight = n end)
 AddSummitBox("Tinggi di titik Cp (Cth: 1.5)", 1.5, function(n) getgenv().SummitCpHeight = n end)
 AddToggle(SummitPage, "Pakai Remote Checkpoint (opsional)", function(v) getgenv().SummitUseRemote = v end)
-AddSummitBox("Jeda Cepat di tiap Cp (detik, Cth: 0.2)", 0.2, function(n) getgenv().SummitDelay = math.max(n, 0) end)
+AddSummitBox("Jeda di tiap Cp (detik, Cth: 1)", 1, function(n) getgenv().SummitDelay = math.max(n, 0) end)
 
-local function TouchCheckpointFast(cpNumber, approxCF)
+local function TouchCheckpoint(cpNumber, approxCF)
 	local part 
 	local waited = 0 
 	
 	pcall(function()
 		LocalPlayer:RequestStreamAroundAsync(approxCF.Position, 5)
 	end)
-	while getgenv().AutoSummitRunning and waited < 1 do
+	while getgenv().AutoSummitRunning and waited < 2 do
 		local folder = workspace:FindFirstChild("Checkpoint")
 		part = folder and folder:FindFirstChild("Checkpoint " .. tostring(cpNumber))
 		if part and part:IsA("BasePart") then break end
 		part = nil
-		task.wait(0.05)
-		waited = waited + 0.05
+		task.wait(0.2)
+		waited = waited + 0.2
 	end
 	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 	if not hrp or not getgenv().AutoSummitRunning then return end
 	if not part then
 		hrp.CFrame = approxCF
+		task.wait(0.1)
 		return
 	end
 	local standPos = part.Position + Vector3.new(0, (part.Size.Y / 2) + 2, 0)
@@ -2104,6 +2037,7 @@ local function TouchCheckpointFast(cpNumber, approxCF)
 	if firetouchinterest then
 		pcall(function()
 			firetouchinterest(hrp, part, 0)
+			task.wait(0.05)
 			firetouchinterest(hrp, part, 1)
 		end)
 	end
@@ -2113,7 +2047,6 @@ task.spawn(function()
 	while true do
 		if getgenv().AutoSummitRunning then
 			pcall(function()
-				SetPlatformStand(true)
 				local midHeight = tonumber(getgenv().SummitHeight) or 6
 				local cpHeight = tonumber(getgenv().SummitCpHeight) or 1.5
 				
@@ -2129,6 +2062,10 @@ task.spawn(function()
 					local cpIndex = string.match(name, "^Cp(%d+)$")
 					local height = cpIndex and cpHeight or midHeight
 					
+					pcall(function() 
+						LocalPlayer:RequestStreamAroundAsync(point[2].Position, 10) 
+					end)
+					
 					hrp.AssemblyLinearVelocity = Vector3.zero
 					hrp.AssemblyAngularVelocity = Vector3.zero
 					
@@ -2137,9 +2074,9 @@ task.spawn(function()
 					if not getgenv().AutoSummitRunning then break end
 					
 					if cpIndex then
-						TouchCheckpointFast(tonumber(cpIndex), point[2])
+						TouchCheckpoint(tonumber(cpIndex), point[2])
 						
-						local delayTime = tonumber(getgenv().SummitDelay) or 0.2
+						local delayTime = tonumber(getgenv().SummitDelay) or 1
 						task.wait(delayTime)
 						
 						if getgenv().SummitUseRemote then
@@ -2152,28 +2089,28 @@ task.spawn(function()
 								end
 							end)
 						end
+						task.wait(0.15)
 					else
-						task.wait(0.05)
+						task.wait(0.15)
 					end
 				end
 				
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
 					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
-					task.wait(0.2)
+					task.wait(0.8)
 					hrpFinal.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
 				end
 			end)
-			task.wait(0.1)
+			task.wait(0.5)
 		else
-			SetPlatformStand(false)
-			task.wait(0.3)
+			task.wait(0.5)
 		end
 	end
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (DENGAN TERBANG & LOMPAT JAUH)
+-- 7. PLAYER PAGE
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2181,7 +2118,7 @@ local TitlePly = Instance.new("TextLabel")
 TitlePly.Parent = PlayerPage
 TitlePly.Size = UDim2.new(1, -5, 0, 25)
 TitlePly.BackgroundTransparency = 1
-TitlePly.Text = "⚡ PLAYER SETTINGS & MOVEMENT"
+TitlePly.Text = "⚡ PLAYER SETTINGS & VISUALS"
 TitlePly.TextColor3 = Color3.fromRGB(80, 150, 255)
 TitlePly.Font = Enum.Font.GothamBold
 TitlePly.TextSize = 12
@@ -2204,53 +2141,6 @@ spc.Parent = SpeedBox
 SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
-end)
-
-AddToggle(PlayerPage, "🛫 Fitur Terbang (Fly)", function(v)
-	getgenv().FlyRunning = v
-	if v then StartFly() else StopFly() end
-end)
-
-local FlySpeedBox = Instance.new("TextBox")
-FlySpeedBox.Parent = PlayerPage
-FlySpeedBox.Size = UDim2.new(1, -5, 0, 36)
-FlySpeedBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-FlySpeedBox.PlaceholderText = "Kecepatan Terbang (Cth: 50)"
-FlySpeedBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-FlySpeedBox.Text = "50"
-FlySpeedBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-FlySpeedBox.Font = Enum.Font.GothamMedium
-FlySpeedBox.TextSize = 11
-FlySpeedBox.ZIndex = 13
-local fsbc = Instance.new("UICorner")
-fsbc.CornerRadius = UDim.new(0, 6)
-fsbc.Parent = FlySpeedBox
-FlySpeedBox.FocusLost:Connect(function()
-	local n = tonumber(FlySpeedBox.Text)
-	if n then getgenv().FlySpeed = n end
-end)
-
-AddToggle(PlayerPage, "🦘 Fitur Lompat Jauh (Long Jump)", function(v)
-	getgenv().LongJumpRunning = v
-end)
-
-local JumpMultiplierBox = Instance.new("TextBox")
-JumpMultiplierBox.Parent = PlayerPage
-JumpMultiplierBox.Size = UDim2.new(1, -5, 0, 36)
-JumpMultiplierBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-JumpMultiplierBox.PlaceholderText = "Kelipatan Lompat Jauh (Cth: 3)"
-JumpMultiplierBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-JumpMultiplierBox.Text = "3"
-JumpMultiplierBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-JumpMultiplierBox.Font = Enum.Font.GothamMedium
-JumpMultiplierBox.TextSize = 11
-JumpMultiplierBox.ZIndex = 13
-local jmbc = Instance.new("UICorner")
-jmbc.CornerRadius = UDim.new(0, 6)
-jmbc.Parent = JumpMultiplierBox
-JumpMultiplierBox.FocusLost:Connect(function()
-	local n = tonumber(JumpMultiplierBox.Text)
-	if n then getgenv().JumpPowerMultiplier = n end
 end)
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
@@ -2748,7 +2638,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 11. SETTINGS & PERFORMANCE PAGE
+-- 11. SETTINGS & PERFORMANCE PAGE (DENGAN AUTO LOAD & AUTO SAVE)
 ----------------------------------------------------
 local SettingsPage = pages["Settings"]
 
@@ -2762,11 +2652,13 @@ TitleSet.Font = Enum.Font.GothamBold
 TitleSet.TextSize = 12
 TitleSet.ZIndex = 13
 
+-- Toggle Auto Save Config
 AddToggle(SettingsPage, "Auto Save Config", function(v)
 	getgenv().TyoConfig.AutoSaveEnabled = v
 	if v then SaveConfig() end
 end, getgenv().TyoConfig.AutoSaveEnabled)
 
+-- Toggle Auto Load Config
 AddToggle(SettingsPage, "Auto Load Config saat Start", function(v)
 	getgenv().TyoConfig.AutoLoadEnabled = v
 	SaveConfig()
@@ -3128,4 +3020,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Fly, Long Jump, Fast Summit & Auto Save/Load!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto Save, Auto Load & Custom Theme!")
