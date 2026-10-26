@@ -72,12 +72,10 @@ local function LoadConfig()
 	end)
 end
 
--- Jalankan Auto Load saat script pertama kali dieksekusi jika diaktifkan
 if getgenv().TyoConfig.AutoLoadEnabled then
 	LoadConfig()
 end
 
--- Sistem Auto Save Berkala (Setiap 30 detik jika ada perubahan)
 task.spawn(function()
 	while true do
 		task.wait(30)
@@ -801,7 +799,7 @@ Main.Parent = Gui
 Main.Visible = true
 Main.Size = UDim2.new(0, 560, 0, 330)
 Main.Position = UDim2.new(0.5, -280, 0.5, -165)
-Main.Image = "rbxassetid://107380961815187"
+Main.Image = "rbxassetid://106191671617535"
 Main.ImageTransparency = 0.35
 Main.BackgroundColor3 = Color3.fromRGB(12, 16, 26)
 Main.ScaleType = Enum.ScaleType.Crop
