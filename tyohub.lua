@@ -2038,15 +2038,25 @@ task.spawn(function()
 					local hrp = character and character:FindFirstChild("HumanoidRootPart")
 					local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 					if not hrp or not humanoid then break end
+					
 					local name = point[1]
 					local cpIndex = string.match(name, "^Cp(%d+)$")
 					local height = cpIndex and cpHeight or midHeight
-					pcall(function() LocalPlayer:RequestStreamAroundAsync(point[2].Position, 3) end)
+					
+					-- 1. Pastikan area sekitar di-stream terlebih dahulu agar tidak nge-lag/stuck
+					pcall(function() 
+						LocalPlayer:RequestStreamAroundAsync(point[2].Position, 10) 
+					end)
+					
+					-- 2. Reset kecepatan fisik agar karakter stabil saat dipindahkan
 					hrp.AssemblyLinearVelocity = Vector3.zero
 					hrp.AssemblyAngularVelocity = Vector3.zero
 					
+					-- 3. Eksekusi Teleport dengan aman
 					hrp.CFrame = point[2] + Vector3.new(0, height, 0)
+					
 					if not getgenv().AutoSummitRunning then break end
+					
 					if cpIndex then
 						TouchCheckpoint(tonumber(cpIndex), point[2])
 						
@@ -2063,19 +2073,21 @@ task.spawn(function()
 								end
 							end)
 						end
-						task.wait(0.1)
+						task.wait(0.15)
 					else
 						task.wait(0.15)
 					end
 				end
-				local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-				if hrp and getgenv().AutoSummitRunning then
-					hrp.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
+				
+				-- 4. Pengaman akhir setelah sampai puncak (Kembali ke area aman/lobi)
+				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if hrpFinal and getgenv().AutoSummitRunning then
+					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
 					task.wait(0.8)
-					hrp.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
+					hrpFinal.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
 				end
 			end)
-			task.wait(0.3)
+			task.wait(0.5)
 		else
 			task.wait(0.5)
 		end
@@ -2974,4 +2986,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath WuWa Hub V3 Loaded Successfully with Fixed Trade & Teleport Player!")
+print("Aemeath WuWa Hub V3 Loaded Successfully with Fixed Trade, Teleport Player & Fixed Auto Summit!")
