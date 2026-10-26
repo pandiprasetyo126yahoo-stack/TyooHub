@@ -1,6 +1,6 @@
 -- ==============================================================================
--- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
--- MAP: MOUNT SOREYA UPDATE (FIXED FLY & LONG JUMP)
+-- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & STABLE VERSION
+-- MAP: MOUNT SOREYA UPDATE (FIXED & GUARANTEED TO EXECUTE)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -361,12 +361,6 @@ getgenv().AutoAcceptTradeRunning = false
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
 
--- FLY & LONG JUMP STATES (FIXED & SAFE)
-getgenv().FlyRunning = false
-getgenv().FlySpeed = 50
-getgenv().LongJumpRunning = false
-getgenv().JumpPowerMultiplier = 3
-
 getgenv().FavRarities = {
 	["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 	["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -409,70 +403,6 @@ local function GetEquippedRod()
 	end
 	return nil
 end
-
-------------------------------------------------------------------
--- FLY SYSTEM (FIXED & STABLE)
-------------------------------------------------------------------
-local flyConn = nil
-local function StartFly()
-	if flyConn then flyConn:Disconnect() end
-	local cam = Workspace.CurrentCamera
-	flyConn = RunService.RenderStepped:Connect(function()
-		if not getgenv().FlyRunning then return end
-		pcall(function()
-			local char = LocalPlayer.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local hum = char and char:FindFirstChildOfClass("Humanoid")
-			if hrp and hum then
-				hum.PlatformStand = true
-				local moveDir = hum.MoveDirection
-				local camCF = cam.CFrame
-				local velocity = Vector3.zero
-				
-				if moveDir.Magnitude > 0 then
-					local moveV = (camCF.RightVector * moveDir.X + camCF.LookVector * moveDir.Z)
-					velocity = Vector3.new(moveV.X, 0, moveV.Z).Unit * getgenv().FlySpeed
-				end
-				
-				if UIS:IsKeyDown(Enum.KeyCode.Space) or UIS:IsKeyDown(Enum.KeyCode.ButtonR2) then
-					velocity = velocity + Vector3.new(0, getgenv().FlySpeed, 0)
-				elseif UIS:IsKeyDown(Enum.KeyCode.LeftShift) or UIS:IsKeyDown(Enum.KeyCode.ButtonL2) then
-					velocity = velocity - Vector3.new(0, getgenv().FlySpeed, 0)
-				end
-				
-				hrp.AssemblyLinearVelocity = velocity
-			end
-		end)
-	end)
-end
-
-local function StopFly()
-	if flyConn then flyConn:Disconnect(); flyConn = nil end
-	pcall(function()
-		local char = LocalPlayer.Character
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		local hrp = char and char:FindFirstChild("HumanoidRootPart")
-		if hum then hum.PlatformStand = false end
-		if hrp then hrp.AssemblyLinearVelocity = Vector3.zero end
-	end)
-end
-
-------------------------------------------------------------------
--- LONG JUMP / SUPER JUMP SYSTEM (FIXED & SAFE)
-------------------------------------------------------------------
-local jumpConn = nil
-jumpConn = UIS.JumpRequest:Connect(function()
-	if not getgenv().LongJumpRunning then return end
-	pcall(function()
-		local char = LocalPlayer.Character
-		local hrp = char and char:FindFirstChild("HumanoidRootPart")
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		if hrp and hum then
-			local jumpPower = (hum.JumpPower > 0 and hum.JumpPower) or (hum.JumpHeight * 50) or 50
-			hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X, jumpPower * (getgenv().JumpPowerMultiplier or 3), hrp.AssemblyLinearVelocity.Z)
-		end
-	end)
-end)
 
 ------------------------------------------------------------------
 -- ROD SETTINGS
@@ -2174,7 +2104,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (DENGAN TERBANG & LOMPAT JAUH)
+-- 7. PLAYER PAGE (WALKSPEED & UTILITIES)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2205,53 +2135,6 @@ spc.Parent = SpeedBox
 SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
-end)
-
-AddToggle(PlayerPage, "🛫 Fitur Terbang (Fly)", function(v)
-	getgenv().FlyRunning = v
-	if v then StartFly() else StopFly() end
-end)
-
-local FlySpeedBox = Instance.new("TextBox")
-FlySpeedBox.Parent = PlayerPage
-FlySpeedBox.Size = UDim2.new(1, -5, 0, 36)
-FlySpeedBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-FlySpeedBox.PlaceholderText = "Kecepatan Terbang (Cth: 50)"
-FlySpeedBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-FlySpeedBox.Text = "50"
-FlySpeedBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-FlySpeedBox.Font = Enum.Font.GothamMedium
-FlySpeedBox.TextSize = 11
-FlySpeedBox.ZIndex = 13
-local fsbc = Instance.new("UICorner")
-fsbc.CornerRadius = UDim.new(0, 6)
-fsbc.Parent = FlySpeedBox
-FlySpeedBox.FocusLost:Connect(function()
-	local n = tonumber(FlySpeedBox.Text)
-	if n then getgenv().FlySpeed = n end
-end)
-
-AddToggle(PlayerPage, "🦘 Fitur Lompat Jauh (Long Jump)", function(v)
-	getgenv().LongJumpRunning = v
-end)
-
-local JumpMultiplierBox = Instance.new("TextBox")
-JumpMultiplierBox.Parent = PlayerPage
-JumpMultiplierBox.Size = UDim2.new(1, -5, 0, 36)
-JumpMultiplierBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-JumpMultiplierBox.PlaceholderText = "Kelipatan Lompat Jauh (Cth: 3)"
-JumpMultiplierBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-JumpMultiplierBox.Text = "3"
-JumpMultiplierBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-JumpMultiplierBox.Font = Enum.Font.GothamMedium
-JumpMultiplierBox.TextSize = 11
-JumpMultiplierBox.ZIndex = 13
-local jmbc = Instance.new("UICorner")
-jmbc.CornerRadius = UDim.new(0, 6)
-jmbc.Parent = JumpMultiplierBox
-JumpMultiplierBox.FocusLost:Connect(function()
-	local n = tonumber(JumpMultiplierBox.Text)
-	if n then getgenv().JumpPowerMultiplier = n end
 end)
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
@@ -3129,4 +3012,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Fixed Fly & Long Jump!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully!")
