@@ -24,7 +24,7 @@ getgenv().TotalFishCaught = 0
 getgenv().SessionStartTime = os.time()
 
 ------------------------------------------------------------------
--- CONFIGURATION & FILE SAVE SYSTEM (AUTO SAVE & AUTO LOAD FIXED)
+-- CONFIGURATION & FILE SAVE SYSTEM (AUTO SAVE & AUTO LOAD)
 ------------------------------------------------------------------
 local SAFE_NAME = tostring(LocalPlayer.UserId or LocalPlayer.Name)
 local CONFIG_FILE = "AemeathHubV3_Config_" .. SAFE_NAME .. ".json"
@@ -110,7 +110,7 @@ local function ResetConfig()
 end
 
 ------------------------------------------------------------------
--- DISCORD WEBHOOK SYSTEM (SERVER-WIDE CUTSCENE BROADCAST)
+-- DISCORD WEBHOOK SYSTEM
 ------------------------------------------------------------------
 local function SendServerWideWebhook(playerName, catchType, position)
 	pcall(function()
@@ -1969,7 +1969,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (DIPERCEPAT / INSTANT SPEED)
+-- 6. SUMMIT PAGE (FAST TP)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -1983,7 +1983,7 @@ TitleSum.Font = Enum.Font.GothamBold
 TitleSum.TextSize = 12
 TitleSum.ZIndex = 13
 
-getgenv().SummitDelay = 0.2 -- Dipercepat defaultnya
+getgenv().SummitDelay = 0.2
 getgenv().SummitCpHeight = 1.5
 getgenv().SummitUseRemote = false
 getgenv().SummitHeight = 6
@@ -2109,7 +2109,6 @@ local function TouchCheckpointFast(cpNumber, approxCF)
 	end
 end
 
--- Loop Auto Summit Super Cepat (Fast TP)
 task.spawn(function()
 	while true do
 		if getgenv().AutoSummitRunning then
@@ -2133,7 +2132,6 @@ task.spawn(function()
 					hrp.AssemblyLinearVelocity = Vector3.zero
 					hrp.AssemblyAngularVelocity = Vector3.zero
 					
-					-- Teleport super cepat instan
 					hrp.CFrame = point[2] + Vector3.new(0, height, 0)
 					
 					if not getgenv().AutoSummitRunning then break end
@@ -2208,7 +2206,6 @@ SpeedBox.FocusLost:Connect(function()
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
 
--- FITUR TERBANG (FLY)
 AddToggle(PlayerPage, "🛫 Fitur Terbang (Fly)", function(v)
 	getgenv().FlyRunning = v
 	if v then StartFly() else StopFly() end
@@ -2233,7 +2230,6 @@ FlySpeedBox.FocusLost:Connect(function()
 	if n then getgenv().FlySpeed = n end
 end)
 
--- FITUR LOMPAT JAUH / SUPER JUMP
 AddToggle(PlayerPage, "🦘 Fitur Lompat Jauh (Long Jump)", function(v)
 	getgenv().LongJumpRunning = v
 end)
