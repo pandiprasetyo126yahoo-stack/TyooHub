@@ -40,7 +40,11 @@ getgenv().TyoConfig = {
 	WebhookUrl = "",
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
-	AutoLoadEnabled = true
+	AutoLoadEnabled = true,
+	AutoReadyTrade = true,         -- Auto Siap Trade
+	AutoConfirmTrade = true,     -- Auto Konfirmasi Trade
+	AutoAcceptTrade = true,      -- Auto Accept Trade
+	AutoAddAllFishTrade = true   -- Auto On Auto Add All Ikan
 }
 
 local function SaveConfig()
@@ -99,7 +103,11 @@ local function ResetConfig()
 			WebhookUrl = "",
 			SelectedTradeTarget = "",
 			AutoSaveEnabled = true,
-			AutoLoadEnabled = true
+			AutoLoadEnabled = true,
+			AutoReadyTrade = true,
+			AutoConfirmTrade = true,
+			AutoAcceptTrade = true,
+			AutoAddAllFishTrade = true
 		}
 		getgenv().SelectedFishingSpot = "Spot Mancing Jembatan"
 		if delfile and isfile and isfile(CONFIG_FILE) then
@@ -356,7 +364,6 @@ getgenv().SpotLoopConfig = {
 	["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
 }
 getgenv().AutoFavoriteRunning = false
-getgenv().AutoAcceptTradeRunning = false
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
 
@@ -658,7 +665,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- TRADE UTILITIES
+-- IMPROVED TRADE UTILITIES (AUTO SIAP, KONFIRMASI, ACCEPT & ADD ALL)
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -706,21 +713,72 @@ local function SendTradeRequestToTarget()
 	end)
 end
 
-task.spawn(function()
-	while true do
-		if getgenv().AutoAcceptTradeRunning then
-			pcall(function()
-				local acceptRemote = GetTradeRemote("Accept") or GetTradeRemote("TerimaTrade")
-				if acceptRemote then
-					if acceptRemote:IsA("RemoteEvent") then
-						acceptRemote:FireServer()
-					elseif acceptRemote:IsA("RemoteFunction") then
-						acceptRemote:InvokeServer()
+-- Fungsi Pintar untuk Menekan Tombol GUI Game (Siap, Konfirmasi, Terima) secara Otomatis
+local function ClickGuiButtonByName(targetNames)
+	pcall(function()
+		for _, guiObj in ipairs(PlayerGui:GetDescendants()) do
+			if guiObj:IsA("TextButton") or guiObj:IsA("ImageButton") then
+				if guiObj.Visible then
+					local textVal = guiObj:IsA("TextButton") and string.lower(guiObj.Text) or ""
+					local nameVal = string.lower(guiObj.Name)
+					
+					for _, tName in ipairs(targetNames) do
+						local targetLower = string.lower(tName)
+						if string.find(textVal, targetLower) or string.find(nameVal, targetLower) then
+							if firesignal then
+								firesignal(guiObj.MouseButton1Click)
+								firesignal(guiObj.Activated)
+							elseif getconnections then
+								for _, c in ipairs(getconnections(guiObj.MouseButton1Click)) do c:Fire() end
+							end
+						end
 					end
 				end
-			end)
+			end
 		end
-		task.wait(1)
+	end)
+end
+
+-- Task Loop untuk Menjalankan Auto Add All, Auto Siap, Auto Konfirmasi, & Auto Accept Trade
+task.spawn(function()
+	while true do
+		pcall(function()
+			-- 1. Auto Add All Ikan (Jika Diaktifkan)
+			if getgenv().TyoConfig.AutoAddAllFishTrade then
+				AutoAddAllFishToTrade()
+			end
+
+			-- 2. Auto Siap (Mendeteksi tombol "Siap" / "Ready")
+			if getgenv().TyoConfig.AutoReadyTrade then
+				ClickGuiButtonByName({"siap", "ready"})
+				local readyRemote = GetTradeRemote("Ready") or GetTradeRemote("Siap") or GetTradeRemote("SetReady")
+				if readyRemote then
+					if readyRemote:IsA("RemoteEvent") then readyRemote:FireServer(true)
+					elseif readyRemote:IsA("RemoteFunction") then readyRemote:InvokeServer(true) end
+				end
+			end
+
+			-- 3. Auto Konfirmasi (Mendeteksi tombol "Konfirmasi" / "Confirm")
+			if getgenv().TyoConfig.AutoConfirmTrade then
+				ClickGuiButtonByName({"konfirmasi", "confirm"})
+				local confirmRemote = GetTradeRemote("Confirm") or GetTradeRemote("Konfirmasi") or GetTradeRemote("SetConfirm")
+				if confirmRemote then
+					if confirmRemote:IsA("RemoteEvent") then confirmRemote:FireServer()
+					elseif confirmRemote:IsA("RemoteFunction") then confirmRemote:InvokeServer() end
+				end
+			end
+
+			-- 4. Auto Accept / Terima Trade Masuk
+			if getgenv().TyoConfig.AutoAcceptTrade then
+				ClickGuiButtonByName({"terima", "accept", "yes"})
+				local acceptRemote = GetTradeRemote("Accept") or GetTradeRemote("TerimaTrade")
+				if acceptRemote then
+					if acceptRemote:IsA("RemoteEvent") then acceptRemote:FireServer()
+					elseif acceptRemote:IsA("RemoteFunction") then acceptRemote:InvokeServer() end
+				end
+			end
+		end)
+		task.wait(0.5)
 	end
 end)
 
@@ -1740,11 +1798,16 @@ end)
 Players.PlayerAdded:Connect(RefreshTradeTargets)
 Players.PlayerRemoving:Connect(RefreshTradeTargets)
 
+AddToggle(TradePage, "Auto Add All Ikan ke Trade (Auto On)", function(v)
+	getgenv().TyoConfig.AutoAddAllFishTrade = v
+	SaveConfig()
+end, getgenv().TyoConfig.AutoAddAllFishTrade)
+
 local AddAllTradeBtn = Instance.new("TextButton")
 AddAllTradeBtn.Parent = TradePage
 AddAllTradeBtn.Size = UDim2.new(1, -5, 0, 34)
 AddAllTradeBtn.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
-AddAllTradeBtn.Text = "📦 Auto Add All Ikan ke Trade"
+AddAllTradeBtn.Text = "📦 Manual Add All Ikan ke Trade"
 AddAllTradeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AddAllTradeBtn.Font = Enum.Font.GothamBold
 AddAllTradeBtn.TextSize = 11
@@ -1753,6 +1816,21 @@ local aatc = Instance.new("UICorner")
 aatc.CornerRadius = UDim.new(0, 6)
 aatc.Parent = AddAllTradeBtn
 AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddAllFishToTrade() end)
+
+AddToggle(TradePage, "Auto Siap (Ready Trade)", function(v)
+	getgenv().TyoConfig.AutoReadyTrade = v
+	SaveConfig()
+end, getgenv().TyoConfig.AutoReadyTrade)
+
+AddToggle(TradePage, "Auto Konfirmasi (Confirm Trade)", function(v)
+	getgenv().TyoConfig.AutoConfirmTrade = v
+	SaveConfig()
+end, getgenv().TyoConfig.AutoConfirmTrade)
+
+AddToggle(TradePage, "Auto Accept Trade (Terima Otomatis)", function(v)
+	getgenv().TyoConfig.AutoAcceptTrade = v
+	SaveConfig()
+end, getgenv().TyoConfig.AutoAcceptTrade)
 
 local SendTradeReqBtn = Instance.new("TextButton")
 SendTradeReqBtn.Parent = TradePage
@@ -1767,8 +1845,6 @@ local strc = Instance.new("UICorner")
 strc.CornerRadius = UDim.new(0, 6)
 strc.Parent = SendTradeReqBtn
 SendTradeReqBtn.MouseButton1Click:Connect(function() SendTradeRequestToTarget() end)
-
-AddToggle(TradePage, "Auto Accept Trade (Terima Otomatis)", function(v) getgenv().AutoAcceptTradeRunning = v end)
 
 ----------------------------------------------------
 -- 4. GALATAMA PAGE
