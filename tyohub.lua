@@ -717,20 +717,18 @@ end
 local function ClickGuiButtonByName(targetNames)
 	pcall(function()
 		for _, guiObj in ipairs(PlayerGui:GetDescendants()) do
-			if guiObj:IsA("TextButton") or guiObj:IsA("ImageButton") then
-				if guiObj.Visible then
-					local textVal = guiObj:IsA("TextButton") and string.lower(guiObj.Text) or ""
-					local nameVal = string.lower(guiObj.Name)
-					
-					for _, tName in ipairs(targetNames) do
-						local targetLower = string.lower(tName)
-						if string.find(textVal, targetLower) or string.find(nameVal, targetLower) then
-							if firesignal then
-								firesignal(guiObj.MouseButton1Click)
-								firesignal(guiObj.Activated)
-							elseif getconnections then
-								for _, c in ipairs(getconnections(guiObj.MouseButton1Click)) do c:Fire() end
-							end
+			if (guiObj:IsA("TextButton") or guiObj:IsA("ImageButton")) and guiObj.Visible then
+				local textVal = guiObj:IsA("TextButton") and string.lower(guiObj.Text) or ""
+				local nameVal = string.lower(guiObj.Name)
+				
+				for _, tName in ipairs(targetNames) do
+					local targetLower = string.lower(tName)
+					if string.find(textVal, targetLower) or string.find(nameVal, targetLower) then
+						if firesignal then
+							firesignal(guiObj.MouseButton1Click)
+							firesignal(guiObj.Activated)
+						elseif getconnections then
+							for _, c in ipairs(getconnections(guiObj.MouseButton1Click)) do c:Fire() end
 						end
 					end
 				end
@@ -739,7 +737,7 @@ local function ClickGuiButtonByName(targetNames)
 	end)
 end
 
--- Task Loop untuk Menjalankan Auto Add All, Auto Siap, Auto Konfirmasi, & Auto Accept Trade
+-- Task Loop untuk Menjalankan Auto Add All, Auto Siap, Auto Konfirmasi, & Auto Accept Trade (Dipercepat & Dioptimalkan)
 task.spawn(function()
 	while true do
 		pcall(function()
@@ -760,7 +758,7 @@ task.spawn(function()
 
 			-- 3. Auto Konfirmasi (Mendeteksi tombol "Konfirmasi" / "Confirm")
 			if getgenv().TyoConfig.AutoConfirmTrade then
-				ClickGuiButtonByName({"konfirmasi", "confirm"})
+				ClickGuiButtonByName({"konfirmasi", "confirm", "ok", "yes"})
 				local confirmRemote = GetTradeRemote("Confirm") or GetTradeRemote("Konfirmasi") or GetTradeRemote("SetConfirm")
 				if confirmRemote then
 					if confirmRemote:IsA("RemoteEvent") then confirmRemote:FireServer()
@@ -778,7 +776,7 @@ task.spawn(function()
 				end
 			end
 		end)
-		task.wait(0.5)
+		task.wait(0.2)
 	end
 end)
 
@@ -1995,7 +1993,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FAST TP)
+-- 6. SUMMIT PAGE (FAST TP - OPTIMIZED)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
