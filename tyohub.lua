@@ -572,18 +572,20 @@ local function GetServerFishData()
 			and repStorage.Remote.Inventaris:FindFirstChild("AmbilSemua")
 		
 		if ambilSemuaRemote then
-			local result = {ambilSemuaRemote:InvokeServer()}
-			local data = result[1]
-			if type(data) == "table" then
-				for _, fish in ipairs(data) do
-					if type(fish) == "table" and (fish.uid or fish.UUID) then
-						table.insert(fishDataList, {
-							UUID = tostring(fish.uid or fish.UUID),
-							Name = tostring(fish.nama or fish.Name or ""),
-							Rarity = tostring(fish.rarity or fish.Rarity or ""),
-							Mutation = tostring(fish.mutasi or fish.Mutation or ""),
-							IsFavorited = fish.favorit or fish.IsFavorit or fish.IsFavorite or false
-						})
+			local success, result = pcall(function() return {ambilSemuaRemote:InvokeServer()} end)
+			if success and result and result[1] then
+				local data = result[1]
+				if type(data) == "table" then
+					for _, fish in ipairs(data) do
+						if type(fish) == "table" and (fish.uid or fish.UUID) then
+							table.insert(fishDataList, {
+								UUID = tostring(fish.uid or fish.UUID),
+								Name = tostring(fish.nama or fish.Name or ""),
+								Rarity = tostring(fish.rarity or fish.Rarity or ""),
+								Mutation = tostring(fish.mutasi or fish.Mutation or ""),
+								IsFavorited = fish.favorit or fish.IsFavorit or fish.IsFavorite or false
+							})
+						end
 					end
 				end
 			end
@@ -713,7 +715,6 @@ local function SendTradeRequestToTarget()
 	end)
 end
 
--- Fungsi Pintar untuk Menekan Tombol GUI Game (Siap, Konfirmasi, Terima) secara Otomatis
 local function ClickGuiButtonByName(targetNames)
 	pcall(function()
 		for _, guiObj in ipairs(PlayerGui:GetDescendants()) do
@@ -737,16 +738,13 @@ local function ClickGuiButtonByName(targetNames)
 	end)
 end
 
--- Task Loop untuk Menjalankan Auto Add All, Auto Siap, Auto Konfirmasi, & Auto Accept Trade (Dipercepat & Dioptimalkan)
 task.spawn(function()
 	while true do
 		pcall(function()
-			-- 1. Auto Add All Ikan (Jika Diaktifkan)
 			if getgenv().TyoConfig.AutoAddAllFishTrade then
 				AutoAddAllFishToTrade()
 			end
 
-			-- 2. Auto Siap (Mendeteksi tombol "Siap" / "Ready")
 			if getgenv().TyoConfig.AutoReadyTrade then
 				ClickGuiButtonByName({"siap", "ready"})
 				local readyRemote = GetTradeRemote("Ready") or GetTradeRemote("Siap") or GetTradeRemote("SetReady")
@@ -756,7 +754,6 @@ task.spawn(function()
 				end
 			end
 
-			-- 3. Auto Konfirmasi (Mendeteksi tombol "Konfirmasi" / "Confirm")
 			if getgenv().TyoConfig.AutoConfirmTrade then
 				ClickGuiButtonByName({"konfirmasi", "confirm", "ok", "yes"})
 				local confirmRemote = GetTradeRemote("Confirm") or GetTradeRemote("Konfirmasi") or GetTradeRemote("SetConfirm")
@@ -766,7 +763,6 @@ task.spawn(function()
 				end
 			end
 
-			-- 4. Auto Accept / Terima Trade Masuk
 			if getgenv().TyoConfig.AutoAcceptTrade then
 				ClickGuiButtonByName({"terima", "accept", "yes"})
 				local acceptRemote = GetTradeRemote("Accept") or GetTradeRemote("TerimaTrade")
@@ -871,7 +867,6 @@ MainStroke.Parent = Main
 MainStroke.Color = Color3.fromRGB(80, 150, 255)
 MainStroke.Thickness = 1.5
 
--- Top Bar Header
 local TopBar = Instance.new("Frame")
 TopBar.Parent = Main
 TopBar.Size = UDim2.new(1, 0, 0, 35)
@@ -963,7 +958,6 @@ task.spawn(function()
 	end
 end)
 
--- Sidebar Tabs
 local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Parent = Main
 Sidebar.Position = UDim2.new(0, 8, 0, 42)
