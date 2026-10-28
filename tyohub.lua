@@ -680,9 +680,30 @@ local function GetTradeRemote(actionName)
 	return res
 end
 
+-- Rarity Priority Ranking (Semakin tinggi nilainya, semakin diprioritaskan)
+local RarityPriority = {
+	["aether"] = 9,
+	["forgotten"] = 8,
+	["secret"] = 7,
+	["mythical"] = 6,
+	["legendary"] = 5,
+	["epic"] = 4,
+	["rare"] = 3,
+	["uncommon"] = 2,
+	["common"] = 1
+}
+
 local function AutoAddAllFishToTrade()
 	pcall(function()
 		local serverData = GetServerFishData()
+		
+		-- Urutkan ikan berdasarkan rarity tertinggi terlebih dahulu
+		table.sort(serverData, function(a, b)
+			local rankA = RarityPriority[string.lower(a.Rarity)] or 0
+			local rankB = RarityPriority[string.lower(b.Rarity)] or 0
+			return rankA > rankB
+		end)
+		
 		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or GetTradeRemote("TambahItem")
 		for _, fish in ipairs(serverData) do
 			if tradeRemote then
