@@ -680,7 +680,6 @@ local function GetTradeRemote(actionName)
 	return res
 end
 
--- Rarity Priority Ranking (Semakin tinggi nilainya, semakin diprioritaskan)
 local RarityPriority = {
 	["aether"] = 9,
 	["forgotten"] = 8,
@@ -697,7 +696,6 @@ local function AutoAddAllFishToTrade()
 	pcall(function()
 		local serverData = GetServerFishData()
 		
-		-- Urutkan ikan berdasarkan rarity tertinggi terlebih dahulu
 		table.sort(serverData, function(a, b)
 			local rankA = RarityPriority[string.lower(a.Rarity)] or 0
 			local rankB = RarityPriority[string.lower(b.Rarity)] or 0
@@ -2333,9 +2331,33 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	end)
 end)
 
+------------------------------------------------------------------
+-- ANTI-AFK SYSTEM (FIXED & ENHANCED)
+------------------------------------------------------------------
 AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end)
+
 LocalPlayer.Idled:Connect(function()
-	if getgenv().AntiAFKRunning then VirtualUser:CaptureController(); VirtualUser:ClickButton2(Vector2.new(0,0)) end
+	if getgenv().AntiAFKRunning then
+		pcall(function()
+			VirtualUser:CaptureController()
+			VirtualUser:ClickButton2(Vector2.new(0, 0))
+		end)
+	end
+end)
+
+-- Loop tambahan untuk mencegah Error 278 (AFK 20 Menit) secara berkala
+task.spawn(function()
+	while true do
+		task.wait(60) -- Mengecek setiap 60 detik
+		if getgenv().AntiAFKRunning then
+			pcall(function()
+				VirtualUser:CaptureController()
+				VirtualUser:Button1Down(Vector2.new(0, 0))
+				task.wait(0.1)
+				VirtualUser:Button1Up(Vector2.new(0, 0))
+			end)
+		end
+	end
 end)
 
 local HeadlessBtn = Instance.new("TextButton")
