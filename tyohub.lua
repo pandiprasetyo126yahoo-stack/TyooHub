@@ -2345,10 +2345,9 @@ LocalPlayer.Idled:Connect(function()
 	end
 end)
 
--- Loop tambahan untuk mencegah Error 278 (AFK 20 Menit) secara berkala
 task.spawn(function()
 	while true do
-		task.wait(60) -- Mengecek setiap 60 detik
+		task.wait(60)
 		if getgenv().AntiAFKRunning then
 			pcall(function()
 				VirtualUser:CaptureController()
