@@ -13,6 +13,7 @@ local TeleportService = game:GetService("TeleportService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -2006,7 +2007,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FAST TP - OPTIMIZED)
+-- 6. SUMMIT PAGE (FLYING MODE - SMOOTH)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2014,13 +2015,13 @@ local TitleSum = Instance.new("TextLabel")
 TitleSum.Parent = SummitPage
 TitleSum.Size = UDim2.new(1, -5, 0, 25)
 TitleSum.BackgroundTransparency = 1
-TitleSum.Text = "⛰️ AUTO SUMMIT FARM (INSTANT FAST TP)"
+TitleSum.Text = "⛰️ AUTO SUMMIT FARM (FLYING MODE)"
 TitleSum.TextColor3 = Color3.fromRGB(80, 150, 255)
 TitleSum.Font = Enum.Font.GothamBold
 TitleSum.TextSize = 12
 TitleSum.ZIndex = 13
 
-getgenv().SummitDelay = 0.2
+getgenv().SummitFlySpeed = 1.2
 getgenv().SummitCpHeight = 1.5
 getgenv().SummitUseRemote = false
 getgenv().SummitHeight = 6
@@ -2074,7 +2075,7 @@ local function SetPlatformStand(state)
 	end)
 end
 
-AddToggle(SummitPage, "Auto Summit Loop (Fast TP)", function(v)
+AddToggle(SummitPage, "Auto Summit Terbang (Smooth Fly)", function(v)
 	getgenv().AutoSummitRunning = v
 	if not v then
 		SetPlatformStand(false)
@@ -2083,6 +2084,9 @@ AddToggle(SummitPage, "Auto Summit Loop (Fast TP)", function(v)
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.zero
 				hrp.AssemblyAngularVelocity = Vector3.zero
+				for _, p in ipairs(LocalPlayer.Character:GetDescendants()) do
+					if p:IsA("BasePart") then p.Anchored = false end
+				end
 			end
 		end)
 	end
@@ -2113,38 +2117,35 @@ end
 AddSummitBox("Tinggi di titik Tengah (Cth: 6)", 6, function(n) getgenv().SummitHeight = n end)
 AddSummitBox("Tinggi di titik Cp (Cth: 1.5)", 1.5, function(n) getgenv().SummitCpHeight = n end)
 AddToggle(SummitPage, "Pakai Remote Checkpoint (opsional)", function(v) getgenv().SummitUseRemote = v end)
-AddSummitBox("Jeda Cepat di tiap Cp (detik, Cth: 0.2)", 0.2, function(n) getgenv().SummitDelay = math.max(n, 0) end)
+AddSummitBox("Kecepatan Terbang (Detik, Cth: 1.2)", 1.2, function(n) getgenv().SummitFlySpeed = math.max(n, 0.1) end)
 
-local function TouchCheckpointFast(cpNumber, approxCF)
-	local part 
-	local waited = 0 
-	
-	pcall(function()
-		LocalPlayer:RequestStreamAroundAsync(approxCF.Position, 5)
-	end)
-	while getgenv().AutoSummitRunning and waited < 1 do
-		local folder = workspace:FindFirstChild("Checkpoint")
-		part = folder and folder:FindFirstChild("Checkpoint " .. tostring(cpNumber))
-		if part and part:IsA("BasePart") then break end
-		part = nil
-		task.wait(0.05)
-		waited = waited + 0.05
-	end
-	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+local function FlyToTarget(targetCF)
+	local char = LocalPlayer.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp or not getgenv().AutoSummitRunning then return end
-	if not part then
-		hrp.CFrame = approxCF
-		return
+
+	for _, p in ipairs(char:GetDescendants()) do
+		if p:IsA("BasePart") then p.Anchored = false end
 	end
-	local standPos = part.Position + Vector3.new(0, (part.Size.Y / 2) + 2, 0)
-	hrp.CFrame = CFrame.new(standPos)
 	hrp.AssemblyLinearVelocity = Vector3.zero
-	if firetouchinterest then
-		pcall(function()
-			firetouchinterest(hrp, part, 0)
-			firetouchinterest(hrp, part, 1)
-		end)
+	hrp.AssemblyAngularVelocity = Vector3.zero
+
+	local distance = (hrp.Position - targetCF.Position).Magnitude
+	local flyDuration = math.clamp(distance / 800, 0.08, tonumber(getgenv().SummitFlySpeed) or 1.2)
+
+	local tweenInfo = TweenInfo.new(flyDuration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCF})
+	
+	tween:Play()
+	
+	local elapsed = 0
+	while tween.PlaybackState == Enum.PlaybackState.Playing and getgenv().AutoSummitRunning do
+		task.wait(0.02)
+		elapsed = elapsed + 0.02
+		if elapsed > flyDuration + 0.5 then break end
 	end
+	
+	pcall(function() tween:Cancel() end)
 end
 
 task.spawn(function()
@@ -2167,18 +2168,24 @@ task.spawn(function()
 					local cpIndex = string.match(name, "^Cp(%d+)$")
 					local height = cpIndex and cpHeight or midHeight
 					
-					hrp.AssemblyLinearVelocity = Vector3.zero
-					hrp.AssemblyAngularVelocity = Vector3.zero
+					local targetCF = point[2] + Vector3.new(0, height, 0)
 					
-					hrp.CFrame = point[2] + Vector3.new(0, height, 0)
+					FlyToTarget(targetCF)
 					
 					if not getgenv().AutoSummitRunning then break end
 					
 					if cpIndex then
-						TouchCheckpointFast(tonumber(cpIndex), point[2])
+						local folder = workspace:FindFirstChild("Checkpoint")
+						local part = folder and (folder:FindFirstChild("Checkpoint " .. tostring(cpIndex)) or folder:FindFirstChild(tostring(cpIndex)))
 						
-						local delayTime = tonumber(getgenv().SummitDelay) or 0.2
-						task.wait(delayTime)
+						if part and part:IsA("BasePart") and firetouchinterest then
+							pcall(function()
+								firetouchinterest(hrp, part, 0)
+								firetouchinterest(hrp, part, 1)
+							end)
+						end
+						
+						task.wait(0.05)
 						
 						if getgenv().SummitUseRemote then
 							pcall(function()
@@ -2191,21 +2198,20 @@ task.spawn(function()
 							end)
 						end
 					else
-						task.wait(0.05)
+						task.wait(0.02)
 					end
 				end
 				
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
-					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
-					task.wait(0.2)
-					hrpFinal.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
+					FlyToTarget(CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0))
+					task.wait(0.3)
 				end
 			end)
-			task.wait(0.1)
+			task.wait(0.2)
 		else
 			SetPlatformStand(false)
-			task.wait(0.3)
+			task.wait(0.5)
 		end
 	end
 end)
