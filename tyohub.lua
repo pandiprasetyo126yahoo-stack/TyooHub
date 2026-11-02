@@ -2142,12 +2142,18 @@ local function FlyToTarget(targetCF)
 	
 	local elapsed = 0
 	while tween.PlaybackState == Enum.PlaybackState.Playing and getgenv().AutoSummitRunning do
-		task.wait(0.02)
-		elapsed = elapsed + 0.02
+		task.wait(0.01)
+		elapsed = elapsed + 0.01
+		if (hrp.Position - targetCF.Position).Magnitude < 1.5 then
+			break
+		end
 		if elapsed > flyDuration + 0.5 then break end
 	end
 	
 	pcall(function() tween:Cancel() end)
+	hrp.CFrame = targetCF
+	hrp.AssemblyLinearVelocity = Vector3.zero
+	hrp.AssemblyAngularVelocity = Vector3.zero
 end
 
 task.spawn(function()
@@ -2213,10 +2219,10 @@ task.spawn(function()
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
 					FlyToTarget(CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0))
-					task.wait(0.3)
+					task.wait(0.5)
 				end
 			end)
-			task.wait(0.2)
+			task.wait(0.5)
 		else
 			SetPlatformStand(false)
 			task.wait(0.5)
@@ -3165,4 +3171,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background & Checkpoint Pause!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Checkpoint Precision Pause and Auto Loop!")
