@@ -42,10 +42,10 @@ getgenv().TyoConfig = {
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
 	AutoLoadEnabled = true,
-	AutoReadyTrade = true,         -- Auto Siap Trade
-	AutoConfirmTrade = true,     -- Auto Konfirmasi Trade
-	AutoAcceptTrade = true,      -- Auto Accept Trade
-	AutoAddAllFishTrade = true   -- Auto On Auto Add All Ikan
+	AutoReadyTrade = true,
+	AutoConfirmTrade = true,
+	AutoAcceptTrade = true,
+	AutoAddAllFishTrade = true
 }
 
 local function SaveConfig()
@@ -2007,7 +2007,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FLYING MODE - SMOOTH)
+-- 6. SUMMIT PAGE (FLYING MODE - SMOOTH & STOP AT CP)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2025,6 +2025,7 @@ getgenv().SummitFlySpeed = 1.2
 getgenv().SummitCpHeight = 1.5
 getgenv().SummitUseRemote = false
 getgenv().SummitHeight = 6
+getgenv().SummitPauseTime = 0.5 -- ⏱️ Jeda waktu berhenti di setiap Checkpoint (dalam detik)
 
 local SummitPoints = {
 	{"Cp1", CFrame.new(464.845001, 452.719116, -8948.57227, 0.997986674, 0.00330765732, -0.063337639, 5.851164e-10, 0.998639166, 0.0521515608, 0.0634239465, -0.0520465635, 0.996628582)},
@@ -2116,6 +2117,7 @@ end
 
 AddSummitBox("Tinggi di titik Tengah (Cth: 6)", 6, function(n) getgenv().SummitHeight = n end)
 AddSummitBox("Tinggi di titik Cp (Cth: 1.5)", 1.5, function(n) getgenv().SummitCpHeight = n end)
+AddSummitBox("⏱️ Jeda Berhenti di Checkpoint (Detik, Cth: 0.5)", 0.5, function(n) getgenv().SummitPauseTime = math.max(n, 0) end)
 AddToggle(SummitPage, "Pakai Remote Checkpoint (opsional)", function(v) getgenv().SummitUseRemote = v end)
 AddSummitBox("Kecepatan Terbang (Detik, Cth: 1.2)", 1.2, function(n) getgenv().SummitFlySpeed = math.max(n, 0.1) end)
 
@@ -2196,6 +2198,12 @@ task.spawn(function()
 									cpRemote:FireServer(tonumber(cpIndex))
 								end
 							end)
+						end
+
+						-- 🛑 JEDA BERHENTI SEBENTAR DI TIAP CHECKPOINT
+						local pauseTime = tonumber(getgenv().SummitPauseTime) or 0.5
+						if pauseTime > 0 then
+							task.wait(pauseTime)
 						end
 					else
 						task.wait(0.02)
@@ -3157,4 +3165,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background & Checkpoint Pause!")
