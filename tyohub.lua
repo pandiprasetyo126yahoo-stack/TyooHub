@@ -2006,7 +2006,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FAST TP - OPTIMIZED & FIXED)
+-- 6. SUMMIT PAGE (FAST TP - STABLE & FIXED)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2020,7 +2020,7 @@ TitleSum.Font = Enum.Font.GothamBold
 TitleSum.TextSize = 12
 TitleSum.ZIndex = 13
 
-getgenv().SummitDelay = 0.35 -- Jeda optimal agar server mendeteksi sentuhan CP
+getgenv().SummitDelay = 0.45
 getgenv().SummitCpHeight = 1.5
 getgenv().SummitUseRemote = false
 getgenv().SummitHeight = 6
@@ -2113,17 +2113,17 @@ end
 AddSummitBox("Tinggi di titik Tengah (Cth: 6)", 6, function(n) getgenv().SummitHeight = n end)
 AddSummitBox("Tinggi di titik Cp (Cth: 1.5)", 1.5, function(n) getgenv().SummitCpHeight = n end)
 AddToggle(SummitPage, "Pakai Remote Checkpoint (opsional)", function(v) getgenv().SummitUseRemote = v end)
-AddSummitBox("Jeda Cepat di tiap Cp (detik, Cth: 0.35)", 0.35, function(n) getgenv().SummitDelay = math.max(n, 0.1) end)
+AddSummitBox("Jeda Cepat di tiap Cp (detik, Cth: 0.45)", 0.45, function(n) getgenv().SummitDelay = math.max(n, 0.1) end)
 
 local function TouchCheckpointFast(cpNumber, approxCF)
 	local part 
 	local waited = 0 
 	
 	pcall(function()
-		LocalPlayer:RequestStreamAroundAsync(approxCF.Position, 5)
+		LocalPlayer:RequestStreamAroundAsync(approxCF.Position, 10)
 	end)
 	
-	while getgenv().AutoSummitRunning and waited < 1.5 do
+	while getgenv().AutoSummitRunning and waited < 2 do
 		local folder = workspace:FindFirstChild("Checkpoint")
 		part = folder and (folder:FindFirstChild("Checkpoint " .. tostring(cpNumber)) or folder:FindFirstChild(tostring(cpNumber)))
 		if part and part:IsA("BasePart") then break end
@@ -2155,6 +2155,15 @@ task.spawn(function()
 	while true do
 		if getgenv().AutoSummitRunning then
 			pcall(function()
+				local character = LocalPlayer.Character
+				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+				local hrp = character and character:FindFirstChild("HumanoidRootPart")
+				
+				if not character or not humanoid or not hrp or humanoid.Health <= 0 then
+					task.wait(1)
+					return
+				end
+
 				SetPlatformStand(true)
 				local midHeight = tonumber(getgenv().SummitHeight) or 6
 				local cpHeight = tonumber(getgenv().SummitCpHeight) or 1.5
@@ -2162,10 +2171,10 @@ task.spawn(function()
 				for _, point in ipairs(SummitPoints) do
 					if not getgenv().AutoSummitRunning then break end
 					
-					local character = LocalPlayer.Character
-					local hrp = character and character:FindFirstChild("HumanoidRootPart")
-					local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-					if not hrp or not humanoid then break end
+					character = LocalPlayer.Character
+					hrp = character and character:FindFirstChild("HumanoidRootPart")
+					humanoid = character and character:FindFirstChildOfClass("Humanoid")
+					if not hrp or not humanoid or humanoid.Health <= 0 then break end
 					
 					local name = point[1]
 					local cpIndex = string.match(name, "^Cp(%d+)$")
@@ -2181,7 +2190,7 @@ task.spawn(function()
 					if cpIndex then
 						TouchCheckpointFast(tonumber(cpIndex), point[2])
 						
-						local delayTime = tonumber(getgenv().SummitDelay) or 0.35
+						local delayTime = tonumber(getgenv().SummitDelay) or 0.45
 						task.wait(delayTime)
 						
 						if getgenv().SummitUseRemote then
@@ -2206,7 +2215,7 @@ task.spawn(function()
 					hrpFinal.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
 				end
 			end)
-			task.wait(0.2)
+			task.wait(0.5)
 		else
 			SetPlatformStand(false)
 			task.wait(0.4)
