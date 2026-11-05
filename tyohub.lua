@@ -44,8 +44,46 @@ getgenv().TyoConfig = {
 	AutoReadyTrade = true,         -- Auto Siap Trade
 	AutoConfirmTrade = true,     -- Auto Konfirmasi Trade
 	AutoAcceptTrade = true,      -- Auto Accept Trade
-	AutoAddAllFishTrade = true   -- Auto On Auto Add All Ikan
+	AutoAddAllFishTrade = true,  -- Auto On Auto Add All Ikan
+	
+	-- Disatukan ke TyoConfig agar ikut tersimpan otomatis
+	FavRarities = {
+		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
+		["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
+	},
+	FavMutations = {
+		["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false,
+		["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false,
+		["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false,
+		["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false,
+		["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false,
+		["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false
+	},
+	UnfavRarities = {
+		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
+		["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false
+	},
+	UnfavMutations = {
+		["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false,
+		["Lightning"] = false, ["Fairy Dust"] = false, ["Gold"] = false, ["Midnight"] = false,
+		["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false,
+		["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false,
+		["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false,
+		["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false
+	},
+	SpotLoopConfig = {
+		["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
+		["Spot Mancing Core"] = { Enabled = false, Timer = "10" },
+		["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
+	}
 }
+
+-- Sinkronisasi Global Variable
+getgenv().FavRarities = getgenv().TyoConfig.FavRarities
+getgenv().FavMutations = getgenv().TyoConfig.FavMutations
+getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
+getgenv().UnfavMutations = getgenv().TyoConfig.UnfavMutations
+getgenv().SpotLoopConfig = getgenv().TyoConfig.SpotLoopConfig
 
 local function SaveConfig()
 	pcall(function()
@@ -68,6 +106,13 @@ local function LoadConfig()
 						getgenv().TyoConfig[k] = v
 					end
 				end
+				-- Sinkronisasi ulang ke global variable
+				getgenv().FavRarities = getgenv().TyoConfig.FavRarities
+				getgenv().FavMutations = getgenv().TyoConfig.FavMutations
+				getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
+				getgenv().UnfavMutations = getgenv().TyoConfig.UnfavMutations
+				getgenv().SpotLoopConfig = getgenv().TyoConfig.SpotLoopConfig
+
 				if getgenv().TyoConfig.SelectedSpot then
 					getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
 				end
@@ -107,7 +152,16 @@ local function ResetConfig()
 			AutoReadyTrade = true,
 			AutoConfirmTrade = true,
 			AutoAcceptTrade = true,
-			AutoAddAllFishTrade = true
+			AutoAddAllFishTrade = true,
+			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
+			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
+			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
+			UnfavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = false, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
+			SpotLoopConfig = {
+				["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
+				["Spot Mancing Core"] = { Enabled = false, Timer = "10" },
+				["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
+			}
 		}
 		getgenv().SelectedFishingSpot = "Spot Mancing Jembatan"
 		if delfile and isfile and isfile(CONFIG_FILE) then
@@ -358,39 +412,9 @@ getgenv().FakeNameInput = "AEMEATH HUB"
 getgenv().CurrentSelectedHalo = nil
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
-getgenv().SpotLoopConfig = {
-	["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
-	["Spot Mancing Core"] = { Enabled = false, Timer = "10" },
-	["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
-}
 getgenv().AutoFavoriteRunning = false
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
-
-getgenv().FavRarities = {
-	["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
-	["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
-}
-getgenv().FavMutations = {
-	["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false,
-	["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false,
-	["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false,
-	["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false,
-	["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false,
-	["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false
-}
-getgenv().UnfavRarities = {
-	["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
-	["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false
-}
-getgenv().UnfavMutations = {
-	["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false,
-	["Lightning"] = false, ["Fairy Dust"] = false, ["Gold"] = false, ["Midnight"] = false,
-	["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false,
-	["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false,
-	["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false,
-	["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false
-}
 
 local FishingSpots = {
 	["Spot Mancing Jembatan"] = CFrame.new(-6783.74756, 1322.81006, -9757.34473, 0.0899723172, -9.34088291e-08, 0.995944262, 1.76120434e-08, 1, 9.21981638e-08, -0.995944262, 9.24533072e-09, 0.0899723172),
@@ -1458,8 +1482,8 @@ local function CreateSpotTimerSetting(parent, spotName)
 	toggleBtn.Parent = frame
 	toggleBtn.Size = UDim2.new(0.65, 0, 1, 0)
 	toggleBtn.BackgroundTransparency = 1
-	toggleBtn.Text = " " .. spotName .. " [OFF]"
-	toggleBtn.TextColor3 = Color3.fromRGB(210, 225, 240)
+	toggleBtn.Text = " " .. spotName .. (getgenv().SpotLoopConfig[spotName].Enabled and " [ON]" or " [OFF]")
+	toggleBtn.TextColor3 = getgenv().SpotLoopConfig[spotName].Enabled and Color3.fromRGB(80, 255, 200) or Color3.fromRGB(210, 225, 240)
 	toggleBtn.Font = Enum.Font.GothamMedium
 	toggleBtn.TextSize = 11
 	toggleBtn.TextXAlignment = Enum.TextXAlignment.Left
@@ -1484,8 +1508,12 @@ local function CreateSpotTimerSetting(parent, spotName)
 		getgenv().SpotLoopConfig[spotName].Enabled = cur
 		toggleBtn.Text = " " .. spotName .. (cur and " [ON]" or " [OFF]")
 		toggleBtn.TextColor3 = cur and Color3.fromRGB(80, 255, 200) or Color3.fromRGB(210, 225, 240)
+		SaveConfig()
 	end)
-	timeBox.FocusLost:Connect(function() getgenv().SpotLoopConfig[spotName].Timer = timeBox.Text end)
+	timeBox.FocusLost:Connect(function()
+		getgenv().SpotLoopConfig[spotName].Timer = timeBox.Text
+		SaveConfig()
+	end)
 end
 
 CreateSpotTimerSetting(FishingPage, "Spot Mancing Jembatan")
@@ -1596,12 +1624,13 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		SaveConfig()
 	end)
 	for _, optName in ipairs(optionsTable) do
+		local isChecked = targetStateTable[optName] or false
 		local optBtn = Instance.new("TextButton")
 		optBtn.Parent = optionsHolder
 		optBtn.Size = UDim2.new(1, 0, 0, 28)
-		optBtn.BackgroundColor3 = targetStateTable[optName] and Color3.fromRGB(35, 48, 78) or Color3.fromRGB(22, 29, 48)
+		optBtn.BackgroundColor3 = isChecked and Color3.fromRGB(35, 48, 78) or Color3.fromRGB(22, 29, 48)
 		optBtn.BackgroundTransparency = 0.2
-		optBtn.Text = " " .. optName .. (targetStateTable[optName] and " [✓]" or " [ ]")
+		optBtn.Text = " " .. optName .. (isChecked and " [✓]" or " [ ]")
 		optBtn.TextColor3 = Color3.fromRGB(160, 180, 210)
 		optBtn.Font = Enum.Font.Gotham
 		optBtn.TextSize = 11
@@ -1613,8 +1642,9 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		itemButtons[optName] = optBtn
 		optBtn.MouseButton1Click:Connect(function()
 			targetStateTable[optName] = not targetStateTable[optName]
-			optBtn.BackgroundColor3 = targetStateTable[optName] and Color3.fromRGB(35, 48, 78) or Color3.fromRGB(22, 29, 48)
-			optBtn.Text = " " .. optName .. (targetStateTable[optName] and " [✓]" or " [ ]")
+			local activeNow = targetStateTable[optName]
+			optBtn.BackgroundColor3 = activeNow and Color3.fromRGB(35, 48, 78) or Color3.fromRGB(22, 29, 48)
+			optBtn.Text = " " .. optName .. (activeNow and " [✓]" or " [ ]")
 			UpdateSummary()
 			SaveConfig()
 		end)
