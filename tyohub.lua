@@ -13,7 +13,6 @@ local TeleportService = game:GetService("TeleportService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -46,10 +45,6 @@ getgenv().TyoConfig = {
 	AutoConfirmTrade = true,     -- Auto Konfirmasi Trade
 	AutoAcceptTrade = true,      -- Auto Accept Trade
 	AutoAddAllFishTrade = true,  -- Auto On Auto Add All Ikan
-	
-	-- Tambahan Konfigurasi Fly & High Jump
-	FlySpeed = 50,
-	JumpPowerValue = 100,
 	
 	-- Disatukan ke TyoConfig agar ikut tersimpan otomatis
 	FavRarities = {
@@ -158,8 +153,6 @@ local function ResetConfig()
 			AutoConfirmTrade = true,
 			AutoAcceptTrade = true,
 			AutoAddAllFishTrade = true,
-			FlySpeed = 50,
-			JumpPowerValue = 100,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -2261,7 +2254,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (WALKSPEED, FLY, HIGH JUMP & UTILITIES)
+-- 7. PLAYER PAGE (WALKSPEED & UTILITIES)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2293,139 +2286,6 @@ spc.Parent = SpeedBox
 SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
-end)
-
--- FITUR: HIGH JUMP (LOMPAT TINGGI)
-local JumpBox = Instance.new("TextBox")
-JumpBox.Parent = PlayerPage
-JumpBox.Size = UDim2.new(1, -5, 0, 36)
-JumpBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-JumpBox.BackgroundTransparency = 0.2
-JumpBox.PlaceholderText = "Ketik JumpPower (Cth: 100)"
-JumpBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-JumpBox.Text = tostring(getgenv().TyoConfig.JumpPowerValue or 100)
-JumpBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-JumpBox.Font = Enum.Font.GothamMedium
-JumpBox.TextSize = 11
-JumpBox.ZIndex = 13
-local jpc = Instance.new("UICorner")
-jpc.CornerRadius = UDim.new(0, 6)
-jpc.Parent = JumpBox
-
-JumpBox.FocusLost:Connect(function()
-	local num = tonumber(JumpBox.Text)
-	if num then
-		getgenv().TyoConfig.JumpPowerValue = num
-		SaveConfig()
-		pcall(function()
-			local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.UseJumpPower = true
-				hum.JumpPower = num
-			end
-		end)
-	end
-end)
-
--- Auto apply jump power on character spawn
-LocalPlayer.CharacterAdded:Connect(function(char)
-	task.wait(1)
-	pcall(function()
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.UseJumpPower = true
-			hum.JumpPower = getgenv().TyoConfig.JumpPowerValue or 100
-		end
-	end)
-end)
-
--- FITUR: FLY (TERBANG)
-local flyActive = false
-local flyConnection = nil
-local bv, bg
-
-AddToggle(PlayerPage, "🛸 Aktifkan Fly (Terbang)", function(v)
-	flyActive = v
-	pcall(function()
-		local char = LocalPlayer.Character
-		local hrp = char and char:FindFirstChild("HumanoidRootPart")
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		
-		if flyActive then
-			if hrp and hum then
-				hum.PlatformStand = true
-				bv = Instance.new("BodyVelocity")
-				bv.Name = "TyoFlyVelocity"
-				bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-				bv.Velocity = Vector3.zero
-				bv.Parent = hrp
-				
-				bg = Instance.new("BodyGyro")
-				bg.Name = "TyoFlyGyro"
-				bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-				bg.CFrame = hrp.CFrame
-				bg.Parent = hrp
-				
-				flyConnection = RunService.RenderStepped:Connect(function()
-					if not flyActive or not hrp or not hum or hum.Health <= 0 then return end
-					local cam = Workspace.CurrentCamera
-					local speed = tonumber(getgenv().TyoConfig.FlySpeed) or 50
-					local moveDir = Vector3.zero
-					
-					if UIS:IsKeyDown(Enum.KeyCode.W) or UIS:IsKeyDown(Enum.KeyCode.Up) then
-						moveDir = moveDir + cam.CFrame.LookVector
-					end
-					if UIS:IsKeyDown(Enum.KeyCode.S) or UIS:IsKeyDown(Enum.KeyCode.Down) then
-						moveDir = moveDir - cam.CFrame.LookVector
-					end
-					if UIS:IsKeyDown(Enum.KeyCode.A) or UIS:IsKeyDown(Enum.KeyCode.Left) then
-						moveDir = moveDir - cam.CFrame.RightVector
-					end
-					if UIS:IsKeyDown(Enum.KeyCode.D) or UIS:IsKeyDown(Enum.KeyCode.Right) then
-						moveDir = moveDir + cam.CFrame.RightVector
-					end
-					if UIS:IsKeyDown(Enum.KeyCode.Space) then
-						moveDir = moveDir + Vector3.new(0, 1, 0)
-					end
-					if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
-						moveDir = moveDir - Vector3.new(0, 1, 0)
-					end
-					
-					bv.Velocity = moveDir * speed
-					bg.CFrame = cam.CFrame
-				end)
-			end
-		else
-			if flyConnection then flyConnection:Disconnect() flyConnection = nil end
-			if bv then bv:Destroy() bv = nil end
-			if bg then bg:Destroy() bg = nil end
-			if hum then hum.PlatformStand = false end
-		end
-	end)
-end)
-
-local FlySpeedBox = Instance.new("TextBox")
-FlySpeedBox.Parent = PlayerPage
-FlySpeedBox.Size = UDim2.new(1, -5, 0, 36)
-FlySpeedBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-FlySpeedBox.BackgroundTransparency = 0.2
-FlySpeedBox.PlaceholderText = "Kecepatan Fly (Cth: 50)"
-FlySpeedBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-FlySpeedBox.Text = tostring(getgenv().TyoConfig.FlySpeed or 50)
-FlySpeedBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-FlySpeedBox.Font = Enum.Font.GothamMedium
-FlySpeedBox.TextSize = 11
-FlySpeedBox.ZIndex = 13
-local fsc = Instance.new("UICorner")
-fsc.CornerRadius = UDim.new(0, 6)
-fsc.Parent = FlySpeedBox
-
-FlySpeedBox.FocusLost:Connect(function()
-	local num = tonumber(FlySpeedBox.Text)
-	if num then
-		getgenv().TyoConfig.FlySpeed = num
-		SaveConfig()
-	end
 end)
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
@@ -3334,4 +3194,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Fly and High Jump Features!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background!")
