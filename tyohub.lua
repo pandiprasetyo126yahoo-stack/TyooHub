@@ -415,13 +415,14 @@ getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
+getgenv().HighJumpRunning = false
+getgenv().JumpPowerValue = 100
 
 local FishingSpots = {
 	["Spot Mancing Jembatan"] = CFrame.new(-6783.74756, 1322.81006, -9757.34473, 0.0899723172, -9.34088291e-08, 0.995944262, 1.76120434e-08, 1, 9.21981638e-08, -0.995944262, 9.24533072e-09, 0.0899723172),
 	["Spot Mancing Core"] = CFrame.new(-9069.33887, 1250.32092, -6510.3374, 0.99812746, -7.96398965e-08, -0.0611686334, 8.05492206e-08, 1, 1.24000188e-08, 0.0611686334, -1.73038845e-08, 0.99812746),
 	["Spot Mancing Ikan Anomali"] = CFrame.new(-8199.52832, 1238.83752, -6278.13135, -0.999144316, 1.1644854e-08, -0.0413601957, 1.63464247e-08, 1, -1.13335595e-07, 0.0413601957, -1.13914709e-07, -0.999144316)
 }
-local NpcSellCFrame = CFrame.new(-6668.01416, 1312.69983, -9965.2998, 0.999977231, 1.08366018e-08, -0.00675115408, -1.09201403e-08, 1, -1.2337189e-08, 0.00675115408, 1.24106316e-08, 0.999977231)
 
 local function GetEquippedRod()
 	local char = LocalPlayer.Character
@@ -562,20 +563,18 @@ local function StartFishingLoop()
 	end)
 end
 
+-- FITUR AUTO SELL LANGSUNG (TANPA TELEPORT KE NPC)
 local function TriggerSellToNpc()
 	pcall(function()
-		local character = LocalPlayer.Character
-		local hrp = character and character:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-		local currentSpotCFrame = hrp.CFrame
-		hrp.CFrame = NpcSellCFrame + Vector3.new(0, 5, 0)
-		task.wait(0.8)
 		local mancing = ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Mancing")
 		local jualSemua = mancing and mancing:FindFirstChild("JualSemua")
-		if jualSemua then jualSemua:InvokeServer() end
-		task.wait(0.8)
-		if getgenv().AutoFishingEventRunning then
-			hrp.CFrame = currentSpotCFrame
+		
+		if jualSemua then
+			if jualSemua:IsA("RemoteFunction") then
+				jualSemua:InvokeServer()
+			elseif jualSemua:IsA("RemoteEvent") then
+				jualSemua:FireServer()
+			end
 		end
 	end)
 end
@@ -1420,7 +1419,7 @@ TapDelayBox.FocusLost:Connect(function()
 	SaveConfig()
 end)
 
-AddToggle(FishingPage, "Auto Sell Timer ke NPC", function(v)
+AddToggle(FishingPage, "Auto Sell Timer (Tanpa TP ke NPC)", function(v)
 	getgenv().AutoSellRunning = v
 	if v then
 		task.spawn(function()
@@ -2268,7 +2267,7 @@ TitlePly.Font = Enum.Font.GothamBold
 TitlePly.TextSize = 12
 TitlePly.ZIndex = 13
 
--- WalkSpeed Input
+-- Input WalkSpeed
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Parent = PlayerPage
 SpeedBox.Size = UDim2.new(1, -5, 0, 36)
@@ -2289,10 +2288,7 @@ SpeedBox.FocusLost:Connect(function()
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
 
--- High Jump Variables & Input
-getgenv().HighJumpRunning = false
-getgenv().JumpPowerValue = 100
-
+-- Input High Jump
 local JumpBox = Instance.new("TextBox")
 JumpBox.Parent = PlayerPage
 JumpBox.Size = UDim2.new(1, -5, 0, 36)
@@ -2315,11 +2311,12 @@ JumpBox.FocusLost:Connect(function()
 	end
 end)
 
+-- Toggle High Jump
 AddToggle(PlayerPage, "🦘 Aktifkan High Jump", function(v)
 	getgenv().HighJumpRunning = v
 end, false)
 
--- Loop untuk menerapkan High Jump secara konsisten
+-- Loop High Jump Updater
 task.spawn(function()
 	while true do
 		pcall(function()
@@ -2327,13 +2324,12 @@ task.spawn(function()
 				local char = LocalPlayer.Character
 				local hum = char and char:FindFirstChildOfClass("Humanoid")
 				if hum then
-					-- Mengatasi perbedaan properti lompatan di berbagai versi Roblox (JumpPower vs JumpHeight)
 					pcall(function()
 						hum.UseJumpPower = true
 						hum.JumpPower = getgenv().JumpPowerValue
 					end)
 					pcall(function()
-						hum.JumpHeight = getgenv().JumpPowerValue / 3 -- Konversi aman jika game menggunakan JumpHeight
+						hum.JumpHeight = getgenv().JumpPowerValue / 3
 					end)
 				end
 			end
@@ -3248,4 +3244,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background & High Jump Feature!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Direct Auto Sell (No Teleport) & High Jump Feature!")
