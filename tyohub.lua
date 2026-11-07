@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
--- MAP: MOUNT SOREYA UPDATE (FLY & JUMP PINDAH KE TAB PLAYER)
+-- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -13,7 +13,6 @@ local TeleportService = game:GetService("TeleportService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -24,7 +23,7 @@ getgenv().TotalFishCaught = 0
 getgenv().SessionStartTime = os.time()
 
 ------------------------------------------------------------------
--- CONFIGURATION & FILE SAVE SYSTEM
+-- CONFIGURATION & FILE SAVE SYSTEM (AUTO SAVE & AUTO LOAD FIXED)
 ------------------------------------------------------------------
 local SAFE_NAME = tostring(LocalPlayer.UserId or LocalPlayer.Name)
 local CONFIG_FILE = "AemeathHubV3_Config_" .. SAFE_NAME .. ".json"
@@ -42,13 +41,12 @@ getgenv().TyoConfig = {
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
 	AutoLoadEnabled = true,
-	AutoReadyTrade = true,
-	AutoConfirmTrade = true,
-	AutoAcceptTrade = true,
-	AutoAddAllFishTrade = true,
-	FlySpeed = 50,
-	JumpPowerValue = 100,
+	AutoReadyTrade = true,         -- Auto Siap Trade
+	AutoConfirmTrade = true,     -- Auto Konfirmasi Trade
+	AutoAcceptTrade = true,      -- Auto Accept Trade
+	AutoAddAllFishTrade = true,  -- Auto On Auto Add All Ikan
 	
+	-- Disatukan ke TyoConfig agar ikut tersimpan otomatis
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 		["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -80,6 +78,7 @@ getgenv().TyoConfig = {
 	}
 }
 
+-- Sinkronisasi Global Variable
 getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -107,6 +106,7 @@ local function LoadConfig()
 						getgenv().TyoConfig[k] = v
 					end
 				end
+				-- Sinkronisasi ulang ke global variable
 				getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 				getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 				getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -153,8 +153,6 @@ local function ResetConfig()
 			AutoConfirmTrade = true,
 			AutoAcceptTrade = true,
 			AutoAddAllFishTrade = true,
-			FlySpeed = 50,
-			JumpPowerValue = 100,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -173,7 +171,7 @@ local function ResetConfig()
 end
 
 ------------------------------------------------------------------
--- DISCORD WEBHOOK SYSTEM
+-- DISCORD WEBHOOK SYSTEM (SERVER-WIDE CUTSCENE BROADCAST)
 ------------------------------------------------------------------
 local function SendServerWideWebhook(playerName, catchType, position)
 	pcall(function()
@@ -227,6 +225,18 @@ local function SendServerWideWebhook(playerName, catchType, position)
 		end
 	end)
 end
+
+task.spawn(function()
+	pcall(function()
+		local CutsceneBroadcastRemote = ReplicatedStorage:FindFirstChild("CutsceneBroadcast")
+		if CutsceneBroadcastRemote and CutsceneBroadcastRemote:IsA("RemoteEvent") then
+			CutsceneBroadcastRemote.OnClientEvent:Connect(function(catchType, position, targetPlayer)
+				local playerName = targetPlayer and targetPlayer.Name or "Unknown Player"
+				SendServerWideWebhook(playerName, catchType, position)
+			end)
+		end
+	end)
+end)
 
 ------------------------------------------------------------------
 -- REAL-TIME CATCH MONITOR & STATS COUNTER
@@ -375,11 +385,25 @@ local function PerformTapClicker()
 end
 
 ------------------------------------------------------------------
--- GLOBAL STATES
+-- AUTO RECONNECT
 ------------------------------------------------------------------
+task.spawn(function()
+	pcall(function()
+		CoreGui.ChildAdded:Connect(function(child)
+			if child.Name == "ErrorPrompt" or child.Name == "DisconnectPrompt" then
+				task.wait(1)
+				pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end)
+			end
+		end)
+	end)
+end)
+
+-- GLOBAL STATES
 getgenv().AutoFishingEventRunning = false
+getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
 getgenv().AutoSellRunning = false
+getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
 getgenv().AutoGalatamaRunning = false
 getgenv().AutoSummitRunning = false
 getgenv().AntiAFKRunning = false
@@ -559,8 +583,8 @@ end
 local function GetInventoryRemote()
 	local repStorage = game:GetService("ReplicatedStorage")
 	return repStorage:FindFirstChild("Remote")
-		and repStorage.Remote:FindFirstChild("Inventaris")
-		and repStorage.Remote.Inventaris:FindFirstChild("TandaiFavorit")
+		and repStorage.Remote:FindFirstChild("Mancing")
+		and repStorage.Remote.Mancing:FindFirstChild("TandaiFavorit")
 end
 
 local function GetServerFishData()
@@ -667,7 +691,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- TRADE UTILITIES
+-- IMPROVED TRADE UTILITIES (AUTO SIAP, KONFIRMASI, ACCEPT & ADD ALL)
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -681,13 +705,21 @@ local function GetTradeRemote(actionName)
 end
 
 local RarityPriority = {
-	["aether"] = 9, ["forgotten"] = 8, ["secret"] = 7, ["mythical"] = 6,
-	["legendary"] = 5, ["epic"] = 4, ["rare"] = 3, ["uncommon"] = 2, ["common"] = 1
+	["aether"] = 9,
+	["forgotten"] = 8,
+	["secret"] = 7,
+	["mythical"] = 6,
+	["legendary"] = 5,
+	["epic"] = 4,
+	["rare"] = 3,
+	["uncommon"] = 2,
+	["common"] = 1
 }
 
 local function AutoAddAllFishToTrade()
 	pcall(function()
 		local serverData = GetServerFishData()
+		
 		table.sort(serverData, function(a, b)
 			local rankA = RarityPriority[string.lower(a.Rarity)] or 0
 			local rankB = RarityPriority[string.lower(b.Rarity)] or 0
@@ -755,6 +787,7 @@ task.spawn(function()
 			if getgenv().TyoConfig.AutoAddAllFishTrade then
 				AutoAddAllFishToTrade()
 			end
+
 			if getgenv().TyoConfig.AutoReadyTrade then
 				ClickGuiButtonByName({"siap", "ready"})
 				local readyRemote = GetTradeRemote("Ready") or GetTradeRemote("Siap") or GetTradeRemote("SetReady")
@@ -763,6 +796,7 @@ task.spawn(function()
 					elseif readyRemote:IsA("RemoteFunction") then readyRemote:InvokeServer(true) end
 				end
 			end
+
 			if getgenv().TyoConfig.AutoConfirmTrade then
 				ClickGuiButtonByName({"konfirmasi", "confirm", "ok", "yes"})
 				local confirmRemote = GetTradeRemote("Confirm") or GetTradeRemote("Konfirmasi") or GetTradeRemote("SetConfirm")
@@ -771,6 +805,7 @@ task.spawn(function()
 					elseif confirmRemote:IsA("RemoteFunction") then confirmRemote:InvokeServer() end
 				end
 			end
+
 			if getgenv().TyoConfig.AutoAcceptTrade then
 				ClickGuiButtonByName({"terima", "accept", "yes"})
 				local acceptRemote = GetTradeRemote("Accept") or GetTradeRemote("TerimaTrade")
@@ -796,7 +831,7 @@ Gui.ResetOnSpawn = false
 Gui.DisplayOrder = 2147483647
 
 ----------------------------------------------------
--- DRAGGABLE FUNCTION
+-- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
 ----------------------------------------------------
 local function MakeDraggable(guiObject, handleObject)
 	handleObject = handleObject or guiObject
@@ -852,7 +887,7 @@ local function MakeDraggable(guiObject, handleObject)
 end
 
 ----------------------------------------------------
--- MAIN HUB UI
+-- MAIN HUB UI (WUTHERING WAVES / AEMEATH AURA THEME)
 ----------------------------------------------------
 local Main = Instance.new("ImageLabel")
 Main.Parent = Gui
@@ -1088,7 +1123,7 @@ navButtons["Fishing & Sell"].TextColor3 = Color3.fromRGB(255, 255, 255)
 navButtons["Fishing & Sell"].Indicator.Visible = true
 
 ----------------------------------------------------
--- TOGGLE BUILDER
+-- SPEED HUB STYLE TOGGLE BUILDER
 ----------------------------------------------------
 local function AddToggle(parent, text, callback, initialValue)
 	local frame = Instance.new("Frame")
@@ -1513,7 +1548,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- MULTI-SELECT DROPDOWN BUILDER
+-- DROPDOWN BUILDER
 ----------------------------------------------------
 local function CreateMultiSelectDropdown(parent, titleText, optionsTable, targetStateTable)
 	local container = Instance.new("Frame")
@@ -1523,11 +1558,9 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	container.BackgroundTransparency = 0.2
 	container.ClipsDescendants = true
 	container.ZIndex = 13
-	
 	local cc = Instance.new("UICorner")
 	cc.CornerRadius = UDim.new(0, 6)
 	cc.Parent = container
-	
 	local header = Instance.new("TextButton")
 	header.Parent = container
 	header.Size = UDim2.new(1, 0, 0, 36)
@@ -1538,7 +1571,6 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	header.TextSize = 11
 	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.ZIndex = 14
-	
 	local countLabel = Instance.new("TextLabel")
 	countLabel.Parent = header
 	countLabel.Size = UDim2.new(0, 120, 1, 0)
@@ -1549,19 +1581,16 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	countLabel.TextSize = 11
 	countLabel.TextXAlignment = Enum.TextXAlignment.Right
 	countLabel.ZIndex = 15
-	
 	local optionsHolder = Instance.new("Frame")
 	optionsHolder.Parent = container
 	optionsHolder.Position = UDim2.new(0, 5, 0, 36)
-	optionsHolder.Size = UDim2.new(1, -10, 0, (#optionsTable + 1) * 32)
+	optionsHolder.Size = UDim2.new(1, -10, 0, 0)
 	optionsHolder.BackgroundTransparency = 1
 	optionsHolder.ZIndex = 14
-	
 	local listLayout = Instance.new("UIListLayout")
 	listLayout.Parent = optionsHolder
 	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	listLayout.Padding = UDim.new(0, 4)
-	
 	local itemButtons = {}
 	local function UpdateSummary()
 		local selectedCount = 0
@@ -1570,7 +1599,6 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		elseif selectedCount == #optionsTable then countLabel.Text = "All (" .. selectedCount .. ") 🔽"
 		else countLabel.Text = selectedCount .. " Selected 🔽" end
 	end
-	
 	local selectAllBtn = Instance.new("TextButton")
 	selectAllBtn.Parent = optionsHolder
 	selectAllBtn.Size = UDim2.new(1, 0, 0, 28)
@@ -1584,7 +1612,6 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	local saCorner = Instance.new("UICorner")
 	saCorner.CornerRadius = UDim.new(0, 4)
 	saCorner.Parent = selectAllBtn
-	
 	local allState = false
 	selectAllBtn.MouseButton1Click:Connect(function()
 		allState = not allState
@@ -1596,7 +1623,6 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		UpdateSummary()
 		SaveConfig()
 	end)
-	
 	for _, optName in ipairs(optionsTable) do
 		local isChecked = targetStateTable[optName] or false
 		local optBtn = Instance.new("TextButton")
@@ -1614,7 +1640,6 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		obc.CornerRadius = UDim.new(0, 4)
 		obc.Parent = optBtn
 		itemButtons[optName] = optBtn
-		
 		optBtn.MouseButton1Click:Connect(function()
 			targetStateTable[optName] = not targetStateTable[optName]
 			local activeNow = targetStateTable[optName]
@@ -1624,7 +1649,6 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 			SaveConfig()
 		end)
 	end
-	
 	UpdateSummary()
 	local isOpen = false
 	header.MouseButton1Click:Connect(function()
@@ -2012,7 +2036,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE
+-- 6. SUMMIT PAGE (FAST TP - STABLE & FIXED)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2230,7 +2254,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (SEKARANG BERISI WALKSPEED, FLY, & JUMP POWER)
+-- 7. PLAYER PAGE (WALKSPEED, HIGH JUMP & UTILITIES)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2244,6 +2268,7 @@ TitlePly.Font = Enum.Font.GothamBold
 TitlePly.TextSize = 12
 TitlePly.ZIndex = 13
 
+-- WalkSpeed Input
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Parent = PlayerPage
 SpeedBox.Size = UDim2.new(1, -5, 0, 36)
@@ -2264,140 +2289,57 @@ SpeedBox.FocusLost:Connect(function()
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
 
--- FITUR FLY (PINDAH KE TAB PLAYER)
-local flyActive = false
-local flyConnection = nil
-local bv, bg
+-- High Jump Variables & Input
+getgenv().HighJumpRunning = false
+getgenv().JumpPowerValue = 100
 
-AddToggle(PlayerPage, "🛸 Aktifkan Fly (Terbang)", function(v)
-	flyActive = v
-	pcall(function()
-		local char = LocalPlayer.Character
-		local hrp = char and char:FindFirstChild("HumanoidRootPart")
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		
-		if flyActive then
-			if hrp and hum then
-				hum.PlatformStand = true
-				bv = Instance.new("BodyVelocity")
-				bv.Name = "TyoFlyVelocity"
-				bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-				bv.Velocity = Vector3.zero
-				bv.Parent = hrp
-				
-				bg = Instance.new("BodyGyro")
-				bg.Name = "TyoFlyGyro"
-				bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-				bg.CFrame = hrp.CFrame
-				bg.Parent = hrp
-				
-				flyConnection = RunService.RenderStepped:Connect(function()
-					if not flyActive or not hrp or not hum or hum.Health <= 0 then return end
-					local cam = Workspace.CurrentCamera
-					local speed = tonumber(getgenv().TyoConfig.FlySpeed) or 50
-					local moveDir = Vector3.zero
-					
-					pcall(function()
-						if UIS:IsKeyDown(Enum.KeyCode.W) or UIS:IsKeyDown(Enum.KeyCode.Up) then
-							moveDir = moveDir + cam.CFrame.LookVector
-						end
-						if UIS:IsKeyDown(Enum.KeyCode.S) or UIS:IsKeyDown(Enum.KeyCode.Down) then
-							moveDir = moveDir - cam.CFrame.LookVector
-						end
-						if UIS:IsKeyDown(Enum.KeyCode.A) or UIS:IsKeyDown(Enum.KeyCode.Left) then
-							moveDir = moveDir - cam.CFrame.RightVector
-						end
-						if UIS:IsKeyDown(Enum.KeyCode.D) or UIS:IsKeyDown(Enum.KeyCode.Right) then
-							moveDir = moveDir + cam.CFrame.RightVector
-						end
-						if UIS:IsKeyDown(Enum.KeyCode.Space) then
-							moveDir = moveDir + Vector3.new(0, 1, 0)
-						end
-						if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
-							moveDir = moveDir - Vector3.new(0, 1, 0)
-						end
-					end)
-					
-					if bv and bg then
-						bv.Velocity = moveDir * speed
-						bg.CFrame = cam.CFrame
-					end
-				end)
-			end
-		else
-			if flyConnection then flyConnection:Disconnect() flyConnection = nil end
-			if bv then bv:Destroy() bv = nil end
-			if bg then bg:Destroy() bg = nil end
-			if hum then hum.PlatformStand = false end
-		end
-	end)
-end)
-
-local FlySpeedBox = Instance.new("TextBox")
-FlySpeedBox.Parent = PlayerPage
-FlySpeedBox.Size = UDim2.new(1, -5, 0, 36)
-FlySpeedBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-FlySpeedBox.BackgroundTransparency = 0.2
-FlySpeedBox.PlaceholderText = "Kecepatan Fly (Cth: 50)"
-FlySpeedBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-FlySpeedBox.Text = tostring(getgenv().TyoConfig.FlySpeed or 50)
-FlySpeedBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-FlySpeedBox.Font = Enum.Font.GothamMedium
-FlySpeedBox.TextSize = 11
-FlySpeedBox.ZIndex = 13
-local fsc = Instance.new("UICorner")
-fsc.CornerRadius = UDim.new(0, 6)
-fsc.Parent = FlySpeedBox
-
-FlySpeedBox.FocusLost:Connect(function()
-	local num = tonumber(FlySpeedBox.Text)
-	if num then
-		getgenv().TyoConfig.FlySpeed = num
-		SaveConfig()
-	end
-end)
-
--- FITUR JUMP POWER (PINDAH KE TAB PLAYER)
 local JumpBox = Instance.new("TextBox")
 JumpBox.Parent = PlayerPage
 JumpBox.Size = UDim2.new(1, -5, 0, 36)
 JumpBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
 JumpBox.BackgroundTransparency = 0.2
-JumpBox.PlaceholderText = "Ketik JumpPower (Cth: 100)"
+JumpBox.PlaceholderText = "Ketik Nilai High Jump (Cth: 100 / 200)"
 JumpBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-JumpBox.Text = tostring(getgenv().TyoConfig.JumpPowerValue or 100)
+JumpBox.Text = "100"
 JumpBox.TextColor3 = Color3.fromRGB(210, 225, 240)
 JumpBox.Font = Enum.Font.GothamMedium
 JumpBox.TextSize = 11
 JumpBox.ZIndex = 13
-local jpc = Instance.new("UICorner")
-jpc.CornerRadius = UDim.new(0, 6)
-jpc.Parent = JumpBox
-
+local jbc = Instance.new("UICorner")
+jbc.CornerRadius = UDim.new(0, 6)
+jbc.Parent = JumpBox
 JumpBox.FocusLost:Connect(function()
 	local num = tonumber(JumpBox.Text)
-	if num then
-		getgenv().TyoConfig.JumpPowerValue = num
-		SaveConfig()
-		pcall(function()
-			local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.UseJumpPower = true
-				hum.JumpPower = num
-			end
-		end)
+	if num then 
+		getgenv().JumpPowerValue = num 
 	end
 end)
 
-LocalPlayer.CharacterAdded:Connect(function(char)
-	task.wait(1)
-	pcall(function()
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.UseJumpPower = true
-			hum.JumpPower = getgenv().TyoConfig.JumpPowerValue or 100
-		end
-	end)
+AddToggle(PlayerPage, "🦘 Aktifkan High Jump", function(v)
+	getgenv().HighJumpRunning = v
+end, false)
+
+-- Loop untuk menerapkan High Jump secara konsisten
+task.spawn(function()
+	while true do
+		pcall(function()
+			if getgenv().HighJumpRunning then
+				local char = LocalPlayer.Character
+				local hum = char and char:FindFirstChildOfClass("Humanoid")
+				if hum then
+					-- Mengatasi perbedaan properti lompatan di berbagai versi Roblox (JumpPower vs JumpHeight)
+					pcall(function()
+						hum.UseJumpPower = true
+						hum.JumpPower = getgenv().JumpPowerValue
+					end)
+					pcall(function()
+						hum.JumpHeight = getgenv().JumpPowerValue / 3 -- Konversi aman jika game menggunakan JumpHeight
+					end)
+				end
+			end
+		end)
+		task.wait(0.5)
+	end
 end)
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
@@ -2408,7 +2350,10 @@ AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilan
 		
 		if v then
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then hrp.CFrame = CFrame.new(0, -9999, 0) end
+			if hrp then
+				hrp.CFrame = CFrame.new(0, -9999, 0)
+			end
+			
 			for _, part in ipairs(char:GetDescendants()) do
 				if part:IsA("BasePart") then
 					part.Transparency = 1
@@ -2417,11 +2362,16 @@ AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilan
 					part.Transparency = 1
 				end
 			end
+			
 			local hum = char:FindFirstChildOfClass("Humanoid")
-			if hum then hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
+			if hum then
+				hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+			end
 		else
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then hrp.CFrame = FishingSpots["Spot Mancing Jembatan"] + Vector3.new(0, 5, 0) end
+			if hrp then
+				hrp.CFrame = FishingSpots["Spot Mancing Jembatan"] + Vector3.new(0, 5, 0)
+			end
 			for _, part in ipairs(char:GetDescendants()) do
 				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
 					part.Transparency = 0
@@ -2466,7 +2416,9 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 				for _, p in ipairs(Players:GetPlayers()) do
 					if p ~= LocalPlayer and p.Character then
 						for _, part in ipairs(p.Character:GetDescendants()) do
-							if part:IsA("BasePart") then part.CastShadow = false end
+							if part:IsA("BasePart") then
+								part.CastShadow = false
+							end
 						end
 					end
 				end
@@ -2477,7 +2429,7 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 end)
 
 ------------------------------------------------------------------
--- ANTI-AFK SYSTEM
+-- ANTI-AFK SYSTEM (FIXED & ENHANCED)
 ------------------------------------------------------------------
 AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end)
 
@@ -3216,7 +3168,7 @@ CredLbl.TextSize = 14
 CredLbl.ZIndex = 13
 
 ----------------------------------------------------
--- STAT TRACKER PANEL
+-- BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
 ----------------------------------------------------
 local StatPanel = Instance.new("Frame")
 StatPanel.Parent = Main
@@ -3296,4 +3248,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background & High Jump Feature!")
