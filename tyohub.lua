@@ -415,6 +415,8 @@ getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
+getgenv().HighJumpRunning = false
+getgenv().JumpPowerValue = 100
 
 local FishingSpots = {
 	["Spot Mancing Jembatan"] = CFrame.new(-6783.74756, 1322.81006, -9757.34473, 0.0899723172, -9.34088291e-08, 0.995944262, 1.76120434e-08, 1, 9.21981638e-08, -0.995944262, 9.24533072e-09, 0.0899723172),
@@ -2319,7 +2321,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (WALKSPEED & UTILITIES)
+-- 7. PLAYER PAGE (WALKSPEED, HIGH JUMP & UTILITIES)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2352,6 +2354,55 @@ SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
+
+-- FITUR BARU: PENGATURAN TINGGI LOMPAT (HIGH JUMP)
+local JumpBox = Instance.new("TextBox")
+JumpBox.Parent = PlayerPage
+JumpBox.Size = UDim2.new(1, -5, 0, 36)
+JumpBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
+JumpBox.BackgroundTransparency = 0.2
+JumpBox.PlaceholderText = "Ketik Tinggi Lompat (Cth: 100 / 200)"
+JumpBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
+JumpBox.Text = "100"
+JumpBox.TextColor3 = Color3.fromRGB(210, 225, 240)
+JumpBox.Font = Enum.Font.GothamMedium
+JumpBox.TextSize = 11
+JumpBox.ZIndex = 13
+local jbc = Instance.new("UICorner")
+jbc.CornerRadius = UDim.new(0, 6)
+jbc.Parent = JumpBox
+JumpBox.FocusLost:Connect(function()
+	local num = tonumber(JumpBox.Text)
+	if num then 
+		getgenv().JumpPowerValue = num 
+	end
+end)
+
+AddToggle(PlayerPage, "🦘 Aktifkan High Jump", function(v)
+	getgenv().HighJumpRunning = v
+end, false)
+
+task.spawn(function()
+	while true do
+		pcall(function()
+			if getgenv().HighJumpRunning then
+				local char = LocalPlayer.Character
+				local hum = char and char:FindFirstChildOfClass("Humanoid")
+				if hum then
+					pcall(function()
+						hum.UseJumpPower = true
+						hum.JumpPower = getgenv().JumpPowerValue
+					end)
+					pcall(function()
+						hum.JumpHeight = getgenv().JumpPowerValue / 3
+					end)
+				end
+			end
+		end)
+		task.wait(0.5)
+	end
+end)
+----------------------------------------------------
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
 	getgenv().InvisibleRunning = v
@@ -3259,4 +3310,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with High Jump & Smart Timer!")
