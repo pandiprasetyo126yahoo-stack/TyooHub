@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
--- MAP: MOUNT SOREYA UPDATE (FIXED EXECUTOR COMPATIBILITY)
+-- MAP: MOUNT SOREYA UPDATE (FLY & JUMP PINDAH KE TAB PLAYER)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -2230,7 +2230,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (SAFE FLY & JUMP POWER)
+-- 7. PLAYER PAGE (SEKARANG BERISI WALKSPEED, FLY, & JUMP POWER)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2264,49 +2264,7 @@ SpeedBox.FocusLost:Connect(function()
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
 
-local JumpBox = Instance.new("TextBox")
-JumpBox.Parent = PlayerPage
-JumpBox.Size = UDim2.new(1, -5, 0, 36)
-JumpBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-JumpBox.BackgroundTransparency = 0.2
-JumpBox.PlaceholderText = "Ketik JumpPower (Cth: 100)"
-JumpBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-JumpBox.Text = tostring(getgenv().TyoConfig.JumpPowerValue or 100)
-JumpBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-JumpBox.Font = Enum.Font.GothamMedium
-JumpBox.TextSize = 11
-JumpBox.ZIndex = 13
-local jpc = Instance.new("UICorner")
-jpc.CornerRadius = UDim.new(0, 6)
-jpc.Parent = JumpBox
-
-JumpBox.FocusLost:Connect(function()
-	local num = tonumber(JumpBox.Text)
-	if num then
-		getgenv().TyoConfig.JumpPowerValue = num
-		SaveConfig()
-		pcall(function()
-			local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.UseJumpPower = true
-				hum.JumpPower = num
-			end
-		end)
-	end
-end)
-
-LocalPlayer.CharacterAdded:Connect(function(char)
-	task.wait(1)
-	pcall(function()
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.UseJumpPower = true
-			hum.JumpPower = getgenv().TyoConfig.JumpPowerValue or 100
-		end
-	end)
-end)
-
--- AMAN UNTUK MOBILE & PC (MENGGUNAKAN LINEAR VELOCITY)
+-- FITUR FLY (PINDAH KE TAB PLAYER)
 local flyActive = false
 local flyConnection = nil
 local bv, bg
@@ -2397,6 +2355,49 @@ FlySpeedBox.FocusLost:Connect(function()
 		getgenv().TyoConfig.FlySpeed = num
 		SaveConfig()
 	end
+end)
+
+-- FITUR JUMP POWER (PINDAH KE TAB PLAYER)
+local JumpBox = Instance.new("TextBox")
+JumpBox.Parent = PlayerPage
+JumpBox.Size = UDim2.new(1, -5, 0, 36)
+JumpBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
+JumpBox.BackgroundTransparency = 0.2
+JumpBox.PlaceholderText = "Ketik JumpPower (Cth: 100)"
+JumpBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
+JumpBox.Text = tostring(getgenv().TyoConfig.JumpPowerValue or 100)
+JumpBox.TextColor3 = Color3.fromRGB(210, 225, 240)
+JumpBox.Font = Enum.Font.GothamMedium
+JumpBox.TextSize = 11
+JumpBox.ZIndex = 13
+local jpc = Instance.new("UICorner")
+jpc.CornerRadius = UDim.new(0, 6)
+jpc.Parent = JumpBox
+
+JumpBox.FocusLost:Connect(function()
+	local num = tonumber(JumpBox.Text)
+	if num then
+		getgenv().TyoConfig.JumpPowerValue = num
+		SaveConfig()
+		pcall(function()
+			local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum.UseJumpPower = true
+				hum.JumpPower = num
+			end
+		end)
+	end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+	task.wait(1)
+	pcall(function()
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.UseJumpPower = true
+			hum.JumpPower = getgenv().TyoConfig.JumpPowerValue or 100
+		end
+	end)
 end)
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
