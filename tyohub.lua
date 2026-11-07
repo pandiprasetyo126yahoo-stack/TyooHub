@@ -415,14 +415,13 @@ getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
-getgenv().HighJumpRunning = false
-getgenv().JumpPowerValue = 100
 
 local FishingSpots = {
 	["Spot Mancing Jembatan"] = CFrame.new(-6783.74756, 1322.81006, -9757.34473, 0.0899723172, -9.34088291e-08, 0.995944262, 1.76120434e-08, 1, 9.21981638e-08, -0.995944262, 9.24533072e-09, 0.0899723172),
 	["Spot Mancing Core"] = CFrame.new(-9069.33887, 1250.32092, -6510.3374, 0.99812746, -7.96398965e-08, -0.0611686334, 8.05492206e-08, 1, 1.24000188e-08, 0.0611686334, -1.73038845e-08, 0.99812746),
 	["Spot Mancing Ikan Anomali"] = CFrame.new(-8199.52832, 1238.83752, -6278.13135, -0.999144316, 1.1644854e-08, -0.0413601957, 1.63464247e-08, 1, -1.13335595e-07, 0.0413601957, -1.13914709e-07, -0.999144316)
 }
+local NpcSellCFrame = CFrame.new(-6668.01416, 1312.69983, -9965.2998, 0.999977231, 1.08366018e-08, -0.00675115408, -1.09201403e-08, 1, -1.2337189e-08, 0.00675115408, 1.24106316e-08, 0.999977231)
 
 local function GetEquippedRod()
 	local char = LocalPlayer.Character
@@ -563,18 +562,20 @@ local function StartFishingLoop()
 	end)
 end
 
--- FITUR AUTO SELL LANGSUNG (TANPA TELEPORT KE NPC)
 local function TriggerSellToNpc()
 	pcall(function()
+		local character = LocalPlayer.Character
+		local hrp = character and character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+		local currentSpotCFrame = hrp.CFrame
+		hrp.CFrame = NpcSellCFrame + Vector3.new(0, 5, 0)
+		task.wait(0.8)
 		local mancing = ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Mancing")
 		local jualSemua = mancing and mancing:FindFirstChild("JualSemua")
-		
-		if jualSemua then
-			if jualSemua:IsA("RemoteFunction") then
-				jualSemua:InvokeServer()
-			elseif jualSemua:IsA("RemoteEvent") then
-				jualSemua:FireServer()
-			end
+		if jualSemua then jualSemua:InvokeServer() end
+		task.wait(0.8)
+		if getgenv().AutoFishingEventRunning then
+			hrp.CFrame = currentSpotCFrame
 		end
 	end)
 end
@@ -1363,16 +1364,81 @@ for _, modeData in ipairs(fishingModes) do
 	end)
 end
 
+----------------------------------------------------
+-- FITUR BARU: SMART AUTO FISHING + TELEPORT 1 MENIT
+----------------------------------------------------
+getgenv().SmartAutoFishTpEnabled = false
+getgenv().SmartAutoFishTpInterval = 1 -- Default 1 menit
+
 AddToggle(FishingPage, "Smart Auto Fishing + Teleport", function(v)
-	getgenv().AutoFishingEventRunning = v
+	getgenv().SmartAutoFishTpEnabled = v
 	if v then
 		pcall(function()
-			local hrp = LocalPlayer.Character and LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
-			if hrp then hrp.CFrame = FishingSpots[getgenv().SelectedFishingSpot] + Vector3.new(0, 5, 0) end
+			local character = LocalPlayer.Character
+			local hrp = character and character:FindFirstChild("HumanoidRootPart")
+			local targetCFrame = FishingSpots[getgenv().SelectedFishingSpot or "Spot Mancing Jembatan"]
+			if hrp and targetCFrame then
+				hrp.CFrame = targetCFrame + Vector3.new(0, 5, 0)
+			end
 		end)
-		StartFishingLoop()
+		if not getgenv().AutoFishingEventRunning then
+			getgenv().AutoFishingEventRunning = true
+			StartFishingLoop()
+		end
+	else
+		getgenv().AutoFishingEventRunning = false
 	end
 end)
+
+local SmartTpIntervalBox = Instance.new("TextBox")
+SmartTpIntervalBox.Parent = FishingPage
+SmartTpIntervalBox.Size = UDim2.new(1, -5, 0, 36)
+SmartTpIntervalBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
+SmartTpIntervalBox.BackgroundTransparency = 0.2
+SmartTpIntervalBox.PlaceholderText = "Interval Teleport (Menit, Cth: 1)"
+SmartTpIntervalBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
+SmartTpIntervalBox.Text = "1"
+SmartTpIntervalBox.TextColor3 = Color3.fromRGB(210, 225, 240)
+SmartTpIntervalBox.Font = Enum.Font.GothamMedium
+SmartTpIntervalBox.TextSize = 11
+SmartTpIntervalBox.ZIndex = 13
+local stipCorner = Instance.new("UICorner")
+stipCorner.CornerRadius = UDim.new(0, 6)
+stipCorner.Parent = SmartTpIntervalBox
+
+SmartTpIntervalBox.FocusLost:Connect(function()
+	local val = tonumber(SmartTpIntervalBox.Text)
+	if val and val > 0 then
+		getgenv().SmartAutoFishTpInterval = val
+	end
+end)
+
+-- Task Loop untuk Teleport setiap X Menit saat diaktifkan
+task.spawn(function()
+	while true do
+		task.wait(1)
+		if getgenv().SmartAutoFishTpEnabled then
+			pcall(function()
+				local intervalSec = (tonumber(getgenv().SmartAutoFishTpInterval) or 1) * 60
+				local startTime = tick()
+				
+				while getgenv().SmartAutoFishTpEnabled and (tick() - startTime < intervalSec) do
+					task.wait(1)
+				end
+				
+				if getgenv().SmartAutoFishTpEnabled then
+					local character = LocalPlayer.Character
+					local hrp = character and character:FindFirstChild("HumanoidRootPart")
+					local targetCFrame = FishingSpots[getgenv().SelectedFishingSpot or "Spot Mancing Jembatan"]
+					if hrp and targetCFrame then
+						hrp.CFrame = targetCFrame + Vector3.new(0, 5, 0)
+					end
+				end
+			end)
+		end
+	end
+end)
+----------------------------------------------------
 
 AddToggle(FishingPage, "Smart Auto Fishing (Di Tempat Saja)", function(v)
 	getgenv().AutoFishingEventRunning = v
@@ -1419,7 +1485,7 @@ TapDelayBox.FocusLost:Connect(function()
 	SaveConfig()
 end)
 
-AddToggle(FishingPage, "Auto Sell Timer (Tanpa TP ke NPC)", function(v)
+AddToggle(FishingPage, "Auto Sell Timer ke NPC", function(v)
 	getgenv().AutoSellRunning = v
 	if v then
 		task.spawn(function()
@@ -2253,7 +2319,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (WALKSPEED, HIGH JUMP & UTILITIES)
+-- 7. PLAYER PAGE (WALKSPEED & UTILITIES)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2267,7 +2333,6 @@ TitlePly.Font = Enum.Font.GothamBold
 TitlePly.TextSize = 12
 TitlePly.ZIndex = 13
 
--- Input WalkSpeed
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Parent = PlayerPage
 SpeedBox.Size = UDim2.new(1, -5, 0, 36)
@@ -2286,56 +2351,6 @@ spc.Parent = SpeedBox
 SpeedBox.FocusLost:Connect(function()
 	local num = tonumber(SpeedBox.Text)
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
-end)
-
--- Input High Jump
-local JumpBox = Instance.new("TextBox")
-JumpBox.Parent = PlayerPage
-JumpBox.Size = UDim2.new(1, -5, 0, 36)
-JumpBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-JumpBox.BackgroundTransparency = 0.2
-JumpBox.PlaceholderText = "Ketik Nilai High Jump (Cth: 100 / 200)"
-JumpBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-JumpBox.Text = "100"
-JumpBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-JumpBox.Font = Enum.Font.GothamMedium
-JumpBox.TextSize = 11
-JumpBox.ZIndex = 13
-local jbc = Instance.new("UICorner")
-jbc.CornerRadius = UDim.new(0, 6)
-jbc.Parent = JumpBox
-JumpBox.FocusLost:Connect(function()
-	local num = tonumber(JumpBox.Text)
-	if num then 
-		getgenv().JumpPowerValue = num 
-	end
-end)
-
--- Toggle High Jump
-AddToggle(PlayerPage, "🦘 Aktifkan High Jump", function(v)
-	getgenv().HighJumpRunning = v
-end, false)
-
--- Loop High Jump Updater
-task.spawn(function()
-	while true do
-		pcall(function()
-			if getgenv().HighJumpRunning then
-				local char = LocalPlayer.Character
-				local hum = char and char:FindFirstChildOfClass("Humanoid")
-				if hum then
-					pcall(function()
-						hum.UseJumpPower = true
-						hum.JumpPower = getgenv().JumpPowerValue
-					end)
-					pcall(function()
-						hum.JumpHeight = getgenv().JumpPowerValue / 3
-					end)
-				end
-			end
-		end)
-		task.wait(0.5)
-	end
 end)
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
@@ -3244,4 +3259,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Direct Auto Sell (No Teleport) & High Jump Feature!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Custom Aemeath Background!")
