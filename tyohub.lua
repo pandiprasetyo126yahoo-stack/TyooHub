@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
--- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
+-- MAP: MOUNT SOREYA UPDATE (AUTO ON & FULL FEATURES)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -23,7 +23,7 @@ getgenv().TotalFishCaught = 0
 getgenv().SessionStartTime = os.time()
 
 ------------------------------------------------------------------
--- CONFIGURATION & FILE SAVE SYSTEM (AUTO SAVE & AUTO LOAD FIXED)
+-- CONFIGURATION & FILE SAVE SYSTEM
 ------------------------------------------------------------------
 local SAFE_NAME = tostring(LocalPlayer.UserId or LocalPlayer.Name)
 local CONFIG_FILE = "AemeathHubV3_Config_" .. SAFE_NAME .. ".json"
@@ -41,12 +41,11 @@ getgenv().TyoConfig = {
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
 	AutoLoadEnabled = true,
-	AutoReadyTrade = true,         -- Auto Siap Trade
-	AutoConfirmTrade = true,     -- Auto Konfirmasi Trade
-	AutoAcceptTrade = true,      -- Auto Accept Trade
-	AutoAddAllFishTrade = true,  -- Auto On Auto Add All Ikan
+	AutoReadyTrade = true,
+	AutoConfirmTrade = true,
+	AutoAcceptTrade = true,
+	AutoAddAllFishTrade = true,
 	
-	-- Disatukan ke TyoConfig agar ikut tersimpan otomatis
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 		["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -78,7 +77,6 @@ getgenv().TyoConfig = {
 	}
 }
 
--- Sinkronisasi Global Variable
 getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -106,7 +104,6 @@ local function LoadConfig()
 						getgenv().TyoConfig[k] = v
 					end
 				end
-				-- Sinkronisasi ulang ke global variable
 				getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 				getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 				getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -171,7 +168,7 @@ local function ResetConfig()
 end
 
 ------------------------------------------------------------------
--- DISCORD WEBHOOK SYSTEM (SERVER-WIDE CUTSCENE BROADCAST)
+-- DISCORD WEBHOOK SYSTEM
 ------------------------------------------------------------------
 local function SendServerWideWebhook(playerName, catchType, position)
 	pcall(function()
@@ -398,21 +395,23 @@ task.spawn(function()
 	end)
 end)
 
--- GLOBAL STATES
-getgenv().AutoFishingEventRunning = false
+------------------------------------------------------------------
+-- GLOBAL STATES (FITUR UTAMA AUTO ON SESUAI FOTO)
+------------------------------------------------------------------
+getgenv().AutoFishingEventRunning = true   -- Smart Auto Fishing langsung ON
 getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
-getgenv().AutoSellRunning = false
+getgenv().AutoSellRunning = true            -- Auto Sell Timer langsung ON
 getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
 getgenv().AutoGalatamaRunning = false
 getgenv().AutoSummitRunning = false
-getgenv().AntiAFKRunning = false
+getgenv().AntiAFKRunning = true             -- Anti-AFK langsung ON
 getgenv().HideNameRunning = false
 getgenv().FakeNameInput = "AEMEATH HUB"
 getgenv().CurrentSelectedHalo = nil
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
-getgenv().AutoFavoriteRunning = false
+getgenv().AutoFavoriteRunning = true        -- Auto Favorite langsung ON
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
 getgenv().HighJumpRunning = false
@@ -564,6 +563,12 @@ local function StartFishingLoop()
 	end)
 end
 
+-- Langsung jalankan fishing loop secara otomatis
+task.spawn(function()
+	task.wait(1)
+	StartFishingLoop()
+end)
+
 local function TriggerSellToNpc()
 	pcall(function()
 		local character = LocalPlayer.Character
@@ -581,6 +586,20 @@ local function TriggerSellToNpc()
 		end
 	end)
 end
+
+-- Auto Sell Timer Loop Langsung Aktif
+task.spawn(function()
+	local lastSellTime = tick()
+	while true do
+		task.wait(1)
+		if getgenv().AutoSellRunning then
+			if ((tick() - lastSellTime) / 60) >= (tonumber(getgenv().TyoConfig.AutoSellTimer) or 5) then
+				TriggerSellToNpc()
+				lastSellTime = tick()
+			end
+		end
+	end
+end)
 
 local function GetInventoryRemote()
 	local repStorage = game:GetService("ReplicatedStorage")
@@ -646,6 +665,7 @@ local function ProcessAutoFavorite()
 	end)
 end
 
+-- Auto Favorite Loop Langsung Aktif
 task.spawn(function()
 	while true do
 		if getgenv().AutoFavoriteRunning then ProcessAutoFavorite() end
@@ -693,7 +713,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- IMPROVED TRADE UTILITIES (AUTO SIAP, KONFIRMASI, ACCEPT & ADD ALL)
+-- TRADE UTILITIES
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -833,7 +853,7 @@ Gui.ResetOnSpawn = false
 Gui.DisplayOrder = 2147483647
 
 ----------------------------------------------------
--- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
+-- DRAGGABLE FUNCTION
 ----------------------------------------------------
 local function MakeDraggable(guiObject, handleObject)
 	handleObject = handleObject or guiObject
@@ -889,7 +909,7 @@ local function MakeDraggable(guiObject, handleObject)
 end
 
 ----------------------------------------------------
--- MAIN HUB UI (WUTHERING WAVES / AEMEATH AURA THEME)
+-- MAIN HUB UI
 ----------------------------------------------------
 local Main = Instance.new("ImageLabel")
 Main.Parent = Gui
@@ -929,7 +949,7 @@ HubTitle.Parent = TopBar
 HubTitle.Position = UDim2.new(0, 15, 0, 0)
 HubTitle.Size = UDim2.new(0, 300, 1, 0)
 HubTitle.BackgroundTransparency = 1
-HubTitle.Text = "AEMEATH HUB <font color='#50A0FF'>V3</font>"
+HubTitle.Text = "AEMEATH HUB <font color='#50A0FF'>V3</font> (AUTO ON)"
 HubTitle.RichText = true
 HubTitle.Font = Enum.Font.GothamBold
 HubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1125,7 +1145,7 @@ navButtons["Fishing & Sell"].TextColor3 = Color3.fromRGB(255, 255, 255)
 navButtons["Fishing & Sell"].Indicator.Visible = true
 
 ----------------------------------------------------
--- SPEED HUB STYLE TOGGLE BUILDER
+-- TOGGLE BUILDER
 ----------------------------------------------------
 local function AddToggle(parent, text, callback, initialValue)
 	local frame = Instance.new("Frame")
@@ -1366,11 +1386,8 @@ for _, modeData in ipairs(fishingModes) do
 	end)
 end
 
-----------------------------------------------------
--- FITUR BARU: SMART AUTO FISHING + TELEPORT 1 MENIT
-----------------------------------------------------
 getgenv().SmartAutoFishTpEnabled = false
-getgenv().SmartAutoFishTpInterval = 1 -- Default 1 menit
+getgenv().SmartAutoFishTpInterval = 1
 
 AddToggle(FishingPage, "Smart Auto Fishing + Teleport", function(v)
 	getgenv().SmartAutoFishTpEnabled = v
@@ -1415,7 +1432,6 @@ SmartTpIntervalBox.FocusLost:Connect(function()
 	end
 end)
 
--- Task Loop untuk Teleport setiap X Menit saat diaktifkan
 task.spawn(function()
 	while true do
 		task.wait(1)
@@ -1440,12 +1456,11 @@ task.spawn(function()
 		end
 	end
 end)
-----------------------------------------------------
 
 AddToggle(FishingPage, "Smart Auto Fishing (Di Tempat Saja)", function(v)
 	getgenv().AutoFishingEventRunning = v
 	if v then StartFishingLoop() end
-end)
+end, true) -- Auto On
 
 local BiteDelayBox = Instance.new("TextBox")
 BiteDelayBox.Parent = FishingPage
@@ -1489,19 +1504,7 @@ end)
 
 AddToggle(FishingPage, "Auto Sell Timer ke NPC", function(v)
 	getgenv().AutoSellRunning = v
-	if v then
-		task.spawn(function()
-			local lastSellTime = tick()
-			while getgenv().AutoSellRunning do
-				task.wait(1)
-				if ((tick() - lastSellTime) / 60) >= (tonumber(getgenv().TyoConfig.AutoSellTimer) or 5) then
-					TriggerSellToNpc()
-					lastSellTime = tick()
-				end
-			end
-		end)
-	end
-end)
+end, true) -- Auto On
 
 local SellTimerBox = Instance.new("TextBox")
 SellTimerBox.Parent = FishingPage
@@ -1739,7 +1742,7 @@ TitleFav.Font = Enum.Font.GothamBold
 TitleFav.TextSize = 12
 TitleFav.ZIndex = 13
 
-AddToggle(FavoritePage, "AUTO FAVORITE (SECRET & AETHER)", function(v) getgenv().AutoFavoriteRunning = v end)
+AddToggle(FavoritePage, "AUTO FAVORITE (SECRET & AETHER)", function(v) getgenv().AutoFavoriteRunning = v end, true) -- Auto On
 
 local rarityList = {"Common", "UnCommon", "Rare", "Epic", "Legendary", "Mythical", "Secret", "Forgotten", "Aether"}
 local mutationList = {
@@ -2103,7 +2106,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FAST TP - STABLE & FIXED)
+-- 6. SUMMIT PAGE
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2321,7 +2324,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (WALKSPEED, HIGH JUMP & UTILITIES)
+-- 7. PLAYER PAGE
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2355,7 +2358,6 @@ SpeedBox.FocusLost:Connect(function()
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
 
--- FITUR BARU: PENGATURAN TINGGI LOMPAT (HIGH JUMP)
 local JumpBox = Instance.new("TextBox")
 JumpBox.Parent = PlayerPage
 JumpBox.Size = UDim2.new(1, -5, 0, 36)
@@ -2402,7 +2404,6 @@ task.spawn(function()
 		task.wait(0.5)
 	end
 end)
-----------------------------------------------------
 
 AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
 	getgenv().InvisibleRunning = v
@@ -2491,9 +2492,9 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 end)
 
 ------------------------------------------------------------------
--- ANTI-AFK SYSTEM (FIXED & ENHANCED)
+-- ANTI-AFK SYSTEM
 ------------------------------------------------------------------
-AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end)
+AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true) -- Auto On
 
 LocalPlayer.Idled:Connect(function()
 	if getgenv().AntiAFKRunning then
@@ -3230,7 +3231,7 @@ CredLbl.TextSize = 14
 CredLbl.ZIndex = 13
 
 ----------------------------------------------------
--- BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
+-- STAT TRACKER PANEL
 ----------------------------------------------------
 local StatPanel = Instance.new("Frame")
 StatPanel.Parent = Main
@@ -3310,4 +3311,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with High Jump & Smart Timer!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully - Auto Features Active!")
