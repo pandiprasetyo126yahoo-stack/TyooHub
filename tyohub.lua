@@ -1,6 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
+-- FIXED & OPTIMIZED FOR ALL EXECUTORS
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -42,16 +43,13 @@ getgenv().TyoConfig = {
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
 	AutoLoadEnabled = true,
-	AutoReadyTrade = true,         -- Auto Siap Trade
-	AutoConfirmTrade = true,     -- Auto Konfirmasi Trade
-	AutoAcceptTrade = true,      -- Auto Accept Trade
-	AutoAddAllFishTrade = true,  -- Auto On Auto Add All Ikan
-	
-	-- Tambahan Konfigurasi Fly & High Jump
+	AutoReadyTrade = true,
+	AutoConfirmTrade = true,
+	AutoAcceptTrade = true,
+	AutoAddAllFishTrade = true,
 	FlySpeed = 50,
 	JumpPowerValue = 100,
 	
-	-- Disatukan ke TyoConfig agar ikut tersimpan otomatis
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 		["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -83,7 +81,6 @@ getgenv().TyoConfig = {
 	}
 }
 
--- Sinkronisasi Global Variable
 getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -111,7 +108,6 @@ local function LoadConfig()
 						getgenv().TyoConfig[k] = v
 					end
 				end
-				-- Sinkronisasi ulang ke global variable
 				getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 				getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 				getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -178,7 +174,7 @@ local function ResetConfig()
 end
 
 ------------------------------------------------------------------
--- DISCORD WEBHOOK SYSTEM (SERVER-WIDE CUTSCENE BROADCAST)
+-- DISCORD WEBHOOK SYSTEM
 ------------------------------------------------------------------
 local function SendServerWideWebhook(playerName, catchType, position)
 	pcall(function()
@@ -590,8 +586,8 @@ end
 local function GetInventoryRemote()
 	local repStorage = game:GetService("ReplicatedStorage")
 	return repStorage:FindFirstChild("Remote")
-		and repStorage.Remote:FindFirstChild("Mancing")
-		and repStorage.Remote.Mancing:FindFirstChild("TandaiFavorit")
+		and repStorage.Remote:FindFirstChild("Inventaris")
+		and repStorage.Remote.Inventaris:FindFirstChild("TandaiFavorit")
 end
 
 local function GetServerFishData()
@@ -698,7 +694,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- IMPROVED TRADE UTILITIES (AUTO SIAP, KONFIRMASI, ACCEPT & ADD ALL)
+-- IMPROVED TRADE UTILITIES
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -838,7 +834,7 @@ Gui.ResetOnSpawn = false
 Gui.DisplayOrder = 2147483647
 
 ----------------------------------------------------
--- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
+-- DRAGGABLE FUNCTION
 ----------------------------------------------------
 local function MakeDraggable(guiObject, handleObject)
 	handleObject = handleObject or guiObject
@@ -894,7 +890,7 @@ local function MakeDraggable(guiObject, handleObject)
 end
 
 ----------------------------------------------------
--- MAIN HUB UI (WUTHERING WAVES / AEMEATH AURA THEME)
+-- MAIN HUB UI
 ----------------------------------------------------
 local Main = Instance.new("ImageLabel")
 Main.Parent = Gui
@@ -1130,7 +1126,7 @@ navButtons["Fishing & Sell"].TextColor3 = Color3.fromRGB(255, 255, 255)
 navButtons["Fishing & Sell"].Indicator.Visible = true
 
 ----------------------------------------------------
--- SPEED HUB STYLE TOGGLE BUILDER
+-- TOGGLE BUILDER
 ----------------------------------------------------
 local function AddToggle(parent, text, callback, initialValue)
 	local frame = Instance.new("Frame")
@@ -1555,7 +1551,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- DROPDOWN BUILDER
+-- MULTI-SELECT DROPDOWN BUILDER (FIXED)
 ----------------------------------------------------
 local function CreateMultiSelectDropdown(parent, titleText, optionsTable, targetStateTable)
 	local container = Instance.new("Frame")
@@ -1565,9 +1561,11 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	container.BackgroundTransparency = 0.2
 	container.ClipsDescendants = true
 	container.ZIndex = 13
+	
 	local cc = Instance.new("UICorner")
 	cc.CornerRadius = UDim.new(0, 6)
 	cc.Parent = container
+	
 	local header = Instance.new("TextButton")
 	header.Parent = container
 	header.Size = UDim2.new(1, 0, 0, 36)
@@ -1578,6 +1576,7 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	header.TextSize = 11
 	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.ZIndex = 14
+	
 	local countLabel = Instance.new("TextLabel")
 	countLabel.Parent = header
 	countLabel.Size = UDim2.new(0, 120, 1, 0)
@@ -1588,16 +1587,19 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	countLabel.TextSize = 11
 	countLabel.TextXAlignment = Enum.TextXAlignment.Right
 	countLabel.ZIndex = 15
+	
 	local optionsHolder = Instance.new("Frame")
 	optionsHolder.Parent = container
 	optionsHolder.Position = UDim2.new(0, 5, 0, 36)
-	optionsHolder.Size = UDim2.new(1, -10, 0, 0)
+	optionsHolder.Size = UDim2.new(1, -10, 0, (#optionsTable + 1) * 32)
 	optionsHolder.BackgroundTransparency = 1
 	optionsHolder.ZIndex = 14
+	
 	local listLayout = Instance.new("UIListLayout")
 	listLayout.Parent = optionsHolder
 	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	listLayout.Padding = UDim.new(0, 4)
+	
 	local itemButtons = {}
 	local function UpdateSummary()
 		local selectedCount = 0
@@ -1606,6 +1608,7 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		elseif selectedCount == #optionsTable then countLabel.Text = "All (" .. selectedCount .. ") 🔽"
 		else countLabel.Text = selectedCount .. " Selected 🔽" end
 	end
+	
 	local selectAllBtn = Instance.new("TextButton")
 	selectAllBtn.Parent = optionsHolder
 	selectAllBtn.Size = UDim2.new(1, 0, 0, 28)
@@ -1619,6 +1622,7 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 	local saCorner = Instance.new("UICorner")
 	saCorner.CornerRadius = UDim.new(0, 4)
 	saCorner.Parent = selectAllBtn
+	
 	local allState = false
 	selectAllBtn.MouseButton1Click:Connect(function()
 		allState = not allState
@@ -1630,6 +1634,7 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		UpdateSummary()
 		SaveConfig()
 	end)
+	
 	for _, optName in ipairs(optionsTable) do
 		local isChecked = targetStateTable[optName] or false
 		local optBtn = Instance.new("TextButton")
@@ -1647,6 +1652,7 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 		obc.CornerRadius = UDim.new(0, 4)
 		obc.Parent = optBtn
 		itemButtons[optName] = optBtn
+		
 		optBtn.MouseButton1Click:Connect(function()
 			targetStateTable[optName] = not targetStateTable[optName]
 			local activeNow = targetStateTable[optName]
@@ -1656,6 +1662,7 @@ local function CreateMultiSelectDropdown(parent, titleText, optionsTable, target
 			SaveConfig()
 		end)
 	end
+	
 	UpdateSummary()
 	local isOpen = false
 	header.MouseButton1Click:Connect(function()
@@ -2043,7 +2050,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FAST TP - STABLE & FIXED)
+-- 6. SUMMIT PAGE
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2261,7 +2268,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (WALKSPEED, FLY, HIGH JUMP & UTILITIES)
+-- 7. PLAYER PAGE
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2295,7 +2302,6 @@ SpeedBox.FocusLost:Connect(function()
 	if num then pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = num end) end
 end)
 
--- FITUR: HIGH JUMP (LOMPAT TINGGI)
 local JumpBox = Instance.new("TextBox")
 JumpBox.Parent = PlayerPage
 JumpBox.Size = UDim2.new(1, -5, 0, 36)
@@ -2327,7 +2333,6 @@ JumpBox.FocusLost:Connect(function()
 	end
 end)
 
--- Auto apply jump power on character spawn
 LocalPlayer.CharacterAdded:Connect(function(char)
 	task.wait(1)
 	pcall(function()
@@ -2339,7 +2344,6 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 	end)
 end)
 
--- FITUR: FLY (TERBANG)
 local flyActive = false
 local flyConnection = nil
 local bv, bg
@@ -2515,7 +2519,7 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 end)
 
 ------------------------------------------------------------------
--- ANTI-AFK SYSTEM (FIXED & ENHANCED)
+-- ANTI-AFK SYSTEM
 ------------------------------------------------------------------
 AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end)
 
@@ -3254,7 +3258,7 @@ CredLbl.TextSize = 14
 CredLbl.ZIndex = 13
 
 ----------------------------------------------------
--- BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
+-- STAT TRACKER PANEL
 ----------------------------------------------------
 local StatPanel = Instance.new("Frame")
 StatPanel.Parent = Main
@@ -3334,4 +3338,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Fly and High Jump Features!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully!")
