@@ -45,7 +45,6 @@ getgenv().TyoConfig = {
 	AutoConfirmTrade = false,
 	AutoAcceptTrade = false,
 	AutoAddAllFishTrade = false,
-	HideOtherCatch = false, -- Fitur Baru: Sembunyikan tangkapan player lain
 	
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
@@ -300,6 +299,7 @@ getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
 getgenv().AutoSellRunning = false
 getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
 
+-- Auto Galatama, Network Booster, & Anti-AFK langsung aktif (true) saat execute
 getgenv().AutoGalatamaRunning = true 
 getgenv().NetworkBoostRunning = true
 getgenv().AntiAFKRunning = true 
@@ -315,6 +315,7 @@ getgenv().InvisibleRunning = false
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
 
+-- Langsung jalankan background task Auto Join Galatama saat execute
 task.spawn(function()
 	while true do
 		if getgenv().AutoGalatamaRunning then
@@ -331,6 +332,7 @@ task.spawn(function()
 	end
 end)
 
+-- Langsung jalankan background task Network Booster saat execute
 task.spawn(function()
 	while true do
 		if getgenv().NetworkBoostRunning then
@@ -2299,7 +2301,7 @@ AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilan
 		local char = LocalPlayer.Character
 		if not char then return end
 		if v then
-			local hrp = char:FindFirstChild("HumanoidRootRootPart") or char:FindFirstChild("HumanoidRootPart")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then hrp.CFrame = CFrame.new(0, -9999, 0) end
 			for _, part in ipairs(char:GetDescendants()) do
 				if part:IsA("BasePart") then
@@ -2349,10 +2351,12 @@ task.spawn(function()
 	end
 end)
 
+-- Toggle Peningkatan Jaringan dibuat dengan status awal true (nyala)
 AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	getgenv().NetworkBoostRunning = v
 end, true)
 
+-- Toggle Anti-AFK dibuat dengan status awal true (nyala otomatis saat execute)
 AddToggle(PlayerPage, "Anti-AFK", function(v)
 	getgenv().AntiAFKRunning = v
 end, true)
@@ -2788,7 +2792,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 ----------------------------------------------------
--- 11. SETTINGS & PERFORMANCE PAGE (EXTREME POTATO & HIDE CATCH)
+-- 11. SETTINGS & PERFORMANCE PAGE
 ----------------------------------------------------
 local SettingsPage = pages["Settings"]
 
@@ -2811,32 +2815,6 @@ AddToggle(SettingsPage, "Auto Load Config saat Start", function(v)
 	getgenv().TyoConfig.AutoLoadEnabled = v
 	SaveConfig()
 end, getgenv().TyoConfig.AutoLoadEnabled)
-
--- FITUR: Sembunyikan Tangkapan / Efek Lemparan Player Lain
-AddToggle(SettingsPage, "Sembunyikan Tangkapan Player Lain", function(v)
-	getgenv().TyoConfig.HideOtherCatch = v
-	SaveConfig()
-end, getgenv().TyoConfig.HideOtherCatch)
-
--- Loop background untuk menghapus efek lemparan/tangkapan player lain jika opsi aktif
-task.spawn(function()
-	while true do
-		task.wait(1)
-		if getgenv().TyoConfig.HideOtherCatch then
-			pcall(function()
-				for _, p in ipairs(Players:GetPlayers()) do
-					if p ~= LocalPlayer and p.Character then
-						for _, desc in ipairs(p.Character:GetDescendants()) do
-							if desc:IsA("ParticleEmitter") or desc:IsA("Trail") or desc:IsA("Beam") or desc:IsA("Highlight") then
-								desc.Enabled = false
-							end
-						end
-					end
-				end
-			end)
-		end
-	end
-end)
 
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Parent = SettingsPage
@@ -3102,10 +3080,10 @@ ResetConfigBtn.MouseButton1Click:Connect(function()
 			BiteDelay = "0.5", TapDelay = "0.12", MinigameMode = "Legit", SelectedSpot = "Spot Mancing Jembatan",
 			AutoSellTimer = "5", AntiAdminEnabled = false, TargetGroupId = 7019573, WebhookEnabled = false, WebhookUrl = "",
 			SelectedTradeTarget = "", AutoSaveEnabled = true, AutoLoadEnabled = true, AutoReadyTrade = false,
-			AutoConfirmTrade = false, AutoAcceptTrade = false, AutoAddAllFishTrade = false, HideOtherCatch = false,
+			AutoConfirmTrade = false, AutoAcceptTrade = false, AutoAddAllFishTrade = false,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
-			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, | ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
+			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
 			UnfavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = false, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			SpotLoopConfig = {
 				["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
@@ -3195,7 +3173,7 @@ Float.Position = UDim2.new(0, 20, 0, 120)
 Float.BackgroundColor3 = Color3.fromRGB(16, 21, 35)
 Float.Image = "rbxassetid://137785805499299"
 Float.ScaleType = Enum.ScaleType.Crop
-Float.Active =` true
+Float.Active = true
 Float.Selectable = true
 Float.ZIndex = 2147483647
 
@@ -3216,4 +3194,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Extreme Potato & Hide Other Catch Features!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully! Network Booster, Auto Join Galatama & Anti-AFK Auto-Active.")
