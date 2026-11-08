@@ -1,3 +1,5 @@
+Buat supaya auto afk peningkatan jaringan dan auto join galatama supaya bisa auto aktif saat di ex
+
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
@@ -41,11 +43,12 @@ getgenv().TyoConfig = {
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
 	AutoLoadEnabled = true,
-	AutoReadyTrade = false,
-	AutoConfirmTrade = false,
-	AutoAcceptTrade = false,
-	AutoAddAllFishTrade = false,
+	AutoReadyTrade = false,         -- Diubah jadi false agar tidak auto aktif saat execute
+	AutoConfirmTrade = false,     -- Diubah jadi false agar tidak auto aktif saat execute
+	AutoAcceptTrade = false,      -- Diubah jadi false agar tidak auto aktif saat execute
+	AutoAddAllFishTrade = false,  -- Diubah jadi false agar tidak auto aktif saat execute
 	
+	-- Disatukan ke TyoConfig agar ikut tersimpan otomatis
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 		["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -105,6 +108,7 @@ local function LoadConfig()
 						getgenv().TyoConfig[k] = v
 					end
 				end
+				-- Sinkronisasi ulang ke global variable
 				getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 				getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 				getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -130,6 +134,110 @@ task.spawn(function()
 			SaveConfig()
 		end
 	end
+end)
+
+local function ResetConfig()
+	pcall(function()
+		getgenv().TyoConfig = {
+			BiteDelay = "0.5",
+			TapDelay = "0.12",
+			MinigameMode = "Legit",
+			SelectedSpot = "Spot Mancing Jembatan",
+			AutoSellTimer = "5",
+			AntiAdminEnabled = false,
+			TargetGroupId = 7019573,
+			WebhookEnabled = false,
+			WebhookUrl = "",
+			SelectedTradeTarget = "",
+			AutoSaveEnabled = true,
+			AutoLoadEnabled = true,
+			AutoReadyTrade = false,
+			AutoConfirmTrade = false,
+			AutoAcceptTrade = false,
+			AutoAddAllFishTrade = false,
+			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
+			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
+			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
+			UnfavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = false, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
+			SpotLoopConfig = {
+				["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
+				["Spot Mancing Core"] = { Enabled = false, Timer = "10" },
+				["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
+			}
+		}
+		getgenv().SelectedFishingSpot = "Spot Mancing Jembatan"
+		if delfile and isfile and isfile(CONFIG_FILE) then
+			delfile(CONFIG_FILE)
+		end
+	end)
+end
+
+------------------------------------------------------------------
+-- DISCORD WEBHOOK SYSTEM (SERVER-WIDE CUTSCENE BROADCAST)
+------------------------------------------------------------------
+local function SendServerWideWebhook(playerName, catchType, position)
+	pcall(function()
+		if not getgenv().TyoConfig.WebhookEnabled then return end
+		local url = getgenv().TyoConfig.WebhookUrl
+		if not url or url == "" or not string.find(url, "api/webhooks") then return end
+		
+		local typeLower = string.lower(tostring(catchType))
+		local targetPlayer = tostring(playerName or "Unknown Player")
+		
+		if string.find(typeLower, "secret") or string.find(typeLower, "forgotten") or string.find(typeLower, "core") or string.find(typeLower, "catch") or string.find(typeLower, "aether") then
+			local requestFunc = (syn and syn.request) or (http and http.request) or request or (fluxus and fluxus.request)
+			if not requestFunc then return end
+			
+			local embedTitle = "👑 Aemeath Wuthering Waves Hub V3 - Mount Soreya Rare Catch Tracker!"
+			local alertContent = string.format("@everyone 🚨 **%s Berhasil Mendapatkan Tangkapan Langka!**", targetPlayer)
+			local embedColor = 10040319
+			
+			if string.find(typeLower, "core") or string.find(typeLower, "aether") then
+				alertContent = string.format("@everyone ⚡ **%s Mendapatkan Item Spesial / Aether Material!**", targetPlayer)
+				embedTitle = "💎 Aemeath Wuthering Waves Hub V3 - Mount Soreya Event Tracker!"
+				embedColor = 16776960
+			end
+			
+			local posStr = position and string.format("%.1f, %.1f, %.1f", position.X, position.Y, position.Z) or "N/A"
+			
+			local data = {
+				["content"] = alertContent,
+				["embeds"] = {
+					{
+						["title"] = embedTitle,
+						["description"] = string.format("Pemain **%s** di dalam server Mount Soreya baru saja mendapatkan item spesial!", targetPlayer),
+						["color"] = embedColor,
+						["fields"] = {
+							{ ["name"] = "👤 Nama Player", ["value"] = targetPlayer, ["inline"] = true },
+							{ ["name"] = "🎯 Tipe Tangkapan", ["value"] = tostring(catchType), ["inline"] = true },
+							{ ["name"] = "📍 Koordinat", ["value"] = posStr, ["inline"] = true }
+						},
+						["footer"] = { ["text"] = "Aemeath Wuthering Waves Edition • Monitor" },
+						["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+					}
+				}
+			}
+			
+			requestFunc({
+				Url = url,
+				Method = "POST",
+				Headers = { ["Content-Type"] = "application/json" },
+				Body = HttpService:JSONEncode(data)
+			})
+		end
+	end)
+end
+
+task.spawn(function()
+	pcall(function()
+		local CutsceneBroadcastRemote = ReplicatedStorage:FindFirstChild("CutsceneBroadcast")
+		if CutsceneBroadcastRemote and CutsceneBroadcastRemote:IsA("RemoteEvent") then
+			CutsceneBroadcastRemote.OnClientEvent:Connect(function(catchType, position, targetPlayer)
+				local playerName = targetPlayer and targetPlayer.Name or "Unknown Player"
+				SendServerWideWebhook(playerName, catchType, position)
+			end)
+		end
+	end)
 end)
 
 ------------------------------------------------------------------
@@ -298,13 +406,9 @@ getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
 getgenv().AutoSellRunning = false
 getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
-
--- Auto Galatama, Network Booster, & Anti-AFK langsung aktif (true) saat execute
-getgenv().AutoGalatamaRunning = true 
-getgenv().NetworkBoostRunning = true
-getgenv().AntiAFKRunning = true 
-
+getgenv().AutoGalatamaRunning = false
 getgenv().AutoSummitRunning = false
+getgenv().AntiAFKRunning = false
 getgenv().HideNameRunning = false
 getgenv().FakeNameInput = "AEMEATH HUB"
 getgenv().CurrentSelectedHalo = nil
@@ -312,46 +416,9 @@ getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
 getgenv().InvisibleRunning = false
+getgenv().NetworkBoostRunning = false
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
-
--- Langsung jalankan background task Auto Join Galatama saat execute
-task.spawn(function()
-	while true do
-		if getgenv().AutoGalatamaRunning then
-			pcall(function()
-				local galatamaRemote = ReplicatedStorage:FindFirstChild("Remote")
-					and ReplicatedStorage.Remote:FindFirstChild("Glatama")
-					and ReplicatedStorage.Remote.Glatama:FindFirstChild("Ikut")
-				if galatamaRemote then
-					galatamaRemote:InvokeServer()
-				end
-			end)
-		end
-		task.wait(10)
-	end
-end)
-
--- Langsung jalankan background task Network Booster saat execute
-task.spawn(function()
-	while true do
-		if getgenv().NetworkBoostRunning then
-			pcall(function()
-				settings():GetService("NetworkSettings").IncomingReplicationLag = 0
-				for _, p in ipairs(Players:GetPlayers()) do
-					if p ~= LocalPlayer and p.Character then
-						for _, part in ipairs(p.Character:GetDescendants()) do
-							if part:IsA("BasePart") then
-								part.CastShadow = false
-							end
-						end
-					end
-				end
-			end)
-		end
-		task.wait(2)
-	end
-end)
 
 local FishingSpots = {
 	["Spot Mancing Jembatan"] = CFrame.new(-6783.74756, 1322.81006, -9757.34473, 0.0899723172, -9.34088291e-08, 0.995944262, 1.76120434e-08, 1, 9.21981638e-08, -0.995944262, 9.24533072e-09, 0.0899723172),
@@ -628,7 +695,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- IMPROVED TRADE UTILITIES
+-- IMPROVED TRADE UTILITIES (AUTO SIAP, KONFIRMASI, ACCEPT & ADD ALL)
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -656,6 +723,7 @@ local RarityPriority = {
 local function AutoAddAllFishToTrade()
 	pcall(function()
 		local serverData = GetServerFishData()
+		
 		table.sort(serverData, function(a, b)
 			local rankA = RarityPriority[string.lower(a.Rarity)] or 0
 			local rankB = RarityPriority[string.lower(b.Rarity)] or 0
@@ -1300,8 +1368,11 @@ for _, modeData in ipairs(fishingModes) do
 	end)
 end
 
+----------------------------------------------------
+-- SMART AUTO FISHING + TELEPORT 1 MENIT
+----------------------------------------------------
 getgenv().SmartAutoFishTpEnabled = false
-getgenv().SmartAutoFishTpInterval = 1
+getgenv().SmartAutoFishTpInterval = 1 -- Default 1 menit
 
 AddToggle(FishingPage, "Smart Auto Fishing + Teleport", function(v)
 	getgenv().SmartAutoFishTpEnabled = v
@@ -1884,7 +1955,7 @@ strc.Parent = SendTradeReqBtn
 SendTradeReqBtn.MouseButton1Click:Connect(function() SendTradeRequestToTarget() end)
 
 ----------------------------------------------------
--- 4. GALATAMA PAGE (AUTO JOIN SET ON)
+-- 4. GALATAMA PAGE
 ----------------------------------------------------
 local GalatamaPage = pages["Galatama"]
 
@@ -1916,7 +1987,22 @@ end)
 
 AddToggle(GalatamaPage, "Aktifkan Auto Join Galatama", function(v)
 	getgenv().AutoGalatamaRunning = v
-end, true)
+	if v then
+		task.spawn(function()
+			while getgenv().AutoGalatamaRunning do
+				pcall(function()
+					local galatamaRemote = ReplicatedStorage:FindFirstChild("Remote")
+						and ReplicatedStorage.Remote:FindFirstChild("Glatama")
+						and ReplicatedStorage.Remote.Glatama:FindFirstChild("Ikut")
+					if galatamaRemote then
+						galatamaRemote:InvokeServer()
+					end
+				end)
+				task.wait(10)
+			end
+		end)
+	end
+end)
 
 local TitleCoreEvent = Instance.new("TextLabel")
 TitleCoreEvent.Parent = GalatamaPage
@@ -2017,7 +2103,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE
+-- 6. SUMMIT PAGE (FAST TP - STABLE & FIXED)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2129,9 +2215,11 @@ AddSummitBox("Jeda Cepat di tiap Cp (detik, Cth: 0.45)", 0.45, function(n) getge
 local function TouchCheckpointFast(cpNumber, approxCF)
 	local part 
 	local waited = 0 
+	
 	pcall(function()
 		LocalPlayer:RequestStreamAroundAsync(approxCF.Position, 10)
 	end)
+	
 	while getgenv().AutoSummitRunning and waited < 2 do
 		local folder = workspace:FindFirstChild("Checkpoint")
 		part = folder and (folder:FindFirstChild("Checkpoint " .. tostring(cpNumber)) or folder:FindFirstChild(tostring(cpNumber)))
@@ -2140,11 +2228,14 @@ local function TouchCheckpointFast(cpNumber, approxCF)
 		task.wait(0.05)
 		waited = waited + 0.05
 	end
+	
 	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 	if not hrp or not getgenv().AutoSummitRunning then return end
+	
 	if part then
 		hrp.CFrame = part.CFrame + Vector3.new(0, 1, 0)
 		hrp.AssemblyLinearVelocity = Vector3.zero
+		
 		if firetouchinterest then
 			pcall(function()
 				firetouchinterest(hrp, part, 0)
@@ -2164,42 +2255,56 @@ task.spawn(function()
 				local character = LocalPlayer.Character
 				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 				local hrp = character and character:FindFirstChild("HumanoidRootPart")
+				
 				if not character or not humanoid or not hrp or humanoid.Health <= 0 then
 					task.wait(1)
 					return
 				end
+
 				SetPlatformStand(true)
 				local midHeight = tonumber(getgenv().SummitHeight) or 6
 				local cpHeight = tonumber(getgenv().SummitCpHeight) or 1.5
+				
 				for _, point in ipairs(SummitPoints) do
 					if not getgenv().AutoSummitRunning then break end
+					
 					character = LocalPlayer.Character
 					hrp = character and character:FindFirstChild("HumanoidRootPart")
 					humanoid = character and character:FindFirstChildOfClass("Humanoid")
 					if not hrp or not humanoid or humanoid.Health <= 0 then break end
+					
 					local name = point[1]
 					local cpIndex = string.match(name, "^Cp(%d+)$")
 					local height = cpIndex and cpHeight or midHeight
+					
 					hrp.AssemblyLinearVelocity = Vector3.zero
 					hrp.AssemblyAngularVelocity = Vector3.zero
+					
 					hrp.CFrame = point[2] + Vector3.new(0, height, 0)
+					
 					if not getgenv().AutoSummitRunning then break end
+					
 					if cpIndex then
 						TouchCheckpointFast(tonumber(cpIndex), point[2])
+						
 						local delayTime = tonumber(getgenv().SummitDelay) or 0.45
 						task.wait(delayTime)
+						
 						if getgenv().SummitUseRemote then
 							pcall(function()
 								local cpRemote = ReplicatedStorage:FindFirstChild("Remote")
 									and ReplicatedStorage.Remote:FindFirstChild("Checkpoint")
 									and ReplicatedStorage.Remote.Checkpoint:FindFirstChild("TpToCheckpoint")
-								if cpRemote then cpRemote:FireServer(tonumber(cpIndex)) end
+								if cpRemote then
+									cpRemote:FireServer(tonumber(cpIndex))
+								end
 							end)
 						end
 					else
 						task.wait(0.08)
 					end
 				end
+				
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
 					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
@@ -2216,7 +2321,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 7. PLAYER PAGE (NETWORK BOOSTER SET ON)
+-- 7. PLAYER PAGE (WALKSPEED, HIGH JUMP & UTILITIES)
 ----------------------------------------------------
 local PlayerPage = pages["Player"]
 
@@ -2267,7 +2372,9 @@ jbc.CornerRadius = UDim.new(0, 6)
 jbc.Parent = JumpBox
 JumpBox.FocusLost:Connect(function()
 	local num = tonumber(JumpBox.Text)
-	if num then getgenv().JumpPowerValue = num end
+	if num then 
+		getgenv().JumpPowerValue = num 
+	end
 end)
 
 AddToggle(PlayerPage, "🦘 Aktifkan High Jump", function(v)
@@ -2300,9 +2407,13 @@ AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilan
 	pcall(function()
 		local char = LocalPlayer.Character
 		if not char then return end
+		
 		if v then
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then hrp.CFrame = CFrame.new(0, -9999, 0) end
+			if hrp then
+				hrp.CFrame = CFrame.new(0, -9999, 0)
+			end
+			
 			for _, part in ipairs(char:GetDescendants()) do
 				if part:IsA("BasePart") then
 					part.Transparency = 1
@@ -2311,11 +2422,16 @@ AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilan
 					part.Transparency = 1
 				end
 			end
+			
 			local hum = char:FindFirstChildOfClass("Humanoid")
-			if hum then hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
+			if hum then
+				hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+			end
 		else
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then hrp.CFrame = FishingSpots["Spot Mancing Jembatan"] + Vector3.new(0, 5, 0) end
+			if hrp then
+				hrp.CFrame = FishingSpots["Spot Mancing Jembatan"] + Vector3.new(0, 5, 0)
+			end
 			for _, part in ipairs(char:GetDescendants()) do
 				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
 					part.Transparency = 0
@@ -2351,15 +2467,31 @@ task.spawn(function()
 	end
 end)
 
--- Toggle Peningkatan Jaringan dibuat dengan status awal true (nyala)
 AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	getgenv().NetworkBoostRunning = v
-end, true)
+	task.spawn(function()
+		while getgenv().NetworkBoostRunning do
+			pcall(function()
+				settings():GetService("NetworkSettings").IncomingReplicationLag = 0
+				for _, p in ipairs(Players:GetPlayers()) do
+					if p ~= LocalPlayer and p.Character then
+						for _, part in ipairs(p.Character:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.CastShadow = false
+							end
+						end
+					end
+				end
+			end)
+			task.wait(2)
+		end
+	end)
+end)
 
--- Toggle Anti-AFK dibuat dengan status awal true (nyala otomatis saat execute)
-AddToggle(PlayerPage, "Anti-AFK", function(v)
-	getgenv().AntiAFKRunning = v
-end, true)
+------------------------------------------------------------------
+-- ANTI-AFK SYSTEM (FIXED & ENHANCED)
+------------------------------------------------------------------
+AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end)
 
 LocalPlayer.Idled:Connect(function()
 	if getgenv().AntiAFKRunning then
@@ -3075,25 +3207,7 @@ local rcc = Instance.new("UICorner")
 rcc.CornerRadius = UDim.new(0, 6)
 rcc.Parent = ResetConfigBtn
 ResetConfigBtn.MouseButton1Click:Connect(function()
-	pcall(function()
-		getgenv().TyoConfig = {
-			BiteDelay = "0.5", TapDelay = "0.12", MinigameMode = "Legit", SelectedSpot = "Spot Mancing Jembatan",
-			AutoSellTimer = "5", AntiAdminEnabled = false, TargetGroupId = 7019573, WebhookEnabled = false, WebhookUrl = "",
-			SelectedTradeTarget = "", AutoSaveEnabled = true, AutoLoadEnabled = true, AutoReadyTrade = false,
-			AutoConfirmTrade = false, AutoAcceptTrade = false, AutoAddAllFishTrade = false,
-			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
-			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
-			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
-			UnfavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = false, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
-			SpotLoopConfig = {
-				["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
-				["Spot Mancing Core"] = { Enabled = false, Timer = "10" },
-				["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
-			}
-		}
-		getgenv().SelectedFishingSpot = "Spot Mancing Jembatan"
-		if delfile and isfile and isfile(CONFIG_FILE) then delfile(CONFIG_FILE) end
-	end)
+	ResetConfig()
 	ResetConfigBtn.Text = "🔄 Config Direset!"
 	task.wait(1.5)
 	ResetConfigBtn.Text = "🔄 Reset Konfigurasi"
@@ -3194,4 +3308,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully! Network Booster, Auto Join Galatama & Anti-AFK Auto-Active.")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Safe Auto Trade Defaults!")
