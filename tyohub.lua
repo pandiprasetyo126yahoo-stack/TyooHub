@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
--- MAP: MOUNT SOREYA UPDATE (AUTO-EXECUTE FEATURES ON)
+-- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO RESET TO NORMAL ON EXECUTE)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -391,15 +391,15 @@ task.spawn(function()
 	end)
 end)
 
--- GLOBAL STATES
+-- GLOBAL STATES (Extreme Potato, Anti-AFK, Network Booster, Auto Galatama Auto-ON)
 getgenv().AutoFishingEventRunning = false
 getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
 getgenv().AutoSellRunning = false
 getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
-getgenv().AutoGalatamaRunning = true -- Diatur langsung ON saat di-execute
+getgenv().AutoGalatamaRunning = true
 getgenv().AutoSummitRunning = false
-getgenv().AntiAFKRunning = true -- Diatur langsung ON saat di-execute
+getgenv().AntiAFKRunning = true
 getgenv().HideNameRunning = false
 getgenv().FakeNameInput = "AEMEATH HUB"
 getgenv().CurrentSelectedHalo = nil
@@ -407,7 +407,7 @@ getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
 getgenv().InvisibleRunning = false
-getgenv().NetworkBoostRunning = true -- Diatur langsung ON saat di-execute
+getgenv().NetworkBoostRunning = true
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
 
@@ -1910,7 +1910,7 @@ end)
 
 AddToggle(GalatamaPage, "Aktifkan Auto Join Galatama", function(v)
 	getgenv().AutoGalatamaRunning = v
-end, true) -- Diatur bernilai awal true (Auto-ON)
+end, true)
 
 local TitleCoreEvent = Instance.new("TextLabel")
 TitleCoreEvent.Parent = GalatamaPage
@@ -2341,9 +2341,9 @@ end)
 
 AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	getgenv().NetworkBoostRunning = v
-end, true) -- Diatur bernilai awal true (Auto-ON)
+end, true)
 
-AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true) -- Diatur bernilai awal true (Auto-ON)
+AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true)
 
 local HeadlessBtn = Instance.new("TextButton")
 HeadlessBtn.Parent = PlayerPage
@@ -2841,12 +2841,10 @@ local function ApplyNoWallsAndMinimalRender(state)
 	end)
 end
 
--- Langsung aktifkan Extreme Potato saat di-execute (Auto-ON)
-ApplyNoWallsAndMinimalRender(true)
-
+-- Extreme Potato dikembalikan seperti semula (OFF saat di-execute)
 AddToggle(SettingsPage, "⚡ Extreme Potato: Hapus Tembok & Min Render (On/Off)", function(v)
 	ApplyNoWallsAndMinimalRender(v)
-end, true) -- Tombol UI diset ke kondisi ON
+end, false)
 
 local BlackScreenGui = nil
 local BlackScreenToggleBtn = Instance.new("TextButton")
@@ -3050,7 +3048,7 @@ local CredLbl = Instance.new("TextLabel")
 CredLbl.Parent = CreditsPage
 CredLbl.Size = UDim2.new(1, -5, 1, 0)
 CredLbl.BackgroundTransparency = 1
-CredLbl.Text = "Aemeath Wuthering Waves Edition\nMap: Mount Soreya\nAuto-Execute Features Update"
+CredLbl.Text = "Aemeath Wuthering Waves Edition\nMap: Mount Soreya\nExtreme Potato Reset Update"
 CredLbl.TextColor3 = Color3.fromRGB(210, 225, 240)
 CredLbl.Font = Enum.Font.GothamBold
 CredLbl.TextSize = 14
@@ -3137,4 +3135,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto-ON Features!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully! (Extreme Potato Normal / OFF on Execute)")
