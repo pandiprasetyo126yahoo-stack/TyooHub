@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
--- MAP: MOUNT SOREYA UPDATE (AUTO ON & FULL FEATURES)
+-- MAP: MOUNT SOREYA UPDATE (AUTO TRADE OFF ON EXECUTE)
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -41,10 +41,11 @@ getgenv().TyoConfig = {
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
 	AutoLoadEnabled = true,
-	AutoReadyTrade = true,
-	AutoConfirmTrade = true,
-	AutoAcceptTrade = true,
-	AutoAddAllFishTrade = true,
+	-- Diubah menjadi false agar tidak langsung aktif saat execute
+	AutoReadyTrade = false,
+	AutoConfirmTrade = false,
+	AutoAcceptTrade = false,
+	AutoAddAllFishTrade = false,
 	
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
@@ -146,10 +147,10 @@ local function ResetConfig()
 			SelectedTradeTarget = "",
 			AutoSaveEnabled = true,
 			AutoLoadEnabled = true,
-			AutoReadyTrade = true,
-			AutoConfirmTrade = true,
-			AutoAcceptTrade = true,
-			AutoAddAllFishTrade = true,
+			AutoReadyTrade = false,
+			AutoConfirmTrade = false,
+			AutoAcceptTrade = false,
+			AutoAddAllFishTrade = false,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -396,22 +397,22 @@ task.spawn(function()
 end)
 
 ------------------------------------------------------------------
--- GLOBAL STATES (FITUR UTAMA AUTO ON SESUAI FOTO)
+-- GLOBAL STATES
 ------------------------------------------------------------------
-getgenv().AutoFishingEventRunning = true   -- Smart Auto Fishing langsung ON
+getgenv().AutoFishingEventRunning = true
 getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
-getgenv().AutoSellRunning = true            -- Auto Sell Timer langsung ON
+getgenv().AutoSellRunning = true
 getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
 getgenv().AutoGalatamaRunning = false
 getgenv().AutoSummitRunning = false
-getgenv().AntiAFKRunning = true             -- Anti-AFK langsung ON
+getgenv().AntiAFKRunning = true
 getgenv().HideNameRunning = false
 getgenv().FakeNameInput = "AEMEATH HUB"
 getgenv().CurrentSelectedHalo = nil
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
-getgenv().AutoFavoriteRunning = true        -- Auto Favorite langsung ON
+getgenv().AutoFavoriteRunning = true
 getgenv().InvisibleRunning = false
 getgenv().NetworkBoostRunning = false
 getgenv().HighJumpRunning = false
@@ -563,7 +564,6 @@ local function StartFishingLoop()
 	end)
 end
 
--- Langsung jalankan fishing loop secara otomatis
 task.spawn(function()
 	task.wait(1)
 	StartFishingLoop()
@@ -587,7 +587,6 @@ local function TriggerSellToNpc()
 	end)
 end
 
--- Auto Sell Timer Loop Langsung Aktif
 task.spawn(function()
 	local lastSellTime = tick()
 	while true do
@@ -665,7 +664,6 @@ local function ProcessAutoFavorite()
 	end)
 end
 
--- Auto Favorite Loop Langsung Aktif
 task.spawn(function()
 	while true do
 		if getgenv().AutoFavoriteRunning then ProcessAutoFavorite() end
@@ -949,7 +947,7 @@ HubTitle.Parent = TopBar
 HubTitle.Position = UDim2.new(0, 15, 0, 0)
 HubTitle.Size = UDim2.new(0, 300, 1, 0)
 HubTitle.BackgroundTransparency = 1
-HubTitle.Text = "AEMEATH HUB <font color='#50A0FF'>V3</font> (AUTO ON)"
+HubTitle.Text = "AEMEATH HUB <font color='#50A0FF'>V3</font>"
 HubTitle.RichText = true
 HubTitle.Font = Enum.Font.GothamBold
 HubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1460,7 +1458,7 @@ end)
 AddToggle(FishingPage, "Smart Auto Fishing (Di Tempat Saja)", function(v)
 	getgenv().AutoFishingEventRunning = v
 	if v then StartFishingLoop() end
-end, true) -- Auto On
+end, true)
 
 local BiteDelayBox = Instance.new("TextBox")
 BiteDelayBox.Parent = FishingPage
@@ -1504,7 +1502,7 @@ end)
 
 AddToggle(FishingPage, "Auto Sell Timer ke NPC", function(v)
 	getgenv().AutoSellRunning = v
-end, true) -- Auto On
+end, true)
 
 local SellTimerBox = Instance.new("TextBox")
 SellTimerBox.Parent = FishingPage
@@ -1742,7 +1740,7 @@ TitleFav.Font = Enum.Font.GothamBold
 TitleFav.TextSize = 12
 TitleFav.ZIndex = 13
 
-AddToggle(FavoritePage, "AUTO FAVORITE (SECRET & AETHER)", function(v) getgenv().AutoFavoriteRunning = v end, true) -- Auto On
+AddToggle(FavoritePage, "AUTO FAVORITE (SECRET & AETHER)", function(v) getgenv().AutoFavoriteRunning = v end, true)
 
 local rarityList = {"Common", "UnCommon", "Rare", "Epic", "Legendary", "Mythical", "Secret", "Forgotten", "Aether"}
 local mutationList = {
@@ -1796,7 +1794,7 @@ uac.Parent = UnfavBtn
 UnfavBtn.MouseButton1Click:Connect(function() UnfavoriteAllFish() end)
 
 ----------------------------------------------------
--- 3. AUTO TRADE PAGE
+-- 3. AUTO TRADE PAGE (DISINI AUTO TIDAK AKTIF SAAT START)
 ----------------------------------------------------
 local TradePage = pages["🤝 Auto Trade"]
 
@@ -1909,7 +1907,7 @@ end)
 Players.PlayerAdded:Connect(RefreshTradeTargets)
 Players.PlayerRemoving:Connect(RefreshTradeTargets)
 
-AddToggle(TradePage, "Auto Add All Ikan ke Trade (Auto On)", function(v)
+AddToggle(TradePage, "Auto Add All Ikan ke Trade", function(v)
 	getgenv().TyoConfig.AutoAddAllFishTrade = v
 	SaveConfig()
 end, getgenv().TyoConfig.AutoAddAllFishTrade)
@@ -2494,7 +2492,7 @@ end)
 ------------------------------------------------------------------
 -- ANTI-AFK SYSTEM
 ------------------------------------------------------------------
-AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true) -- Auto On
+AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true)
 
 LocalPlayer.Idled:Connect(function()
 	if getgenv().AntiAFKRunning then
@@ -3311,4 +3309,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully - Auto Features Active!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully - Auto Trade Default OFF!")
