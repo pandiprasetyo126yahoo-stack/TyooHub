@@ -2119,7 +2119,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FIXED CHECKPOINT DETECTION)
+-- 6. SUMMIT PAGE (FIXED FINAL TP TO RED AREA)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2327,11 +2327,11 @@ task.spawn(function()
 					end
 				end
 				
+				-- BAGIAN AKHIR SETELAH SAMPAI PUNCAK (LANGSUNG KE AREA/PORTAL MERAH)[span_1](start_span)[span_1](end_span)
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
-					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
+					hrpFinal.CFrame = NpcSellCFrame + Vector3.new(0, 3, 2)
 					task.wait(0.3)
-					hrpFinal.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
 				end
 			end)
 			task.wait(0.5)
