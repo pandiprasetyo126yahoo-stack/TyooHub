@@ -401,9 +401,9 @@ getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
 getgenv().AutoSellRunning = false
 getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
-getgenv().AutoGalatamaRunning = true -- Diubah jadi true agar auto aktif saat execute
+getgenv().AutoGalatamaRunning = true
 getgenv().AutoSummitRunning = false
-getgenv().AntiAFKRunning = true -- Diubah jadi true agar auto aktif saat execute
+getgenv().AntiAFKRunning = true
 getgenv().HideNameRunning = false
 getgenv().FakeNameInput = "AEMEATH HUB"
 getgenv().CurrentSelectedHalo = nil
@@ -411,7 +411,7 @@ getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
 getgenv().InvisibleRunning = false
-getgenv().NetworkBoostRunning = true -- Diubah jadi true agar auto aktif saat execute
+getgenv().NetworkBoostRunning = true
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
 
@@ -2018,7 +2018,7 @@ end)
 
 AddToggle(GalatamaPage, "Aktifkan Auto Join Galatama", function(v)
 	getgenv().AutoGalatamaRunning = v
-end, true) -- Di-set true secara default agar tombol UI-nya ikut aktif saat start
+end, true)
 
 local TitleCoreEvent = Instance.new("TextLabel")
 TitleCoreEvent.Parent = GalatamaPage
@@ -2119,7 +2119,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE
+-- 6. SUMMIT PAGE (FIXED CHECKPOINT DETECTION)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2236,11 +2236,17 @@ local function TouchCheckpointFast(cpNumber, approxCF)
 		LocalPlayer:RequestStreamAroundAsync(approxCF.Position, 10)
 	end)
 	
-	while getgenv().AutoSummitRunning and waited < 2 do
-		local folder = workspace:FindFirstChild("Checkpoint")
-		part = folder and (folder:FindFirstChild("Checkpoint " .. tostring(cpNumber)) or folder:FindFirstChild(tostring(cpNumber)))
-		if part and part:IsA("BasePart") then break end
-		part = nil
+	while getgenv().AutoSummitRunning and waited < 1.5 do
+		for _, obj in ipairs(workspace:GetDescendants()) do
+			if obj:IsA("BasePart") then
+				local nameLower = string.lower(obj.Name)
+				if nameLower == "checkpoint " .. tostring(cpNumber) or nameLower == "cp" .. tostring(cpNumber) or nameLower == tostring(cpNumber) then
+					part = obj
+					break
+				end
+			end
+		end
+		if part then break end
 		task.wait(0.05)
 		waited = waited + 0.05
 	end
@@ -2502,12 +2508,12 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 			task.wait(2)
 		end
 	end)
-end, true) -- Di-set true agar toggle UI-nya otomatis ON saat execute
+end, true)
 
 ------------------------------------------------------------------
--- ANTI-AFK SYSTEM (DI-SET AUTO AKTIF SAAT START)
+-- ANTI-AFK SYSTEM
 ------------------------------------------------------------------
-AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true) -- Di-set true agar toggle UI-nya otomatis ON saat execute
+AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true)
 
 LocalPlayer.Idled:Connect(function()
 	if getgenv().AntiAFKRunning then
