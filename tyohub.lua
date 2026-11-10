@@ -1,6 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
+-- FIXED: AUTO UNFAVORITE IKAN BERDASARKAN FILTER & INVENTARIS
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -395,7 +396,7 @@ task.spawn(function()
 	end)
 end)
 
--- GLOBAL STATES (DISET AUTO AKTIF UNTUK FITUR TERTENTU)
+-- GLOBAL STATES
 getgenv().AutoFishingEventRunning = false
 getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
@@ -415,7 +416,7 @@ getgenv().NetworkBoostRunning = true
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
 
--- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Peningkatan Jaringan
+-- Peningkatan Jaringan
 task.spawn(function()
 	while getgenv().NetworkBoostRunning do
 		pcall(function()
@@ -434,7 +435,7 @@ task.spawn(function()
 	end
 end)
 
--- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Auto Join Galatama
+-- Auto Join Galatama
 task.spawn(function()
 	while true do
 		if getgenv().AutoGalatamaRunning then
@@ -635,14 +636,14 @@ local function GetServerFishData()
 			if success and result and result[1] then
 				local data = result[1]
 				if type(data) == "table" then
-					for _, fish in ipairs(data) do
-						if type(fish) == "table" and (fish.uid or fish.UUID) then
+					for _, fish in pairs(data) do
+						if type(fish) == "table" then
 							table.insert(fishDataList, {
-								UUID = tostring(fish.uid or fish.UUID),
-								Name = tostring(fish.nama or fish.Name or ""),
-								Rarity = tostring(fish.rarity or fish.Rarity or ""),
-								Mutation = tostring(fish.mutasi or fish.Mutation or ""),
-								IsFavorited = fish.favorit or fish.IsFavorit or fish.IsFavorite or false
+								UUID = tostring(fish.uid or fish.UUID or fish.Id or fish.ID or ""),
+								Name = tostring(fish.nama or fish.Name or fish.FishName or ""),
+								Rarity = tostring(fish.rarity or fish.Rarity or fish.Kelangkaan or ""),
+								Mutation = tostring(fish.mutasi or fish.Mutation or fish.Mutasi or ""),
+								IsFavorited = fish.favorit or fish.IsFavorit or fish.IsFavorite or fish.Favorited or false
 							})
 						end
 					end
@@ -660,20 +661,22 @@ local function ProcessAutoFavorite()
 		local serverData = GetServerFishData()
 		for _, fish in ipairs(serverData) do
 			if not getgenv().AutoFavoriteRunning then break end
-			local shouldFav = false
-			local fishRarityLower = string.lower(fish.Rarity)
-			local fishMutationLower = string.lower(fish.Mutation)
-			
-			for rName, active in pairs(getgenv().FavRarities) do
-				if active and string.lower(rName) == fishRarityLower then shouldFav = true end
-			end
-			for mName, active in pairs(getgenv().FavMutations) do
-				if active and string.find(fishMutationLower, string.lower(mName)) then shouldFav = true end
-			end
-			
-			if shouldFav and not fish.IsFavorited then
-				tandaiRemote:FireServer(fish.UUID, true)
-				task.wait(0.12)
+			if fish.UUID ~= "" then
+				local shouldFav = false
+				local fishRarityLower = string.lower(fish.Rarity)
+				local fishMutationLower = string.lower(fish.Mutation)
+				
+				for rName, active in pairs(getgenv().FavRarities) do
+					if active and string.lower(rName) == fishRarityLower then shouldFav = true end
+				end
+				for mName, active in pairs(getgenv().FavMutations) do
+					if active and string.find(fishMutationLower, string.lower(mName)) then shouldFav = true end
+				end
+				
+				if shouldFav and not fish.IsFavorited then
+					tandaiRemote:FireServer(fish.UUID, true)
+					task.wait(0.12)
+				end
 			end
 		end
 	end)
@@ -693,8 +696,10 @@ local function UnfavoriteAllFish()
 			if not tandaiRemote then return end
 			local serverData = GetServerFishData()
 			for _, fish in ipairs(serverData) do
-				tandaiRemote:FireServer(fish.UUID, false)
-				task.wait(0.08)
+				if fish.UUID ~= "" then
+					tandaiRemote:FireServer(fish.UUID, false)
+					task.wait(0.08)
+				end
 			end
 		end)
 	end)
@@ -707,18 +712,20 @@ local function UnfavoriteByFilter()
 			if not tandaiRemote then return end
 			local serverData = GetServerFishData()
 			for _, fish in ipairs(serverData) do
-				local shouldUnfav = false
-				local fishRarityLower = string.lower(fish.Rarity)
-				local fishMutationLower = string.lower(fish.Mutation)
-				for rName, active in pairs(getgenv().UnfavRarities) do
-					if active and string.lower(rName) == fishRarityLower then shouldUnfav = true end
-				end
-				for mName, active in pairs(getgenv().UnfavMutations) do
-					if active and string.find(fishMutationLower, string.lower(mName)) then shouldUnfav = true end
-				end
-				if shouldUnfav and fish.IsFavorited then
-					tandaiRemote:FireServer(fish.UUID, false)
-					task.wait(0.08)
+				if fish.UUID ~= "" then
+					local shouldUnfav = false
+					local fishRarityLower = string.lower(fish.Rarity)
+					local fishMutationLower = string.lower(fish.Mutation)
+					for rName, active in pairs(getgenv().UnfavRarities) do
+						if active and string.lower(rName) == fishRarityLower then shouldUnfav = true end
+					end
+					for mName, active in pairs(getgenv().UnfavMutations) do
+						if active and string.find(fishMutationLower, string.lower(mName)) then shouldUnfav = true end
+					end
+					if shouldUnfav then
+						tandaiRemote:FireServer(fish.UUID, false)
+						task.wait(0.08)
+					end
 				end
 			end
 		end)
@@ -763,7 +770,7 @@ local function AutoAddAllFishToTrade()
 		
 		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or GetTradeRemote("TambahItem")
 		for _, fish in ipairs(serverData) do
-			if tradeRemote then
+			if tradeRemote and fish.UUID ~= "" then
 				if tradeRemote:IsA("RemoteEvent") then
 					tradeRemote:FireServer(fish.UUID)
 				elseif tradeRemote:IsA("RemoteFunction") then
@@ -1399,9 +1406,7 @@ for _, modeData in ipairs(fishingModes) do
 	end)
 end
 
-----------------------------------------------------
--- SMART AUTO FISHING + TELEPORT 1 MENIT
-----------------------------------------------------
+-- SMART AUTO FISHING + TELEPORT INTERVAL
 getgenv().SmartAutoFishTpEnabled = false
 getgenv().SmartAutoFishTpInterval = 1
 
@@ -2119,7 +2124,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FIXED FINAL TP TO RED AREA)
+-- 6. SUMMIT PAGE
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2327,10 +2332,9 @@ task.spawn(function()
 					end
 				end
 				
-				-- BAGIAN AKHIR SETELAH SAMPAI PUNCAK (LANGSUNG KE AREA/PORTAL MERAH)[span_1](start_span)[span_1](end_span)
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
-					hrpFinal.CFrame = NpcSellCFrame + Vector3.new(0, 3, 2)
+					hrpFinal.CFrame = CFrame.new(-6740.0, 1108.0, -10775.0) + Vector3.new(0, 3, 0)
 					task.wait(0.3)
 				end
 			end)
@@ -3330,4 +3334,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto-Active Anti-AFK, Network Booster & Galatama!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Fixed Auto Unfavorite Filter!")
