@@ -2325,7 +2325,7 @@ task.spawn(function()
 					end
 				end
 				
-				-- BAGIAN AKHIR SETELAH SAMPAI PUNCAK (LANGSUNG KE PORTAL MERAH)
+				-- BAGIAN AKHIR SETELAH SAMPAI PUNCAK (LANGSUNG KE PORTAL MERAH)[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span)
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
 					hrpFinal.CFrame = CFrame.new(-6740.0, 1108.0, -10775.0) + Vector3.new(0, 3, 0)
