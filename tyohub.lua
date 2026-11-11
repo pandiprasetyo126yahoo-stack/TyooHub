@@ -395,7 +395,7 @@ task.spawn(function()
 	end)
 end)
 
--- GLOBAL STATES
+-- GLOBAL STATES (DISET AUTO AKTIF UNTUK FITUR TERTENTU)
 getgenv().AutoFishingEventRunning = false
 getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
@@ -415,7 +415,7 @@ getgenv().NetworkBoostRunning = true
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
 
--- Peningkatan Jaringan
+-- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Peningkatan Jaringan
 task.spawn(function()
 	while getgenv().NetworkBoostRunning do
 		pcall(function()
@@ -434,7 +434,7 @@ task.spawn(function()
 	end
 end)
 
--- Auto Join Galatama
+-- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Auto Join Galatama
 task.spawn(function()
 	while true do
 		if getgenv().AutoGalatamaRunning then
@@ -1399,7 +1399,9 @@ for _, modeData in ipairs(fishingModes) do
 	end)
 end
 
--- SMART AUTO FISHING + TELEPORT INTERVAL
+----------------------------------------------------
+-- SMART AUTO FISHING + TELEPORT 1 MENIT
+----------------------------------------------------
 getgenv().SmartAutoFishTpEnabled = false
 getgenv().SmartAutoFishTpInterval = 1
 
@@ -2117,7 +2119,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FIXED FINAL TP TO RED PORTAL AREA)
+-- 6. SUMMIT PAGE (FIXED CHECKPOINT DETECTION)
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2325,11 +2327,11 @@ task.spawn(function()
 					end
 				end
 				
-				-- BAGIAN AKHIR SETELAH SAMPAI PUNCAK (LANGSUNG KE PORTAL MERAH)[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span)
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
-					hrpFinal.CFrame = CFrame.new(-6740.0, 1108.0, -10775.0) + Vector3.new(0, 3, 0)
+					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
 					task.wait(0.3)
+					hrpFinal.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
 				end
 			end)
 			task.wait(0.5)
@@ -2505,8 +2507,8 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 			end)
 			task.wait(2)
 		end
-	end, true)
-end)
+	end)
+end, true)
 
 ------------------------------------------------------------------
 -- ANTI-AFK SYSTEM
