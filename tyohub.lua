@@ -45,6 +45,8 @@ getgenv().TyoConfig = {
 	AutoConfirmTrade = false,
 	AutoAcceptTrade = false,
 	AutoAddAllFishTrade = false,
+	AutoAddAllCoinPearlsTrade = false,
+	AutoAddCoreTrade = false, -- FITUR BARU: Auto Add Core
 	
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
@@ -150,6 +152,8 @@ local function ResetConfig()
 			AutoConfirmTrade = false,
 			AutoAcceptTrade = false,
 			AutoAddAllFishTrade = false,
+			AutoAddAllCoinPearlsTrade = false,
+			AutoAddCoreTrade = false,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -395,7 +399,7 @@ task.spawn(function()
 	end)
 end)
 
--- GLOBAL STATES (DISET AUTO AKTIF UNTUK FITUR TERTENTU)
+-- GLOBAL STATES
 getgenv().AutoFishingEventRunning = false
 getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
@@ -415,7 +419,7 @@ getgenv().NetworkBoostRunning = true
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
 
--- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Peningkatan Jaringan
+-- NETWORK BOOSTER
 task.spawn(function()
 	while getgenv().NetworkBoostRunning do
 		pcall(function()
@@ -434,7 +438,7 @@ task.spawn(function()
 	end
 end)
 
--- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Auto Join Galatama
+-- AUTO JOIN GALATAMA
 task.spawn(function()
 	while true do
 		if getgenv().AutoGalatamaRunning then
@@ -726,7 +730,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- IMPROVED TRADE UTILITIES
+-- IMPROVED TRADE UTILITIES & AUTO ADD COIN, PEARLS, & CORE
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -768,6 +772,91 @@ local function AutoAddAllFishToTrade()
 					tradeRemote:FireServer(fish.UUID)
 				elseif tradeRemote:IsA("RemoteFunction") then
 					tradeRemote:InvokeServer(fish.UUID)
+				end
+				task.wait(0.05)
+			end
+		end
+	end)
+end
+
+local function GetGeneralInventoryData()
+	local itemsList = {}
+	pcall(function()
+		local repStorage = game:GetService("ReplicatedStorage")
+		local ambilSemuaRemote = repStorage:FindFirstChild("Remote")
+			and repStorage.Remote:FindFirstChild("Inventaris")
+			and repStorage.Remote.Inventaris:FindFirstChild("AmbilSemua")
+		
+		if ambilSemuaRemote then
+			local success, result = pcall(function() return {ambilSemuaRemote:InvokeServer()} end)
+			if success and result and result[1] then
+				local data = result[1]
+				if type(data) == "table" then
+					for _, item in ipairs(data) do
+						if type(item) == "table" and (item.uid or item.UUID) then
+							table.insert(itemsList, {
+								UUID = tostring(item.uid or item.UUID),
+								Name = tostring(item.nama or item.Name or ""),
+								Rarity = tostring(item.rarity or item.Rarity or "Common"),
+								Category = tostring(item.kategori or item.Category or "")
+							})
+						end
+					end
+				end
+			end
+		end
+	end)
+	return itemsList
+end
+
+local function AutoAddAllCoinAndPearlsToTrade()
+	pcall(function()
+		local allItems = GetGeneralInventoryData()
+		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or GetTradeRemote("TambahItem")
+		
+		for _, item in ipairs(allItems) do
+			local nameLower = string.lower(item.Name)
+			if string.find(nameLower, "coin") or string.find(nameLower, "koin") or string.find(nameLower, "pearl") or string.find(nameLower, "mutiara") then
+				if tradeRemote then
+					if tradeRemote:IsA("RemoteEvent") then
+						tradeRemote:FireServer(item.UUID)
+					elseif tradeRemote:IsA("RemoteFunction") then
+						tradeRemote:InvokeServer(item.UUID)
+					end
+					task.wait(0.05)
+				end
+			end
+		end
+	end)
+end
+
+-- FITUR BARU: Auto Add Core dengan Prioritas Rarity Tertinggi
+local function AutoAddAllCoreToTrade()
+	pcall(function()
+		local allItems = GetGeneralInventoryData()
+		local coreItems = {}
+		
+		for _, item in ipairs(allItems) do
+			local nameLower = string.lower(item.Name)
+			if string.find(nameLower, "core") or string.find(nameLower, "kora") then
+				table.insert(coreItems, item)
+			end
+		end
+		
+		-- Urutkan Core berdasarkan Rarity Tertinggi
+		table.sort(coreItems, function(a, b)
+			local rankA = RarityPriority[string.lower(a.Rarity)] or 0
+			local rankB = RarityPriority[string.lower(b.Rarity)] or 0
+			return rankA > rankB
+		end)
+		
+		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or GetTradeRemote("TambahItem")
+		for _, coreItem in ipairs(coreItems) do
+			if tradeRemote then
+				if tradeRemote:IsA("RemoteEvent") then
+					tradeRemote:FireServer(coreItem.UUID)
+				elseif tradeRemote:IsA("RemoteFunction") then
+					tradeRemote:InvokeServer(coreItem.UUID)
 				end
 				task.wait(0.05)
 			end
@@ -821,6 +910,15 @@ task.spawn(function()
 		pcall(function()
 			if getgenv().TyoConfig.AutoAddAllFishTrade then
 				AutoAddAllFishToTrade()
+			end
+
+			if getgenv().TyoConfig.AutoAddAllCoinPearlsTrade then
+				AutoAddAllCoinAndPearlsToTrade()
+			end
+
+			-- Loop Eksekusi Auto Add Core
+			if getgenv().TyoConfig.AutoAddCoreTrade then
+				AutoAddAllCoreToTrade()
 			end
 
 			if getgenv().TyoConfig.AutoReadyTrade then
@@ -1942,6 +2040,17 @@ AddToggle(TradePage, "Auto Add All Ikan ke Trade (Auto On)", function(v)
 	SaveConfig()
 end, getgenv().TyoConfig.AutoAddAllFishTrade)
 
+AddToggle(TradePage, "Auto Add Coin & Mutiara (Auto On)", function(v)
+	getgenv().TyoConfig.AutoAddAllCoinPearlsTrade = v
+	SaveConfig()
+end, getgenv().TyoConfig.AutoAddAllCoinPearlsTrade)
+
+-- FITUR BARU: Toggle Auto Add Core
+AddToggle(TradePage, "Auto Add Core (Highest Rarity) (Auto On)", function(v)
+	getgenv().TyoConfig.AutoAddCoreTrade = v
+	SaveConfig()
+end, getgenv().TyoConfig.AutoAddCoreTrade)
+
 local AddAllTradeBtn = Instance.new("TextButton")
 AddAllTradeBtn.Parent = TradePage
 AddAllTradeBtn.Size = UDim2.new(1, -5, 0, 34)
@@ -1955,6 +2064,35 @@ local aatc = Instance.new("UICorner")
 aatc.CornerRadius = UDim.new(0, 6)
 aatc.Parent = AddAllTradeBtn
 AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddAllFishToTrade() end)
+
+local AddAllCoinPearlsBtn = Instance.new("TextButton")
+AddAllCoinPearlsBtn.Parent = TradePage
+AddAllCoinPearlsBtn.Size = UDim2.new(1, -5, 0, 34)
+AddAllCoinPearlsBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+AddAllCoinPearlsBtn.Text = "🪙📦 Manual Add All Coin & Mutiara"
+AddAllCoinPearlsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AddAllCoinPearlsBtn.Font = Enum.Font.GothamBold
+AddAllCoinPearlsBtn.TextSize = 11
+AddAllCoinPearlsBtn.ZIndex = 13
+local aacp = Instance.new("UICorner")
+aacp.CornerRadius = UDim.new(0, 6)
+aacp.Parent = AddAllCoinPearlsBtn
+AddAllCoinPearlsBtn.MouseButton1Click:Connect(function() AutoAddAllCoinAndPearlsToTrade() end)
+
+-- FITUR BARU: Tombol Manual Add Core
+local AddAllCoreBtn = Instance.new("TextButton")
+AddAllCoreBtn.Parent = TradePage
+AddAllCoreBtn.Size = UDim2.new(1, -5, 0, 34)
+AddAllCoreBtn.BackgroundColor3 = Color3.fromRGB(170, 80, 255)
+AddAllCoreBtn.Text = "💎📦 Manual Add Core (Highest Rarity)"
+AddAllCoreBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AddAllCoreBtn.Font = Enum.Font.GothamBold
+AddAllCoreBtn.TextSize = 11
+AddAllCoreBtn.ZIndex = 13
+local aacore = Instance.new("UICorner")
+aacore.CornerRadius = UDim.new(0, 6)
+aacore.Parent = AddAllCoreBtn
+AddAllCoreBtn.MouseButton1Click:Connect(function() AutoAddAllCoreToTrade() end)
 
 AddToggle(TradePage, "Auto Siap (Ready Trade)", function(v)
 	getgenv().TyoConfig.AutoReadyTrade = v
@@ -2119,7 +2257,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FIXED CHECKPOINT DETECTION)
+-- 6. SUMMIT PAGE
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -3330,4 +3468,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto-Active Anti-AFK, Network Booster & Galatama!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto-Add Core & Highest Rarity Priority!")
