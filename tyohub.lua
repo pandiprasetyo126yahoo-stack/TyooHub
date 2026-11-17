@@ -1,6 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
+-- UPDATED: Added Auto Add All Coin & Mutiara in Auto Trade
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -45,6 +46,7 @@ getgenv().TyoConfig = {
 	AutoConfirmTrade = false,
 	AutoAcceptTrade = false,
 	AutoAddAllFishTrade = false,
+	AutoAddCoinAndPearlTrade = false, -- Fitur Baru: Auto Add Coin & Mutiara
 	
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
@@ -150,6 +152,7 @@ local function ResetConfig()
 			AutoConfirmTrade = false,
 			AutoAcceptTrade = false,
 			AutoAddAllFishTrade = false,
+			AutoAddCoinAndPearlTrade = false,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -395,7 +398,7 @@ task.spawn(function()
 	end)
 end)
 
--- GLOBAL STATES (DISET AUTO AKTIF UNTUK FITUR TERTENTU)
+-- GLOBAL STATES
 getgenv().AutoFishingEventRunning = false
 getgenv().BiteDelayInput = getgenv().TyoConfig.BiteDelay
 getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
@@ -415,7 +418,7 @@ getgenv().NetworkBoostRunning = true
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
 
--- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Peningkatan Jaringan
+-- Network Booster
 task.spawn(function()
 	while getgenv().NetworkBoostRunning do
 		pcall(function()
@@ -434,7 +437,7 @@ task.spawn(function()
 	end
 end)
 
--- LANGSUNG JALANKAN OTOMATIS SAAT EXECUTE: Auto Join Galatama
+-- Auto Join Galatama
 task.spawn(function()
 	while true do
 		if getgenv().AutoGalatamaRunning then
@@ -726,7 +729,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- IMPROVED TRADE UTILITIES
+-- TRADE UTILITIES & AUTO ADD COIN / PEARL
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -772,6 +775,61 @@ local function AutoAddAllFishToTrade()
 				task.wait(0.05)
 			end
 		end
+	end)
+end
+
+-- Fitur Auto Add Coin & Mutiara ke Trade
+local function AutoAddCoinAndPearlToTrade()
+	pcall(function()
+		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddCurrency") or GetTradeRemote("AddCoin") or GetTradeRemote("TambahItem")
+		if not tradeRemote then return end
+
+		local backpack = LocalPlayer:FindFirstChild("Backpack")
+		local char = LocalPlayer.Character
+		
+		local containers = {backpack, char}
+		for _, container in ipairs(containers) do
+			if container then
+				for _, item in ipairs(container:GetChildren()) do
+					local nameLower = string.lower(item.Name)
+					if string.find(nameLower, "coin") or string.find(nameLower, "koin") or string.find(nameLower, "pearl") or string.find(nameLower, "mutiara") then
+						if tradeRemote:IsA("RemoteEvent") then
+							tradeRemote:FireServer(item)
+						elseif tradeRemote:IsA("RemoteFunction") then
+							tradeRemote:InvokeServer(item)
+						end
+						task.wait(0.05)
+					end
+				end
+			end
+		end
+
+		pcall(function()
+			local repStorage = game:GetService("ReplicatedStorage")
+			local inventarisRemote = repStorage:FindFirstChild("Remote")
+				and repStorage.Remote:FindFirstChild("Inventaris")
+				and repStorage.Remote.Inventaris:FindFirstChild("AmbilSemua")
+			
+			if inventarisRemote then
+				local _, result = pcall(function() return inventarisRemote:InvokeServer() end)
+				if type(result) == "table" then
+					for _, entry in ipairs(result) do
+						if type(entry) == "table" then
+							local itemName = string.lower(tostring(entry.nama or entry.Name or ""))
+							local itemUid = tostring(entry.uid or entry.UUID or "")
+							if string.find(itemName, "coin") or string.find(itemName, "koin") or string.find(itemName, "pearl") or string.find(itemName, "mutiara") then
+								if tradeRemote:IsA("RemoteEvent") then
+									tradeRemote:FireServer(itemUid)
+								elseif tradeRemote:IsA("RemoteFunction") then
+									tradeRemote:InvokeServer(itemUid)
+								end
+								task.wait(0.05)
+							end
+						end
+					end
+				end
+			end
+		end)
 	end)
 end
 
@@ -823,6 +881,10 @@ task.spawn(function()
 				AutoAddAllFishToTrade()
 			end
 
+			if getgenv().TyoConfig.AutoAddCoinAndPearlTrade then
+				AutoAddCoinAndPearlToTrade()
+			end
+
 			if getgenv().TyoConfig.AutoReadyTrade then
 				ClickGuiButtonByName({"siap", "ready"})
 				local readyRemote = GetTradeRemote("Ready") or GetTradeRemote("Siap") or GetTradeRemote("SetReady")
@@ -866,7 +928,7 @@ Gui.ResetOnSpawn = false
 Gui.DisplayOrder = 2147483647
 
 ----------------------------------------------------
--- IMPROVED UNIVERSAL DRAGGABLE FUNCTION
+-- DRAGGABLE FUNCTION
 ----------------------------------------------------
 local function MakeDraggable(guiObject, handleObject)
 	handleObject = handleObject or guiObject
@@ -922,7 +984,7 @@ local function MakeDraggable(guiObject, handleObject)
 end
 
 ----------------------------------------------------
--- MAIN HUB UI (WUTHERING WAVES / AEMEATH AURA THEME)
+-- MAIN HUB UI
 ----------------------------------------------------
 local Main = Instance.new("ImageLabel")
 Main.Parent = Gui
@@ -1157,9 +1219,6 @@ navButtons["Fishing & Sell"].BackgroundColor3 = Color3.fromRGB(35, 48, 78)
 navButtons["Fishing & Sell"].TextColor3 = Color3.fromRGB(255, 255, 255)
 navButtons["Fishing & Sell"].Indicator.Visible = true
 
-----------------------------------------------------
--- SPEED HUB STYLE TOGGLE BUILDER
-----------------------------------------------------
 local function AddToggle(parent, text, callback, initialValue)
 	local frame = Instance.new("Frame")
 	frame.Parent = parent
@@ -1399,9 +1458,6 @@ for _, modeData in ipairs(fishingModes) do
 	end)
 end
 
-----------------------------------------------------
--- SMART AUTO FISHING + TELEPORT 1 MENIT
-----------------------------------------------------
 getgenv().SmartAutoFishTpEnabled = false
 getgenv().SmartAutoFishTpInterval = 1
 
@@ -1483,7 +1539,7 @@ BiteDelayBox.Parent = FishingPage
 BiteDelayBox.Size = UDim2.new(1, -5, 0, 36)
 BiteDelayBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
 BiteDelayBox.BackgroundTransparency = 0.2
-BiteDelayBox.PlaceholderText = "Bite Delay (Detik, Cth: 0.5) - Mode Instant"
+BiteDelayBox.PlaceholderText = "Bite Delay (Detik, Cth: 0.5)"
 BiteDelayBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
 BiteDelayBox.Text = tostring(getgenv().TyoConfig.BiteDelay)
 BiteDelayBox.TextColor3 = Color3.fromRGB(210, 225, 240)
@@ -1503,7 +1559,7 @@ TapDelayBox.Parent = FishingPage
 TapDelayBox.Size = UDim2.new(1, -5, 0, 36)
 TapDelayBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
 TapDelayBox.BackgroundTransparency = 0.2
-TapDelayBox.PlaceholderText = "Jeda Tap (Detik, Cth: 0.12) - Mode Legit"
+TapDelayBox.PlaceholderText = "Jeda Tap (Detik, Cth: 0.12)"
 TapDelayBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
 TapDelayBox.Text = tostring(getgenv().TyoConfig.TapDelay or "0.12")
 TapDelayBox.TextColor3 = Color3.fromRGB(210, 225, 240)
@@ -1942,11 +1998,17 @@ AddToggle(TradePage, "Auto Add All Ikan ke Trade (Auto On)", function(v)
 	SaveConfig()
 end, getgenv().TyoConfig.AutoAddAllFishTrade)
 
+-- Toggle Fitur Baru: Auto Add Coin & Mutiara di Auto Trade
+AddToggle(TradePage, "✨ Auto Add Coin & Mutiara ke Trade", function(v)
+	getgenv().TyoConfig.AutoAddCoinAndPearlTrade = v
+	SaveConfig()
+end, getgenv().TyoConfig.AutoAddCoinAndPearlTrade)
+
 local AddAllTradeBtn = Instance.new("TextButton")
 AddAllTradeBtn.Parent = TradePage
 AddAllTradeBtn.Size = UDim2.new(1, -5, 0, 34)
 AddAllTradeBtn.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
-AddAllTradeBtn.Text = "📦 Manual Add All Ikan ke Trade"
+AddAllTradeBtn.Text = "📦 Manual Add Coin & Mutiara ke Trade"
 AddAllTradeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AddAllTradeBtn.Font = Enum.Font.GothamBold
 AddAllTradeBtn.TextSize = 11
@@ -1954,7 +2016,7 @@ AddAllTradeBtn.ZIndex = 13
 local aatc = Instance.new("UICorner")
 aatc.CornerRadius = UDim.new(0, 6)
 aatc.Parent = AddAllTradeBtn
-AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddAllFishToTrade() end)
+AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddCoinAndPearlToTrade() end)
 
 AddToggle(TradePage, "Auto Siap (Ready Trade)", function(v)
 	getgenv().TyoConfig.AutoReadyTrade = v
@@ -2119,7 +2181,7 @@ AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69
 AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
 
 ----------------------------------------------------
--- 6. SUMMIT PAGE (FIXED CHECKPOINT DETECTION)
+-- 6. SUMMIT PAGE
 ----------------------------------------------------
 local SummitPage = pages["Summit"]
 
@@ -2510,9 +2572,6 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	end)
 end, true)
 
-------------------------------------------------------------------
--- ANTI-AFK SYSTEM
-------------------------------------------------------------------
 AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true)
 
 LocalPlayer.Idled:Connect(function()
@@ -3330,4 +3389,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto-Active Anti-AFK, Network Booster & Galatama!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto Add Coin & Pearl in Trade!")
