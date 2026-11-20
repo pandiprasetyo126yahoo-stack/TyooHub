@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Added Auto Add All Coin & Mutiara in Auto Trade
+-- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -35,8 +35,6 @@ getgenv().TyoConfig = {
 	MinigameMode = "Legit",
 	SelectedSpot = "Spot Mancing Jembatan",
 	AutoSellTimer = "5",
-	AntiAdminEnabled = false,
-	TargetGroupId = 7019573,
 	WebhookEnabled = false,
 	WebhookUrl = "",
 	SelectedTradeTarget = "",
@@ -46,8 +44,9 @@ getgenv().TyoConfig = {
 	AutoConfirmTrade = false,
 	AutoAcceptTrade = false,
 	AutoAddAllFishTrade = false,
-	AutoAddCoinAndPearlTrade = false, -- Fitur Baru: Auto Add Coin & Mutiara
-	
+	AutoAddCoinAndPearlTrade = false,
+	FavEventFishOnly = false,
+
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
 		["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true
@@ -141,8 +140,6 @@ local function ResetConfig()
 			MinigameMode = "Legit",
 			SelectedSpot = "Spot Mancing Jembatan",
 			AutoSellTimer = "5",
-			AntiAdminEnabled = false,
-			TargetGroupId = 7019573,
 			WebhookEnabled = false,
 			WebhookUrl = "",
 			SelectedTradeTarget = "",
@@ -153,6 +150,7 @@ local function ResetConfig()
 			AutoAcceptTrade = false,
 			AutoAddAllFishTrade = false,
 			AutoAddCoinAndPearlTrade = false,
+			FavEventFishOnly = false,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -163,6 +161,11 @@ local function ResetConfig()
 				["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
 			}
 		}
+		getgenv().FavRarities = getgenv().TyoConfig.FavRarities
+		getgenv().FavMutations = getgenv().TyoConfig.FavMutations
+		getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
+		getgenv().UnfavMutations = getgenv().TyoConfig.UnfavMutations
+		getgenv().SpotLoopConfig = getgenv().TyoConfig.SpotLoopConfig
 		getgenv().SelectedFishingSpot = "Spot Mancing Jembatan"
 		if delfile and isfile and isfile(CONFIG_FILE) then
 			delfile(CONFIG_FILE)
@@ -178,26 +181,26 @@ local function SendServerWideWebhook(playerName, catchType, position)
 		if not getgenv().TyoConfig.WebhookEnabled then return end
 		local url = getgenv().TyoConfig.WebhookUrl
 		if not url or url == "" or not string.find(url, "api/webhooks") then return end
-		
+
 		local typeLower = string.lower(tostring(catchType))
 		local targetPlayer = tostring(playerName or "Unknown Player")
-		
+
 		if string.find(typeLower, "secret") or string.find(typeLower, "forgotten") or string.find(typeLower, "core") or string.find(typeLower, "catch") or string.find(typeLower, "aether") then
 			local requestFunc = (syn and syn.request) or (http and http.request) or request or (fluxus and fluxus.request)
 			if not requestFunc then return end
-			
+
 			local embedTitle = "👑 Aemeath Wuthering Waves Hub V3 - Mount Soreya Rare Catch Tracker!"
 			local alertContent = string.format("@everyone 🚨 **%s Berhasil Mendapatkan Tangkapan Langka!**", targetPlayer)
 			local embedColor = 10040319
-			
+
 			if string.find(typeLower, "core") or string.find(typeLower, "aether") then
 				alertContent = string.format("@everyone ⚡ **%s Mendapatkan Item Spesial / Aether Material!**", targetPlayer)
 				embedTitle = "💎 Aemeath Wuthering Waves Hub V3 - Mount Soreya Event Tracker!"
 				embedColor = 16776960
 			end
-			
+
 			local posStr = position and string.format("%.1f, %.1f, %.1f", position.X, position.Y, position.Z) or "N/A"
-			
+
 			local data = {
 				["content"] = alertContent,
 				["embeds"] = {
@@ -215,7 +218,7 @@ local function SendServerWideWebhook(playerName, catchType, position)
 					}
 				}
 			}
-			
+
 			requestFunc({
 				Url = url,
 				Method = "POST",
@@ -300,13 +303,13 @@ local function AutoEquipRod()
 	pcall(function()
 		local character = LocalPlayer.Character
 		if not character then return end
-		
+
 		for _, child in ipairs(character:GetChildren()) do
 			if child:IsA("Tool") and (string.find(string.lower(child.Name), "rod") or string.find(string.lower(child.Name), "pancing")) then
 				return
 			end
 		end
-		
+
 		local backpack = LocalPlayer:FindFirstChild("Backpack")
 		local humanoid = character:FindFirstChildOfClass("Humanoid")
 		if backpack and humanoid then
@@ -371,12 +374,12 @@ local function PerformTapClicker()
 		end)
 		return
 	end
-	
+
 	local cam = Workspace.CurrentCamera
 	local vp = cam and cam.ViewportSize or Vector2.new(800, 600)
 	local mousePos = UIS:GetMouseLocation()
 	local pos = (mousePos.X > 0 and mousePos.Y > 0) and mousePos or Vector2.new(vp.X * 0.5, vp.Y * 0.5)
-	
+
 	pcall(function()
 		VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 1)
 		task.wait(0.02)
@@ -407,9 +410,6 @@ getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
 getgenv().AutoGalatamaRunning = true
 getgenv().AutoSummitRunning = false
 getgenv().AntiAFKRunning = true
-getgenv().HideNameRunning = false
-getgenv().FakeNameInput = "AEMEATH HUB"
-getgenv().CurrentSelectedHalo = nil
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
@@ -514,18 +514,18 @@ local function RunAutoFishCycle(remoteFolder)
 	pcall(function()
 		local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
-		
+
 		OptimizeRodSettings()
-		
+
 		remoteFolder.CastEvent:FireServer(true)
 		task.wait(0.05)
 		remoteFolder.CastEvent:FireServer(false, 100, hrp.CFrame.LookVector)
-		
+
 		local hooked = false
 		local conn = remoteFolder.NotifyClient.OnClientEvent:Connect(function(actionType)
 			if actionType == "Bite" or actionType == "Hook" then hooked = true end
 		end)
-		
+
 		local start = tick()
 		while not hooked and getgenv().AutoFishingEventRunning
 			and getgenv().TyoConfig.MinigameMode == "Instant" do
@@ -533,13 +533,13 @@ local function RunAutoFishCycle(remoteFolder)
 			task.wait(0.05)
 		end
 		if conn then conn:Disconnect() end
-		
+
 		if hooked and getgenv().AutoFishingEventRunning
 			and getgenv().TyoConfig.MinigameMode == "Instant" then
 			task.wait(tonumber(getgenv().TyoConfig.BiteDelay) or 0.5)
-			
+
 			if getgenv().TyoConfig.MinigameMode ~= "Instant" then return end
-			
+
 			local tandaSeruRemote = remoteFolder:FindFirstChild("TandaSeruBersama")
 			if tandaSeruRemote then
 				local color1 = Color3.fromRGB(23, 255, 151)
@@ -550,7 +550,7 @@ local function RunAutoFishCycle(remoteFolder)
 				})
 				tandaSeruRemote:FireServer(color1, color2, seq, 1.5)
 			end
-			
+
 			task.wait(0.1)
 			if getgenv().TyoConfig.MinigameMode ~= "Instant" then return end
 			remoteFolder.MiniGame:FireServer(true)
@@ -618,6 +618,40 @@ local function TriggerSellToNpc()
 	end)
 end
 
+------------------------------------------------------------------
+-- AUTO FAVORITE (KHUSUS IKAN ACARA / EVENT SUPPORT)
+------------------------------------------------------------------
+local EventFishNames = {
+	["talon serpent"] = true,
+	["emerald winter whale"] = true,
+	["strawberry choc megalodon"] = true,
+	["gran"] = true,
+	["glacial serpent"] = true,
+	["pelagon"] = true,
+	["leviathan"] = true,
+	["love nessie"] = true,
+	["dark megalodon"] = true,
+	["machodon"] = true,
+	["enchanted angelfish"] = true,
+	["cosmic starlight scampi"] = true
+}
+
+local function IsEventFish(fish)
+	local nameLower = string.lower(tostring(fish.Name or ""))
+	local tagLower = string.lower(tostring(fish.EventTag or fish.Category or fish.Pool or ""))
+
+	if EventFishNames[nameLower] then
+		return true
+	end
+	if string.find(nameLower, "acara") or string.find(nameLower, "event") then
+		return true
+	end
+	if string.find(tagLower, "acara") or string.find(tagLower, "event") or string.find(tagLower, "hadiah") then
+		return true
+	end
+	return false
+end
+
 local function GetInventoryRemote()
 	local repStorage = game:GetService("ReplicatedStorage")
 	return repStorage:FindFirstChild("Remote")
@@ -632,7 +666,7 @@ local function GetServerFishData()
 		local ambilSemuaRemote = repStorage:FindFirstChild("Remote")
 			and repStorage.Remote:FindFirstChild("Inventaris")
 			and repStorage.Remote.Inventaris:FindFirstChild("AmbilSemua")
-		
+
 		if ambilSemuaRemote then
 			local success, result = pcall(function() return {ambilSemuaRemote:InvokeServer()} end)
 			if success and result and result[1] then
@@ -645,6 +679,7 @@ local function GetServerFishData()
 								Name = tostring(fish.nama or fish.Name or ""),
 								Rarity = tostring(fish.rarity or fish.Rarity or ""),
 								Mutation = tostring(fish.mutasi or fish.Mutation or ""),
+								EventTag = tostring(fish.event or fish.Event or fish.acara or fish.Acara or fish.kategori or fish.Category or ""),
 								IsFavorited = fish.favorit or fish.IsFavorit or fish.IsFavorite or false
 							})
 						end
@@ -661,19 +696,27 @@ local function ProcessAutoFavorite()
 		local tandaiRemote = GetInventoryRemote()
 		if not tandaiRemote then return end
 		local serverData = GetServerFishData()
+		local eventOnly = getgenv().TyoConfig.FavEventFishOnly == true
+
 		for _, fish in ipairs(serverData) do
 			if not getgenv().AutoFavoriteRunning then break end
 			local shouldFav = false
-			local fishRarityLower = string.lower(fish.Rarity)
-			local fishMutationLower = string.lower(fish.Mutation)
-			
-			for rName, active in pairs(getgenv().FavRarities) do
-				if active and string.lower(rName) == fishRarityLower then shouldFav = true end
+
+			if eventOnly then
+				-- Hanya favoritkan ikan acara / event ini saja
+				shouldFav = IsEventFish(fish)
+			else
+				local fishRarityLower = string.lower(fish.Rarity)
+				local fishMutationLower = string.lower(fish.Mutation)
+
+				for rName, active in pairs(getgenv().FavRarities) do
+					if active and string.lower(rName) == fishRarityLower then shouldFav = true end
+				end
+				for mName, active in pairs(getgenv().FavMutations) do
+					if active and string.find(fishMutationLower, string.lower(mName)) then shouldFav = true end
+				end
 			end
-			for mName, active in pairs(getgenv().FavMutations) do
-				if active and string.find(fishMutationLower, string.lower(mName)) then shouldFav = true end
-			end
-			
+
 			if shouldFav and not fish.IsFavorited then
 				tandaiRemote:FireServer(fish.UUID, true)
 				task.wait(0.12)
@@ -729,7 +772,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- TRADE UTILITIES & AUTO ADD COIN / PEARL
+-- TRADE UTILITIES & AUTO ADD ALL COIN / MUTIARA
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -740,6 +783,22 @@ local function GetTradeRemote(actionName)
 		end
 	end)
 	return res
+end
+
+local function IsCoinOrPearlName(nameStr)
+	local n = string.lower(tostring(nameStr or ""))
+	return string.find(n, "coin") or string.find(n, "koin") or string.find(n, "pearl") or string.find(n, "mutiara")
+end
+
+local function FireTradeAdd(remote, payload)
+	if not remote or payload == nil then return end
+	pcall(function()
+		if remote:IsA("RemoteEvent") then
+			remote:FireServer(payload)
+		elseif remote:IsA("RemoteFunction") then
+			remote:InvokeServer(payload)
+		end
+	end)
 end
 
 local RarityPriority = {
@@ -757,79 +816,74 @@ local RarityPriority = {
 local function AutoAddAllFishToTrade()
 	pcall(function()
 		local serverData = GetServerFishData()
-		
+
 		table.sort(serverData, function(a, b)
 			local rankA = RarityPriority[string.lower(a.Rarity)] or 0
 			local rankB = RarityPriority[string.lower(b.Rarity)] or 0
 			return rankA > rankB
 		end)
-		
+
 		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddFish") or GetTradeRemote("TambahItem")
 		for _, fish in ipairs(serverData) do
 			if tradeRemote then
-				if tradeRemote:IsA("RemoteEvent") then
-					tradeRemote:FireServer(fish.UUID)
-				elseif tradeRemote:IsA("RemoteFunction") then
-					tradeRemote:InvokeServer(fish.UUID)
-				end
+				FireTradeAdd(tradeRemote, fish.UUID)
 				task.wait(0.05)
 			end
 		end
 	end)
 end
 
--- Fitur Auto Add Coin & Mutiara ke Trade
+-- Fitur Auto Add All Coin & Mutiara ke Trade
 local function AutoAddCoinAndPearlToTrade()
 	pcall(function()
-		local tradeRemote = GetTradeRemote("AddItem") or GetTradeRemote("AddCurrency") or GetTradeRemote("AddCoin") or GetTradeRemote("TambahItem")
-		if not tradeRemote then return end
+		local itemRemote = GetTradeRemote("AddItem") or GetTradeRemote("TambahItem")
+		local currRemote = GetTradeRemote("AddCurrency") or GetTradeRemote("AddCoin") or GetTradeRemote("AddPearl") or GetTradeRemote("TambahKoin") or GetTradeRemote("TambahMutiara")
+		if not itemRemote and not currRemote then return end
 
-		local backpack = LocalPlayer:FindFirstChild("Backpack")
-		local char = LocalPlayer.Character
-		
-		local containers = {backpack, char}
+		local sentKeys = {}
+		local function SendOnce(key, payload, preferCurrency)
+			if not key or key == "" or sentKeys[key] then return end
+			sentKeys[key] = true
+			local targetRemote = (preferCurrency and currRemote) or itemRemote or currRemote
+			FireTradeAdd(targetRemote, payload)
+			task.wait(0.04)
+		end
+
+		-- 1. Scan semua Tool / Item / Value di Backpack & Character
+		local containers = {LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character}
 		for _, container in ipairs(containers) do
 			if container then
-				for _, item in ipairs(container:GetChildren()) do
-					local nameLower = string.lower(item.Name)
-					if string.find(nameLower, "coin") or string.find(nameLower, "koin") or string.find(nameLower, "pearl") or string.find(nameLower, "mutiara") then
-						if tradeRemote:IsA("RemoteEvent") then
-							tradeRemote:FireServer(item)
-						elseif tradeRemote:IsA("RemoteFunction") then
-							tradeRemote:InvokeServer(item)
-						end
-						task.wait(0.05)
+				for _, item in ipairs(container:GetDescendants()) do
+					if IsCoinOrPearlName(item.Name) then
+						local isCoin = string.find(string.lower(item.Name), "coin") or string.find(string.lower(item.Name), "koin")
+						SendOnce("inst_" .. tostring(item), item, isCoin)
 					end
 				end
 			end
 		end
 
-		pcall(function()
-			local repStorage = game:GetService("ReplicatedStorage")
-			local inventarisRemote = repStorage:FindFirstChild("Remote")
-				and repStorage.Remote:FindFirstChild("Inventaris")
-				and repStorage.Remote.Inventaris:FindFirstChild("AmbilSemua")
-			
-			if inventarisRemote then
-				local _, result = pcall(function() return inventarisRemote:InvokeServer() end)
-				if type(result) == "table" then
-					for _, entry in ipairs(result) do
-						if type(entry) == "table" then
-							local itemName = string.lower(tostring(entry.nama or entry.Name or ""))
-							local itemUid = tostring(entry.uid or entry.UUID or "")
-							if string.find(itemName, "coin") or string.find(itemName, "koin") or string.find(itemName, "pearl") or string.find(itemName, "mutiara") then
-								if tradeRemote:IsA("RemoteEvent") then
-									tradeRemote:FireServer(itemUid)
-								elseif tradeRemote:IsA("RemoteFunction") then
-									tradeRemote:InvokeServer(itemUid)
-								end
-								task.wait(0.05)
-							end
+		-- 2. Scan semua entry Coin & Mutiara dari inventaris server
+		local repStorage = game:GetService("ReplicatedStorage")
+		local inventarisRemote = repStorage:FindFirstChild("Remote")
+			and repStorage.Remote:FindFirstChild("Inventaris")
+			and repStorage.Remote.Inventaris:FindFirstChild("AmbilSemua")
+
+		if inventarisRemote then
+			local ok, result = pcall(function() return inventarisRemote:InvokeServer() end)
+			if ok and type(result) == "table" then
+				for _, entry in ipairs(result) do
+					if type(entry) == "table" then
+						local itemName = tostring(entry.nama or entry.Name or entry.item or entry.Item or "")
+						local itemUid = tostring(entry.uid or entry.UUID or entry.id or entry.Id or "")
+						if IsCoinOrPearlName(itemName) or IsCoinOrPearlName(itemUid) then
+							local isCoin = string.find(string.lower(itemName), "coin") or string.find(string.lower(itemName), "koin")
+							local payload = (itemUid ~= "" and itemUid) or itemName
+							SendOnce("inv_" .. tostring(payload), payload, isCoin)
 						end
 					end
 				end
 			end
-		end)
+		end
 	end)
 end
 
@@ -857,7 +911,7 @@ local function ClickGuiButtonByName(targetNames)
 			if (guiObj:IsA("TextButton") or guiObj:IsA("ImageButton")) and guiObj.Visible then
 				local textVal = guiObj:IsA("TextButton") and string.lower(guiObj.Text) or ""
 				local nameVal = string.lower(guiObj.Name)
-				
+
 				for _, tName in ipairs(targetNames) do
 					local targetLower = string.lower(tName)
 					if string.find(textVal, targetLower) or string.find(nameVal, targetLower) then
@@ -1104,7 +1158,7 @@ Sidebar.Position = UDim2.new(0, 8, 0, 42)
 Sidebar.Size = UDim2.new(0, 135, 1, -50)
 Sidebar.BackgroundColor3 = Color3.fromRGB(16, 21, 35)
 Sidebar.BackgroundTransparency = 0.2
-Sidebar.CanvasSize = UDim2.new(0, 0, 3.2, 0)
+Sidebar.CanvasSize = UDim2.new(0, 0, 2.2, 0)
 Sidebar.ScrollBarThickness = 0
 Sidebar.ZIndex = 11
 
@@ -1148,11 +1202,11 @@ local function CreateNavButton(text)
 	btn.TextSize = 11
 	btn.TextXAlignment = Enum.TextXAlignment.Left
 	btn.ZIndex = 12
-	
+
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 6)
 	corner.Parent = btn
-	
+
 	local indicator = Instance.new("Frame")
 	indicator.Name = "Indicator"
 	indicator.Parent = btn
@@ -1161,11 +1215,11 @@ local function CreateNavButton(text)
 	indicator.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
 	indicator.Visible = false
 	indicator.ZIndex = 13
-	
+
 	local indCorner = Instance.new("UICorner")
 	indCorner.CornerRadius = UDim.new(0, 2)
 	indCorner.Parent = indicator
-	
+
 	return btn
 end
 
@@ -1179,27 +1233,28 @@ local function MakePage()
 	f.ScrollBarThickness = 3
 	f.ScrollBarImageColor3 = Color3.fromRGB(80, 150, 255)
 	f.ZIndex = 12
-	
+
 	local pad = Instance.new("UIPadding")
 	pad.Parent = f
 	pad.PaddingTop = UDim.new(0, 5)
-	
+
 	local l = Instance.new("UIListLayout")
 	l.Parent = f
 	l.SortOrder = Enum.SortOrder.LayoutOrder
 	l.Padding = UDim.new(0, 6)
-	
+
 	return f
 end
 
-local tabList = {"Fishing & Sell", "⭐ Favorite", "🤝 Auto Trade", "Galatama", "Teleport Shop", "Summit", "Player", "Halo Kepala", "Teleport Player", "Privacy", "Settings", "Credits"}
+-- Credits, Privacy, dan Halo Kepala sudah dihapus
+local tabList = {"Fishing & Sell", "⭐ Favorite", "🤝 Auto Trade", "Galatama", "Teleport Shop", "Summit", "Player", "Teleport Player", "Settings"}
 
 for _, name in ipairs(tabList) do
 	local btn = CreateNavButton(name)
 	local page = MakePage()
 	navButtons[name] = btn
 	pages[name] = page
-	
+
 	btn.MouseButton1Click:Connect(function()
 		for _, p in pairs(pages) do p.Visible = false end
 		for _, b in pairs(navButtons) do
@@ -1226,11 +1281,11 @@ local function AddToggle(parent, text, callback, initialValue)
 	frame.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
 	frame.BackgroundTransparency = 0.2
 	frame.ZIndex = 13
-	
+
 	local fc = Instance.new("UICorner")
 	fc.CornerRadius = UDim.new(0, 6)
 	fc.Parent = frame
-	
+
 	local label = Instance.new("TextLabel")
 	label.Parent = frame
 	label.Position = UDim2.new(0, 12, 0, 0)
@@ -1242,7 +1297,7 @@ local function AddToggle(parent, text, callback, initialValue)
 	label.TextSize = 11
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.ZIndex = 14
-	
+
 	local switchBg = Instance.new("TextButton")
 	switchBg.Parent = frame
 	switchBg.Position = UDim2.new(1, -45, 0.5, -10)
@@ -1250,29 +1305,29 @@ local function AddToggle(parent, text, callback, initialValue)
 	switchBg.BackgroundColor3 = Color3.fromRGB(30, 40, 64)
 	switchBg.Text = ""
 	switchBg.ZIndex = 14
-	
+
 	local sbc = Instance.new("UICorner")
 	sbc.CornerRadius = UDim.new(1, 0)
 	sbc.Parent = switchBg
-	
+
 	local knob = Instance.new("Frame")
 	knob.Parent = switchBg
 	knob.Position = UDim2.new(0, 2, 0.5, -7)
 	knob.Size = UDim2.new(0, 14, 0, 14)
 	knob.BackgroundColor3 = Color3.fromRGB(130, 150, 180)
 	knob.ZIndex = 15
-	
+
 	local kc = Instance.new("UICorner")
 	kc.CornerRadius = UDim.new(1, 0)
 	kc.Parent = knob
-	
+
 	local state = initialValue or false
 	if state then
 		knob.Position = UDim2.new(1, -16, 0.5, -7)
 		switchBg.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
 		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	end
-	
+
 	switchBg.MouseButton1Click:Connect(function()
 		state = not state
 		if state then
@@ -1361,7 +1416,7 @@ for _, spotName in ipairs({"Spot Mancing Jembatan", "Spot Mancing Core", "Spot M
 	local obc = Instance.new("UICorner")
 	obc.CornerRadius = UDim.new(0, 4)
 	obc.Parent = optBtn
-	
+
 	optBtn.MouseButton1Click:Connect(function()
 		getgenv().SelectedFishingSpot = spotName
 		getgenv().TyoConfig.SelectedSpot = spotName
@@ -1431,7 +1486,7 @@ for _, modeData in ipairs(fishingModes) do
 	local mobc = Instance.new("UICorner")
 	mobc.CornerRadius = UDim.new(0, 4)
 	mobc.Parent = mOptBtn
-	
+
 	mOptBtn.MouseButton1Click:Connect(function()
 		local oldMode = getgenv().TyoConfig.MinigameMode
 		getgenv().TyoConfig.MinigameMode = modeData.Value
@@ -1511,11 +1566,11 @@ task.spawn(function()
 			pcall(function()
 				local intervalSec = (tonumber(getgenv().SmartAutoFishTpInterval) or 1) * 60
 				local startTime = tick()
-				
+
 				while getgenv().SmartAutoFishTpEnabled and (tick() - startTime < intervalSec) do
 					task.wait(1)
 				end
-				
+
 				if getgenv().SmartAutoFishTpEnabled then
 					local character = LocalPlayer.Character
 					local hrp = character and character:FindFirstChild("HumanoidRootPart")
@@ -1820,18 +1875,23 @@ local TitleFav = Instance.new("TextLabel")
 TitleFav.Parent = FavoritePage
 TitleFav.Size = UDim2.new(1, -5, 0, 25)
 TitleFav.BackgroundTransparency = 1
-TitleFav.Text = "⭐ AUTO FAVORITE FILTER (BUAT PET AETHER)"
+TitleFav.Text = "⭐ AUTO FAVORITE FILTER (ACARA / EVENT ONLY)"
 TitleFav.TextColor3 = Color3.fromRGB(80, 150, 255)
 TitleFav.Font = Enum.Font.GothamBold
 TitleFav.TextSize = 12
 TitleFav.ZIndex = 13
 
-AddToggle(FavoritePage, "AUTO FAVORITE (SECRET & AETHER)", function(v) getgenv().AutoFavoriteRunning = v end)
+AddToggle(FavoritePage, "AUTO FAVORITE", function(v) getgenv().AutoFavoriteRunning = v end)
+
+AddToggle(FavoritePage, "🎪 Hanya Favorit Ikan Acara Ini Saja", function(v)
+	getgenv().TyoConfig.FavEventFishOnly = v
+	SaveConfig()
+end, getgenv().TyoConfig.FavEventFishOnly)
 
 local rarityList = {"Common", "UnCommon", "Rare", "Epic", "Legendary", "Mythical", "Secret", "Forgotten", "Aether"}
 local mutationList = {
-	"Galaxy", "Corrupt", "Gemstone", "Ghost", "Lightning", "Fairy Dust", 
-	"Gold", "Midnight", "Radioactive", "Stone", "Holographic", "Albino", "Sandy", "Cosmic", 
+	"Galaxy", "Corrupt", "Gemstone", "Ghost", "Lightning", "Fairy Dust",
+	"Gold", "Midnight", "Radioactive", "Stone", "Holographic", "Albino", "Sandy", "Cosmic",
 	"Elemental", "Festive", "8-Bit", "Bloodmoon", "Abyssal", "Strawberry", "Void", "Cupid"
 }
 
@@ -1998,8 +2058,7 @@ AddToggle(TradePage, "Auto Add All Ikan ke Trade (Auto On)", function(v)
 	SaveConfig()
 end, getgenv().TyoConfig.AutoAddAllFishTrade)
 
--- Toggle Fitur Baru: Auto Add Coin & Mutiara di Auto Trade
-AddToggle(TradePage, "✨ Auto Add Coin & Mutiara ke Trade", function(v)
+AddToggle(TradePage, "✨ Auto Add All Coin & Mutiara ke Trade", function(v)
 	getgenv().TyoConfig.AutoAddCoinAndPearlTrade = v
 	SaveConfig()
 end, getgenv().TyoConfig.AutoAddCoinAndPearlTrade)
@@ -2008,7 +2067,7 @@ local AddAllTradeBtn = Instance.new("TextButton")
 AddAllTradeBtn.Parent = TradePage
 AddAllTradeBtn.Size = UDim2.new(1, -5, 0, 34)
 AddAllTradeBtn.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
-AddAllTradeBtn.Text = "📦 Manual Add Coin & Mutiara ke Trade"
+AddAllTradeBtn.Text = "📦 Manual Add All Coin & Mutiara ke Trade"
 AddAllTradeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AddAllTradeBtn.Font = Enum.Font.GothamBold
 AddAllTradeBtn.TextSize = 11
@@ -2102,7 +2161,7 @@ task.spawn(function()
 			pcall(function()
 				local currentMinute = tonumber(os.date("%M"))
 				local isEventTime = (currentMinute >= 0 and currentMinute <= 10)
-				
+
 				if isEventTime then
 					if not IsAtCoreEvent then
 						SavedPreviousSpot = getgenv().SelectedFishingSpot
@@ -2110,7 +2169,7 @@ task.spawn(function()
 					end
 					getgenv().SelectedFishingSpot = "Spot Mancing Core"
 					SetSpotDisplay("Spot Mancing Core (⚡ Event Core)")
-					
+
 					local character = LocalPlayer.Character
 					local hrp = character and character:FindFirstChild("HumanoidRootPart")
 					local targetCFrame = FishingSpots["Spot Mancing Core"]
@@ -2125,7 +2184,7 @@ task.spawn(function()
 						if SavedPreviousSpot and FishingSpots[SavedPreviousSpot] then
 							getgenv().SelectedFishingSpot = SavedPreviousSpot
 							SetSpotDisplay(SavedPreviousSpot)
-							
+
 							local character = LocalPlayer.Character
 							local hrp = character and character:FindFirstChild("HumanoidRootPart")
 							local prevCFrame = FishingSpots[SavedPreviousSpot]
@@ -2291,13 +2350,13 @@ AddToggle(SummitPage, "Pakai Remote Checkpoint (opsional)", function(v) getgenv(
 AddSummitBox("Jeda Cepat di tiap Cp (detik, Cth: 0.45)", 0.45, function(n) getgenv().SummitDelay = math.max(n, 0.1) end)
 
 local function TouchCheckpointFast(cpNumber, approxCF)
-	local part 
-	local waited = 0 
-	
+	local part
+	local waited = 0
+
 	pcall(function()
 		LocalPlayer:RequestStreamAroundAsync(approxCF.Position, 10)
 	end)
-	
+
 	while getgenv().AutoSummitRunning and waited < 1.5 do
 		for _, obj in ipairs(workspace:GetDescendants()) do
 			if obj:IsA("BasePart") then
@@ -2312,14 +2371,14 @@ local function TouchCheckpointFast(cpNumber, approxCF)
 		task.wait(0.05)
 		waited = waited + 0.05
 	end
-	
+
 	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 	if not hrp or not getgenv().AutoSummitRunning then return end
-	
+
 	if part then
 		hrp.CFrame = part.CFrame + Vector3.new(0, 1, 0)
 		hrp.AssemblyLinearVelocity = Vector3.zero
-		
+
 		if firetouchinterest then
 			pcall(function()
 				firetouchinterest(hrp, part, 0)
@@ -2339,7 +2398,7 @@ task.spawn(function()
 				local character = LocalPlayer.Character
 				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 				local hrp = character and character:FindFirstChild("HumanoidRootPart")
-				
+
 				if not character or not humanoid or not hrp or humanoid.Health <= 0 then
 					task.wait(1)
 					return
@@ -2348,32 +2407,32 @@ task.spawn(function()
 				SetPlatformStand(true)
 				local midHeight = tonumber(getgenv().SummitHeight) or 6
 				local cpHeight = tonumber(getgenv().SummitCpHeight) or 1.5
-				
+
 				for _, point in ipairs(SummitPoints) do
 					if not getgenv().AutoSummitRunning then break end
-					
+
 					character = LocalPlayer.Character
 					hrp = character and character:FindFirstChild("HumanoidRootPart")
 					humanoid = character and character:FindFirstChildOfClass("Humanoid")
 					if not hrp or not humanoid or humanoid.Health <= 0 then break end
-					
+
 					local name = point[1]
 					local cpIndex = string.match(name, "^Cp(%d+)$")
 					local height = cpIndex and cpHeight or midHeight
-					
+
 					hrp.AssemblyLinearVelocity = Vector3.zero
 					hrp.AssemblyAngularVelocity = Vector3.zero
-					
+
 					hrp.CFrame = point[2] + Vector3.new(0, height, 0)
-					
+
 					if not getgenv().AutoSummitRunning then break end
-					
+
 					if cpIndex then
 						TouchCheckpointFast(tonumber(cpIndex), point[2])
-						
+
 						local delayTime = tonumber(getgenv().SummitDelay) or 0.45
 						task.wait(delayTime)
-						
+
 						if getgenv().SummitUseRemote then
 							pcall(function()
 								local cpRemote = ReplicatedStorage:FindFirstChild("Remote")
@@ -2388,7 +2447,7 @@ task.spawn(function()
 						task.wait(0.08)
 					end
 				end
-				
+
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
 					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
@@ -2456,8 +2515,8 @@ jbc.CornerRadius = UDim.new(0, 6)
 jbc.Parent = JumpBox
 JumpBox.FocusLost:Connect(function()
 	local num = tonumber(JumpBox.Text)
-	if num then 
-		getgenv().JumpPowerValue = num 
+	if num then
+		getgenv().JumpPowerValue = num
 	end
 end)
 
@@ -2491,13 +2550,13 @@ AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilan
 	pcall(function()
 		local char = LocalPlayer.Character
 		if not char then return end
-		
+
 		if v then
 			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
 				hrp.CFrame = CFrame.new(0, -9999, 0)
 			end
-			
+
 			for _, part in ipairs(char:GetDescendants()) do
 				if part:IsA("BasePart") then
 					part.Transparency = 1
@@ -2506,7 +2565,7 @@ AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilan
 					part.Transparency = 1
 				end
 			end
-			
+
 			local hum = char:FindFirstChildOfClass("Humanoid")
 			if hum then
 				hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
@@ -2673,101 +2732,7 @@ task.spawn(function()
 end)
 
 ----------------------------------------------------
--- 8. HALO PAGE
-----------------------------------------------------
-local HaloPage = pages["Halo Kepala"]
-
-local TitleHalo = Instance.new("TextLabel")
-TitleHalo.Parent = HaloPage
-TitleHalo.Size = UDim2.new(1, -5, 0, 25)
-TitleHalo.BackgroundTransparency = 1
-TitleHalo.Text = "👑 HALO & AKSESORIS KEPALA"
-TitleHalo.TextColor3 = Color3.fromRGB(80, 150, 255)
-TitleHalo.Font = Enum.Font.GothamBold
-TitleHalo.TextSize = 12
-TitleHalo.ZIndex = 13
-
-local function ApplyHaloToCharacter(haloName)
-	getgenv().CurrentSelectedHalo = haloName
-	pcall(function()
-		local character = LocalPlayer.Character
-		local head = character and character:FindFirstChild("Head")
-		if not head then return end
-		for _, v in ipairs(head:GetChildren()) do if v.Name == "CustomPlayerHalo" then v:Destroy() end end
-		local haloSourceFolder = ReplicatedStorage:FindFirstChild("HaloKenyal")
-		if haloSourceFolder then
-			local targetHaloModel = haloSourceFolder:FindFirstChild(haloName)
-			if targetHaloModel then
-				local cloneModel = targetHaloModel:Clone()
-				cloneModel.Name = "CustomPlayerHalo"
-				local primaryPart = cloneModel:FindFirstChild("Handle") or cloneModel:FindFirstChild("Antenna") or cloneModel:FindFirstChildWhichIsA("BasePart")
-				cloneModel.Parent = head
-				for _, desc in ipairs(cloneModel:GetDescendants()) do
-					if desc:IsA("BasePart") then desc.Anchored = false desc.CanCollide = false desc.Massless = true
-					elseif desc:IsA("Script") or desc:IsA("LocalScript") then desc:Destroy() end
-				end
-				if primaryPart then
-					primaryPart.CFrame = head.CFrame * CFrame.new(0, 1.3, 0)
-					local weld = Instance.new("WeldConstraint")
-					weld.Part0 = head
-					weld.Part1 = primaryPart
-					weld.Parent = primaryPart
-				end
-			end
-		end
-	end)
-end
-
-LocalPlayer.CharacterAdded:Connect(function(char)
-	task.wait(1)
-	if getgenv().CurrentSelectedHalo then ApplyHaloToCharacter(getgenv().CurrentSelectedHalo) end
-end)
-
-pcall(function()
-	local haloSourceFolder = ReplicatedStorage:FindFirstChild("HaloKenyal")
-	if haloSourceFolder then
-		local clearHaloBtn = Instance.new("TextButton")
-		clearHaloBtn.Parent = HaloPage
-		clearHaloBtn.Size = UDim2.new(1, -5, 0, 34)
-		clearHaloBtn.BackgroundColor3 = Color3.fromRGB(220, 70, 70)
-		clearHaloBtn.Text = "❌ Lepas Aksesoris Kepala"
-		clearHaloBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		clearHaloBtn.Font = Enum.Font.GothamBold
-		clearHaloBtn.TextSize = 11
-		clearHaloBtn.ZIndex = 13
-		local chc = Instance.new("UICorner")
-		chc.CornerRadius = UDim.new(0, 6)
-		chc.Parent = clearHaloBtn
-		
-		clearHaloBtn.MouseButton1Click:Connect(function()
-			getgenv().CurrentSelectedHalo = nil
-			pcall(function()
-				local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
-				if head then for _, v in ipairs(head:GetChildren()) do if v.Name == "CustomPlayerHalo" then v:Destroy() end end end
-			end)
-		end)
-		for _, haloItem in ipairs(haloSourceFolder:GetChildren()) do
-			local name = haloItem.Name
-			local haloBtn = Instance.new("TextButton")
-			haloBtn.Parent = HaloPage
-			haloBtn.Size = UDim2.new(1, -5, 0, 34)
-			haloBtn.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-			haloBtn.BackgroundTransparency = 0.2
-			haloBtn.Text = "👑 " .. name
-			haloBtn.TextColor3 = Color3.fromRGB(210, 225, 240)
-			haloBtn.Font = Enum.Font.GothamMedium
-			haloBtn.TextSize = 11
-			haloBtn.ZIndex = 13
-			local hbc = Instance.new("UICorner")
-			hbc.CornerRadius = UDim.new(0, 6)
-			hbc.Parent = haloBtn
-			haloBtn.MouseButton1Click:Connect(function() ApplyHaloToCharacter(name) end)
-		end
-	end
-end)
-
-----------------------------------------------------
--- 9. TELEPORT PLAYER PAGE
+-- 8. TELEPORT PLAYER PAGE
 ----------------------------------------------------
 local PlayerTpPage = pages["Teleport Player"]
 
@@ -2814,9 +2779,9 @@ end)
 
 local function GetCharacterRootPart(char)
 	if not char then return nil end
-	return char:FindFirstChild("HumanoidRootPart") 
-		or char:FindFirstChild("Torso") 
-		or char:FindFirstChild("UpperTorso") 
+	return char:FindFirstChild("HumanoidRootPart")
+		or char:FindFirstChild("Torso")
+		or char:FindFirstChild("UpperTorso")
 		or char:FindFirstChild("Head")
 end
 
@@ -2830,11 +2795,11 @@ local function ScanAndDisplayPlayers()
 			card.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
 			card.BackgroundTransparency = 0.2
 			card.ZIndex = 14
-			
+
 			local cc = Instance.new("UICorner")
 			cc.CornerRadius = UDim.new(0, 6)
 			cc.Parent = card
-			
+
 			local pName = Instance.new("TextLabel")
 			pName.Parent = card
 			pName.Position = UDim2.new(0, 10, 0, 0)
@@ -2846,7 +2811,7 @@ local function ScanAndDisplayPlayers()
 			pName.TextSize = 11
 			pName.TextXAlignment = Enum.TextXAlignment.Left
 			pName.ZIndex = 15
-			
+
 			local tpBtn = Instance.new("TextButton")
 			tpBtn.Parent = card
 			tpBtn.Position = UDim2.new(1, -70, 0.5, -11)
@@ -2857,11 +2822,11 @@ local function ScanAndDisplayPlayers()
 			tpBtn.Font = Enum.Font.GothamBold
 			tpBtn.TextSize = 10
 			tpBtn.ZIndex = 15
-			
+
 			local tpc = Instance.new("UICorner")
 			tpc.CornerRadius = UDim.new(0, 4)
 			tpc.Parent = tpBtn
-			
+
 			tpBtn.MouseButton1Click:Connect(function()
 				task.spawn(function()
 					pcall(function()
@@ -2869,19 +2834,19 @@ local function ScanAndDisplayPlayers()
 						local targetPart = GetCharacterRootPart(targetChar)
 						local myChar = LocalPlayer.Character
 						local myPart = GetCharacterRootPart(myChar)
-						
+
 						if targetPart and myPart then
 							pcall(function()
 								LocalPlayer:RequestStreamAroundAsync(targetPart.Position, 10)
 							end)
 							task.wait(0.2)
-							
+
 							if myPart:IsA("BasePart") then
 								myPart.Anchored = false
 								myPart.AssemblyLinearVelocity = Vector3.zero
 								myPart.AssemblyAngularVelocity = Vector3.zero
 							end
-							
+
 							local targetCFrame = targetPart.CFrame * CFrame.new(0, 3, 2)
 							for i = 1, 5 do
 								if myChar and myPart and targetPart.Parent then
@@ -2889,7 +2854,7 @@ local function ScanAndDisplayPlayers()
 								end
 								task.wait(0.05)
 							end
-							
+
 							tpBtn.Text = "Berhasil!"
 							task.wait(1)
 							tpBtn.Text = "Teleport"
@@ -2912,100 +2877,7 @@ Players.PlayerAdded:Connect(ScanAndDisplayPlayers)
 Players.PlayerRemoving:Connect(ScanAndDisplayPlayers)
 
 ----------------------------------------------------
--- 10. PRIVACY PAGE
-----------------------------------------------------
-local PrivacyPage = pages["Privacy"]
-
-local TitlePrv = Instance.new("TextLabel")
-TitlePrv.Parent = PrivacyPage
-TitlePrv.Size = UDim2.new(1, -5, 0, 25)
-TitlePrv.BackgroundTransparency = 1
-TitlePrv.Text = "🛡️ PRIVACY & ANTI-ADMIN"
-TitlePrv.TextColor3 = Color3.fromRGB(80, 150, 255)
-TitlePrv.Font = Enum.Font.GothamBold
-TitlePrv.TextSize = 12
-TitlePrv.ZIndex = 13
-
-local FakeNameBox = Instance.new("TextBox")
-FakeNameBox.Parent = PrivacyPage
-FakeNameBox.Size = UDim2.new(1, -5, 0, 36)
-FakeNameBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-FakeNameBox.BackgroundTransparency = 0.2
-FakeNameBox.PlaceholderText = "Nama Samaran (Cth: AEMEATH HUB)"
-FakeNameBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-FakeNameBox.Text = "AEMEATH HUB"
-FakeNameBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-FakeNameBox.Font = Enum.Font.GothamMedium
-FakeNameBox.TextSize = 11
-FakeNameBox.ZIndex = 13
-local fnc = Instance.new("UICorner")
-fnc.CornerRadius = UDim.new(0, 6)
-fnc.Parent = FakeNameBox
-FakeNameBox.FocusLost:Connect(function() getgenv().FakeNameInput = FakeNameBox.Text end)
-
-AddToggle(PrivacyPage, "Privacy Mode (Hide Name)", function(v)
-	getgenv().HideNameRunning = v
-	if v then
-		task.spawn(function()
-			while getgenv().HideNameRunning do
-				pcall(function()
-					local fakeName = getgenv().FakeNameInput or "AEMEATH HUB"
-					local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
-					if head then
-						for _, child in ipairs(head:GetDescendants()) do
-							if child:IsA("TextLabel") or child:IsA("TextMesh") then
-								local txt = child.Text
-								if string.find(txt, LocalPlayer.Name) or string.find(txt, LocalPlayer.DisplayName) then child.Text = fakeName end
-							end
-						end
-					end
-				end)
-				task.wait(1)
-			end
-		end)
-	end
-end)
-
-local AntiAdminToggleBtn = Instance.new("TextButton")
-AntiAdminToggleBtn.Parent = PrivacyPage
-AntiAdminToggleBtn.Size = UDim2.new(1, -5, 0, 36)
-AntiAdminToggleBtn.BackgroundColor3 = getgenv().TyoConfig.AntiAdminEnabled and Color3.fromRGB(180, 50, 50) or Color3.fromRGB(18, 24, 38)
-AntiAdminToggleBtn.BackgroundTransparency = 0.2
-AntiAdminToggleBtn.Text = " Anti-Admin Protect (MPG Group): " .. (getgenv().TyoConfig.AntiAdminEnabled and "[ON]" or "[OFF]")
-AntiAdminToggleBtn.TextColor3 = Color3.fromRGB(210, 225, 240)
-AntiAdminToggleBtn.Font = Enum.Font.GothamMedium
-AntiAdminToggleBtn.TextSize = 11
-AntiAdminToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
-AntiAdminToggleBtn.ZIndex = 13
-local aac = Instance.new("UICorner")
-aac.CornerRadius = UDim.new(0, 6)
-aac.Parent = AntiAdminToggleBtn
-AntiAdminToggleBtn.MouseButton1Click:Connect(function()
-	getgenv().TyoConfig.AntiAdminEnabled = not getgenv().TyoConfig.AntiAdminEnabled
-	local active = getgenv().TyoConfig.AntiAdminEnabled
-	AntiAdminToggleBtn.Text = " Anti-Admin Protect (MPG Group): " .. (active and "[ON]" or "[OFF]")
-	AntiAdminToggleBtn.BackgroundColor3 = active and Color3.fromRGB(180, 50, 50) or Color3.fromRGB(18, 24, 38)
-	SaveConfig()
-end)
-
-local function CheckPlayerIsAdmin(player)
-	local success, rank = pcall(function() return player:GetRankInGroup(getgenv().TyoConfig.TargetGroupId or 7019573) end)
-	return success and rank and rank > 1
-end
-
-Players.PlayerAdded:Connect(function(player)
-	if player ~= LocalPlayer then
-		task.spawn(function()
-			task.wait(1.5)
-			if getgenv().TyoConfig.AntiAdminEnabled and CheckPlayerIsAdmin(player) then
-				TeleportService:Teleport(game.PlaceId, LocalPlayer)
-			end
-		end)
-	end
-end)
-
-----------------------------------------------------
--- 11. SETTINGS & PERFORMANCE PAGE
+-- 9. SETTINGS & PERFORMANCE PAGE
 ----------------------------------------------------
 local SettingsPage = pages["Settings"]
 
@@ -3049,19 +2921,19 @@ local function ApplyExtremePotatoAndNoWalls()
 		Lighting.FogStart = 0
 		Lighting.Brightness = 2
 		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-		
+
 		pcall(function()
 			Workspace.CurrentCamera.CFrame = Workspace.CurrentCamera.CFrame
 			LocalPlayer.CameraMaxZoomDistance = 30
 			LocalPlayer.CameraMinZoomDistance = 5
 		end)
-		
+
 		for _, v in ipairs(Lighting:GetChildren()) do
 			if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("SunRaysEffect") then
 				v:Destroy()
 			end
 		end
-		
+
 		for _, v in ipairs(workspace:GetDescendants()) do
 			pcall(function()
 				local nameLower = string.lower(v.Name)
@@ -3078,7 +2950,7 @@ local function ApplyExtremePotatoAndNoWalls()
 				end
 			end)
 		end
-		
+
 		if workspace:FindFirstChildOfClass("Terrain") then
 			local terrain = workspace:FindFirstChildOfClass("Terrain")
 			terrain.WaterWaveSize = 0
@@ -3118,7 +2990,7 @@ BlackScreenToggleBtn.MouseButton1Click:Connect(function()
 	isBlackScreen = not isBlackScreen
 	BlackScreenToggleBtn.Text = " 📱 Black Screen (Battery Saver): " .. (isBlackScreen and "[ON]" or "[OFF]")
 	BlackScreenToggleBtn.BackgroundColor3 = isBlackScreen and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(18, 24, 38)
-	
+
 	if isBlackScreen then
 		if not BlackScreenGui then
 			BlackScreenGui = Instance.new("ScreenGui")
@@ -3126,12 +2998,12 @@ BlackScreenToggleBtn.MouseButton1Click:Connect(function()
 			BlackScreenGui.Parent = PlayerGui
 			BlackScreenGui.DisplayOrder = 2147483647
 			BlackScreenGui.IgnoreGuiInset = true
-			
+
 			local frame = Instance.new("Frame")
 			frame.Parent = BlackScreenGui
 			frame.Size = UDim2.new(1, 0, 1, 0)
 			frame.BackgroundColor3 = Color3.fromRGB(6, 9, 15)
-			
+
 			local txt = Instance.new("TextLabel")
 			txt.Parent = frame
 			txt.Size = UDim2.new(1, 0, 0, 60)
@@ -3141,7 +3013,7 @@ BlackScreenToggleBtn.MouseButton1Click:Connect(function()
 			txt.TextColor3 = Color3.fromRGB(80, 150, 255)
 			txt.Font = Enum.Font.GothamBold
 			txt.TextSize = 12
-			
+
 			frame.InputBegan:Connect(function()
 				isBlackScreen = false
 				BlackScreenToggleBtn.Text = " 📱 Black Screen (Battery Saver): [OFF]"
@@ -3295,20 +3167,6 @@ ResetConfigBtn.MouseButton1Click:Connect(function()
 end)
 
 ----------------------------------------------------
--- 12. CREDITS PAGE
-----------------------------------------------------
-local CreditsPage = pages["Credits"]
-local CredLbl = Instance.new("TextLabel")
-CredLbl.Parent = CreditsPage
-CredLbl.Size = UDim2.new(1, -5, 1, 0)
-CredLbl.BackgroundTransparency = 1
-CredLbl.Text = "Aemeath Wuthering Waves Edition\nMap: Mount Soreya\nModern UI Redesign"
-CredLbl.TextColor3 = Color3.fromRGB(210, 225, 240)
-CredLbl.Font = Enum.Font.GothamBold
-CredLbl.TextSize = 14
-CredLbl.ZIndex = 13
-
-----------------------------------------------------
 -- BOTTOM PANEL: SESSION STAT TRACKER (LIVE)
 ----------------------------------------------------
 local StatPanel = Instance.new("Frame")
@@ -3342,7 +3200,7 @@ task.spawn(function()
 			local hours = math.floor(elapsed / 3600)
 			local mins = math.floor((elapsed % 3600) / 60)
 			local secs = elapsed % 60
-			
+
 			local timeStr = ""
 			if hours > 0 then
 				timeStr = string.format("%02dh %02dm %02ds", hours, mins, secs)
@@ -3351,7 +3209,7 @@ task.spawn(function()
 			else
 				timeStr = string.format("%02ds", secs)
 			end
-			
+
 			StatLabel.Text = string.format("📊 Total Ikan: %d | ⏱️ Play: %s", getgenv().TotalFishCaught, timeStr)
 		end)
 		task.wait(1)
@@ -3389,4 +3247,4 @@ Float.MouseButton1Click:Connect(function()
 	end
 end)
 
-print("Aemeath Wuthering Waves Hub V3 Loaded Successfully with Auto Add Coin & Pearl in Trade!")
+print("Aemeath Wuthering Waves Hub V3 Loaded Successfully!")
