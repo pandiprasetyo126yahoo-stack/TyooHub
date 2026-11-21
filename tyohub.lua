@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara | Coord Under Title Toggle
+-- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara | Coord Under Title Toggle | Spot Mancing Danau Added
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -85,7 +85,8 @@ getgenv().TyoConfig = {
 	SpotLoopConfig = {
 		["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
 		["Spot Mancing Core"] = { Enabled = false, Timer = "10" },
-		["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
+		["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" },
+		["Spot Mancing Danau"] = { Enabled = false, Timer = "10" }
 	}
 }
 
@@ -94,6 +95,18 @@ getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
 getgenv().UnfavMutations = getgenv().TyoConfig.UnfavMutations
 getgenv().SpotLoopConfig = getgenv().TyoConfig.SpotLoopConfig
+
+local function EnsureSpotLoopDefaults()
+	if type(getgenv().SpotLoopConfig) ~= "table" then
+		getgenv().SpotLoopConfig = {}
+	end
+	for _, sName in ipairs({"Spot Mancing Jembatan", "Spot Mancing Core", "Spot Mancing Ikan Anomali", "Spot Mancing Danau"}) do
+		if type(getgenv().SpotLoopConfig[sName]) ~= "table" then
+			getgenv().SpotLoopConfig[sName] = { Enabled = false, Timer = "10" }
+		end
+	end
+	getgenv().TyoConfig.SpotLoopConfig = getgenv().SpotLoopConfig
+end
 
 local function SaveConfig()
 	pcall(function()
@@ -121,6 +134,7 @@ local function LoadConfig()
 				getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
 				getgenv().UnfavMutations = getgenv().TyoConfig.UnfavMutations
 				getgenv().SpotLoopConfig = getgenv().TyoConfig.SpotLoopConfig
+				EnsureSpotLoopDefaults()
 
 				if getgenv().TyoConfig.SelectedSpot then
 					getgenv().SelectedFishingSpot = getgenv().TyoConfig.SelectedSpot
@@ -130,6 +144,7 @@ local function LoadConfig()
 	end)
 end
 
+EnsureSpotLoopDefaults()
 if getgenv().TyoConfig.AutoLoadEnabled then
 	LoadConfig()
 end
@@ -170,7 +185,8 @@ local function ResetConfig()
 			SpotLoopConfig = {
 				["Spot Mancing Jembatan"] = { Enabled = false, Timer = "10" },
 				["Spot Mancing Core"] = { Enabled = false, Timer = "10" },
-				["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" }
+				["Spot Mancing Ikan Anomali"] = { Enabled = false, Timer = "10" },
+				["Spot Mancing Danau"] = { Enabled = false, Timer = "10" }
 			}
 		}
 		getgenv().FavRarities = getgenv().TyoConfig.FavRarities
@@ -469,7 +485,8 @@ end)
 local FishingSpots = {
 	["Spot Mancing Jembatan"] = CFrame.new(-6783.74756, 1322.81006, -9757.34473, 0.0899723172, -9.34088291e-08, 0.995944262, 1.76120434e-08, 1, 9.21981638e-08, -0.995944262, 9.24533072e-09, 0.0899723172),
 	["Spot Mancing Core"] = CFrame.new(-9069.33887, 1250.32092, -6510.3374, 0.99812746, -7.96398965e-08, -0.0611686334, 8.05492206e-08, 1, 1.24000188e-08, 0.0611686334, -1.73038845e-08, 0.99812746),
-	["Spot Mancing Ikan Anomali"] = CFrame.new(-8199.52832, 1238.83752, -6278.13135, -0.999144316, 1.1644854e-08, -0.0413601957, 1.63464247e-08, 1, -1.13335595e-07, 0.0413601957, -1.13914709e-07, -0.999144316)
+	["Spot Mancing Ikan Anomali"] = CFrame.new(-8199.52832, 1238.83752, -6278.13135, -0.999144316, 1.1644854e-08, -0.0413601957, 1.63464247e-08, 1, -1.13335595e-07, 0.0413601957, -1.13914709e-07, -0.999144316),
+	["Spot Mancing Danau"] = CFrame.new(-9492.4, 1334.6, -10328.1)
 }
 local NpcSellCFrame = CFrame.new(-6668.01416, 1312.69983, -9965.2998, 0.999977231, 1.08366018e-08, -0.00675115408, -1.09201403e-08, 1, -1.2337189e-08, 0.00675115408, 1.24106316e-08, 0.999977231)
 
@@ -1447,7 +1464,7 @@ end
 local DropContainer = Instance.new("Frame")
 DropContainer.Parent = SpotDropdownFrame
 DropContainer.Position = UDim2.new(0, 5, 0, 36)
-DropContainer.Size = UDim2.new(1, -10, 0, 95)
+DropContainer.Size = UDim2.new(1, -10, 0, 128)
 DropContainer.BackgroundTransparency = 1
 DropContainer.ZIndex = 14
 
@@ -1458,10 +1475,10 @@ DropLayout.Padding = UDim.new(0, 4)
 local isDropOpen = false
 DropHeader.MouseButton1Click:Connect(function()
 	isDropOpen = not isDropOpen
-	SpotDropdownFrame:TweenSize(isDropOpen and UDim2.new(1, -5, 0, 135) or UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
+	SpotDropdownFrame:TweenSize(isDropOpen and UDim2.new(1, -5, 0, 168) or UDim2.new(1, -5, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.2, true)
 end)
 
-for _, spotName in ipairs({"Spot Mancing Jembatan", "Spot Mancing Core", "Spot Mancing Ikan Anomali"}) do
+for _, spotName in ipairs({"Spot Mancing Jembatan", "Spot Mancing Core", "Spot Mancing Ikan Anomali", "Spot Mancing Danau"}) do
 	local optBtn = Instance.new("TextButton")
 	optBtn.Parent = DropContainer
 	optBtn.Size = UDim2.new(1, 0, 0, 28)
@@ -1738,6 +1755,9 @@ TitleLoop.ZIndex = 13
 AddToggle(FishingPage, "Aktifkan Loop Spot Mancing (Timer)", function(v) getgenv().LoopSpotEnabled = v end)
 
 local function CreateSpotTimerSetting(parent, spotName)
+	if not getgenv().SpotLoopConfig[spotName] then
+		getgenv().SpotLoopConfig[spotName] = { Enabled = false, Timer = "10" }
+	end
 	local frame = Instance.new("Frame")
 	frame.Parent = parent
 	frame.Size = UDim2.new(1, -5, 0, 36)
@@ -1788,9 +1808,10 @@ end
 CreateSpotTimerSetting(FishingPage, "Spot Mancing Jembatan")
 CreateSpotTimerSetting(FishingPage, "Spot Mancing Core")
 CreateSpotTimerSetting(FishingPage, "Spot Mancing Ikan Anomali")
+CreateSpotTimerSetting(FishingPage, "Spot Mancing Danau")
 
 task.spawn(function()
-	local spotOrder = {"Spot Mancing Jembatan", "Spot Mancing Core", "Spot Mancing Ikan Anomali"}
+	local spotOrder = {"Spot Mancing Jembatan", "Spot Mancing Core", "Spot Mancing Ikan Anomali", "Spot Mancing Danau"}
 	while true do
 		if getgenv().LoopSpotEnabled and not getgenv().AutoDetectCoreEvent then
 			for _, name in ipairs(spotOrder) do
