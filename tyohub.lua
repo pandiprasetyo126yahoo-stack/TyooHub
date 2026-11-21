@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara
+-- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara | Coord Under Title Toggle
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -46,6 +46,7 @@ getgenv().TyoConfig = {
 	AutoAddAllFishTrade = false,
 	AutoAddCoinAndPearlTrade = false,
 	FavEventFishOnly = false,
+	ShowCoordUnderTitle = false,
 
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
@@ -151,6 +152,7 @@ local function ResetConfig()
 			AutoAddAllFishTrade = false,
 			AutoAddCoinAndPearlTrade = false,
 			FavEventFishOnly = false,
+			ShowCoordUnderTitle = false,
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -703,7 +705,6 @@ local function ProcessAutoFavorite()
 			local shouldFav = false
 
 			if eventOnly then
-				-- Hanya favoritkan ikan acara / event ini saja
 				shouldFav = IsEventFish(fish)
 			else
 				local fishRarityLower = string.lower(fish.Rarity)
@@ -833,7 +834,6 @@ local function AutoAddAllFishToTrade()
 	end)
 end
 
--- Fitur Auto Add All Coin & Mutiara ke Trade
 local function AutoAddCoinAndPearlToTrade()
 	pcall(function()
 		local itemRemote = GetTradeRemote("AddItem") or GetTradeRemote("TambahItem")
@@ -849,7 +849,6 @@ local function AutoAddCoinAndPearlToTrade()
 			task.wait(0.04)
 		end
 
-		-- 1. Scan semua Tool / Item / Value di Backpack & Character
 		local containers = {LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character}
 		for _, container in ipairs(containers) do
 			if container then
@@ -862,7 +861,6 @@ local function AutoAddCoinAndPearlToTrade()
 			end
 		end
 
-		-- 2. Scan semua entry Coin & Mutiara dari inventaris server
 		local repStorage = game:GetService("ReplicatedStorage")
 		local inventarisRemote = repStorage:FindFirstChild("Remote")
 			and repStorage.Remote:FindFirstChild("Inventaris")
@@ -1036,6 +1034,59 @@ local function MakeDraggable(guiObject, handleObject)
 		return isClick and (tick() - clickTimeStart < 0.35)
 	end
 end
+
+----------------------------------------------------
+-- COORDINATE DISPLAY UNDER TITLE ICON (TOGGLEABLE)
+----------------------------------------------------
+local TitleCoordFrame = Instance.new("Frame")
+TitleCoordFrame.Name = "TitleCoordHud"
+TitleCoordFrame.Parent = Gui
+TitleCoordFrame.Size = UDim2.new(0, 178, 0, 22)
+TitleCoordFrame.Position = UDim2.new(0.5, -18, 0, 56)
+TitleCoordFrame.BackgroundColor3 = Color3.fromRGB(14, 20, 34)
+TitleCoordFrame.BackgroundTransparency = 0.15
+TitleCoordFrame.BorderSizePixel = 0
+TitleCoordFrame.Visible = (getgenv().TyoConfig.ShowCoordUnderTitle == true)
+TitleCoordFrame.ZIndex = 2147483640
+
+local tcfCorner = Instance.new("UICorner")
+tcfCorner.CornerRadius = UDim.new(0, 6)
+tcfCorner.Parent = TitleCoordFrame
+
+local tcfStroke = Instance.new("UIStroke")
+tcfStroke.Parent = TitleCoordFrame
+tcfStroke.Color = Color3.fromRGB(80, 150, 255)
+tcfStroke.Thickness = 1
+
+local TitleCoordLabel = Instance.new("TextLabel")
+TitleCoordLabel.Parent = TitleCoordFrame
+TitleCoordLabel.Size = UDim2.new(1, -8, 1, 0)
+TitleCoordLabel.Position = UDim2.new(0, 4, 0, 0)
+TitleCoordLabel.BackgroundTransparency = 1
+TitleCoordLabel.Text = "📍 0.0, 0.0, 0.0"
+TitleCoordLabel.TextColor3 = Color3.fromRGB(80, 255, 200)
+TitleCoordLabel.Font = Enum.Font.GothamBold
+TitleCoordLabel.TextSize = 10
+TitleCoordLabel.ZIndex = 2147483641
+
+MakeDraggable(TitleCoordFrame, TitleCoordLabel)
+
+task.spawn(function()
+	while true do
+		if TitleCoordFrame.Visible then
+			pcall(function()
+				local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					local p = hrp.Position
+					TitleCoordLabel.Text = string.format("📍 %.1f, %.1f, %.1f", p.X, p.Y, p.Z)
+				else
+					TitleCoordLabel.Text = "📍 Menunggu Karakter..."
+				end
+			end)
+		end
+		task.wait(0.1)
+	end
+end)
 
 ----------------------------------------------------
 -- MAIN HUB UI
@@ -1246,7 +1297,6 @@ local function MakePage()
 	return f
 end
 
--- Credits, Privacy, dan Halo Kepala sudah dihapus
 local tabList = {"Fishing & Sell", "⭐ Favorite", "🤝 Auto Trade", "Galatama", "Teleport Shop", "Summit", "Player", "Teleport Player", "Settings"}
 
 for _, name in ipairs(tabList) do
@@ -2478,6 +2528,12 @@ TitlePly.Font = Enum.Font.GothamBold
 TitlePly.TextSize = 12
 TitlePly.ZIndex = 13
 
+AddToggle(PlayerPage, "📍 Tampilkan Koordinat di Bawah Title", function(v)
+	getgenv().TyoConfig.ShowCoordUnderTitle = v
+	TitleCoordFrame.Visible = v
+	SaveConfig()
+end, getgenv().TyoConfig.ShowCoordUnderTitle)
+
 local PencatatLokasiBtn = Instance.new("TextButton")
 PencatatLokasiBtn.Parent = PlayerPage
 PencatatLokasiBtn.Size = UDim2.new(1, -5, 0, 34)
@@ -3177,6 +3233,7 @@ lcc.CornerRadius = UDim.new(0, 6)
 lcc.Parent = LoadConfigBtn
 LoadConfigBtn.MouseButton1Click:Connect(function()
 	LoadConfig()
+	TitleCoordFrame.Visible = (getgenv().TyoConfig.ShowCoordUnderTitle == true)
 	LoadConfigBtn.Text = "✅ Config Berhasil Dimuat!"
 	task.wait(1.5)
 	LoadConfigBtn.Text = "📂 Muat Konfigurasi (Manual Load)"
@@ -3196,6 +3253,7 @@ rcc.CornerRadius = UDim.new(0, 6)
 rcc.Parent = ResetConfigBtn
 ResetConfigBtn.MouseButton1Click:Connect(function()
 	ResetConfig()
+	TitleCoordFrame.Visible = (getgenv().TyoConfig.ShowCoordUnderTitle == true)
 	ResetConfigBtn.Text = "🔄 Config Direset!"
 	task.wait(1.5)
 	ResetConfigBtn.Text = "🔄 Reset Konfigurasi"
