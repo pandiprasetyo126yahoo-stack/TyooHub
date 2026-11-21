@@ -3,6 +3,16 @@
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
 -- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara | Coord Under Title Toggle
 -- ==============================================================================
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
+
+if getgenv().TyoHubV3Loaded then
+	warn("[TyoHub V3] Sudah berjalan.")
+	return
+end
+getgenv().TyoHubV3Loaded = true
+
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
