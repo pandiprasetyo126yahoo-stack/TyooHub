@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- FIXED: Safe execution wrapper + Custom Coord Edit & Teleport in Player tab
+-- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara | Coord Under Title Toggle
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -47,7 +47,6 @@ getgenv().TyoConfig = {
 	AutoAddCoinAndPearlTrade = false,
 	FavEventFishOnly = false,
 	ShowCoordUnderTitle = false,
-	CustomCoordInput = "",
 
 	FavRarities = {
 		["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false,
@@ -107,9 +106,6 @@ local function LoadConfig()
 						getgenv().TyoConfig[k] = v
 					end
 				end
-				if type(getgenv().TyoConfig.CustomCoordInput) ~= "string" then
-					getgenv().TyoConfig.CustomCoordInput = tostring(getgenv().TyoConfig.CustomCoordInput or "")
-				end
 				getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 				getgenv().FavMutations = getgenv().TyoConfig.FavMutations
 				getgenv().UnfavRarities = getgenv().TyoConfig.UnfavRarities
@@ -157,7 +153,6 @@ local function ResetConfig()
 			AutoAddCoinAndPearlTrade = false,
 			FavEventFishOnly = false,
 			ShowCoordUnderTitle = false,
-			CustomCoordInput = "",
 			FavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = true, ["Mythical"] = true, ["Secret"] = true, ["Forgotten"] = true, ["Aether"] = true },
 			FavMutations = { ["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false, ["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false, ["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false, ["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false, ["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false, ["Strawberry"] = false, ["Void"] = false, ["Cupid"] = false },
 			UnfavRarities = { ["Common"] = false, ["UnCommon"] = false, ["Rare"] = false, ["Epic"] = false, ["Legendary"] = false, ["Mythical"] = false, ["Secret"] = false, ["Forgotten"] = false },
@@ -429,8 +424,7 @@ getgenv().JumpPowerValue = 100
 task.spawn(function()
 	while getgenv().NetworkBoostRunning do
 		pcall(function()
-			local net = settings():GetService("NetworkSettings")
-			if net then net.IncomingReplicationLag = 0 end
+			settings():GetService("NetworkSettings").IncomingReplicationLag = 0
 			for _, p in ipairs(Players:GetPlayers()) do
 				if p ~= LocalPlayer and p.Character then
 					for _, part in ipairs(p.Character:GetDescendants()) do
@@ -2540,137 +2534,11 @@ AddToggle(PlayerPage, "📍 Tampilkan Koordinat di Bawah Title", function(v)
 	SaveConfig()
 end, getgenv().TyoConfig.ShowCoordUnderTitle)
 
-local CustomCoordBox = Instance.new("TextBox")
-CustomCoordBox.Parent = PlayerPage
-CustomCoordBox.Size = UDim2.new(1, -5, 0, 36)
-CustomCoordBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-CustomCoordBox.BackgroundTransparency = 0.2
-CustomCoordBox.PlaceholderText = "Edit Koordinat X, Y, Z (Cth: -6783.7, 1322.8, -9757.3)"
-CustomCoordBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
-CustomCoordBox.Text = tostring(getgenv().TyoConfig.CustomCoordInput or "")
-CustomCoordBox.TextColor3 = Color3.fromRGB(210, 225, 240)
-CustomCoordBox.Font = Enum.Font.GothamMedium
-CustomCoordBox.TextSize = 11
-CustomCoordBox.ClearTextOnFocus = false
-CustomCoordBox.ZIndex = 13
-local ccbCorner = Instance.new("UICorner")
-ccbCorner.CornerRadius = UDim.new(0, 6)
-ccbCorner.Parent = CustomCoordBox
-
-CustomCoordBox.FocusLost:Connect(function()
-	pcall(function()
-		getgenv().TyoConfig.CustomCoordInput = tostring(CustomCoordBox.Text or "")
-		SaveConfig()
-	end)
-end)
-
-local CoordActionRow = Instance.new("Frame")
-CoordActionRow.Parent = PlayerPage
-CoordActionRow.Size = UDim2.new(1, -5, 0, 34)
-CoordActionRow.BackgroundTransparency = 1
-CoordActionRow.ZIndex = 13
-
-local AmbilCoordBtn = Instance.new("TextButton")
-AmbilCoordBtn.Parent = CoordActionRow
-AmbilCoordBtn.Size = UDim2.new(0.42, -3, 1, 0)
-AmbilCoordBtn.Position = UDim2.new(0, 0, 0, 0)
-AmbilCoordBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 220)
-AmbilCoordBtn.Text = "📌 Ambil Posisi"
-AmbilCoordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AmbilCoordBtn.Font = Enum.Font.GothamBold
-AmbilCoordBtn.TextSize = 11
-AmbilCoordBtn.ZIndex = 14
-local acbCorner = Instance.new("UICorner")
-acbCorner.CornerRadius = UDim.new(0, 6)
-acbCorner.Parent = AmbilCoordBtn
-
-local TpCustomCoordBtn = Instance.new("TextButton")
-TpCustomCoordBtn.Parent = CoordActionRow
-TpCustomCoordBtn.Size = UDim2.new(0.58, -3, 1, 0)
-TpCustomCoordBtn.Position = UDim2.new(0.42, 3, 0, 0)
-TpCustomCoordBtn.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
-TpCustomCoordBtn.Text = "🚀 Teleport ke Koordinat"
-TpCustomCoordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TpCustomCoordBtn.Font = Enum.Font.GothamBold
-TpCustomCoordBtn.TextSize = 11
-TpCustomCoordBtn.ZIndex = 14
-local tccbCorner = Instance.new("UICorner")
-tccbCorner.CornerRadius = UDim.new(0, 6)
-tccbCorner.Parent = TpCustomCoordBtn
-
-local function ParseCoordinateString(str)
-	if type(str) ~= "string" then return nil end
-	local nums = {}
-	for numStr in string.gmatch(str, "[-+]?%d+%.?%d*") do
-		local val = tonumber(numStr)
-		if val ~= nil then
-			table.insert(nums, val)
-		end
-	end
-	if #nums >= 3 then
-		return Vector3.new(nums[1], nums[2], nums[3])
-	end
-	return nil
-end
-
-AmbilCoordBtn.MouseButton1Click:Connect(function()
-	pcall(function()
-		local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			local pos = hrp.Position
-			local formatted = string.format("%.2f, %.2f, %.2f", pos.X, pos.Y, pos.Z)
-			CustomCoordBox.Text = formatted
-			getgenv().TyoConfig.CustomCoordInput = formatted
-			SaveConfig()
-			AmbilCoordBtn.Text = "✅ Diambil!"
-			task.wait(1.2)
-			AmbilCoordBtn.Text = "📌 Ambil Posisi"
-		else
-			AmbilCoordBtn.Text = "❌ Belum Siap!"
-			task.wait(1.2)
-			AmbilCoordBtn.Text = "📌 Ambil Posisi"
-		end
-	end)
-end)
-
-TpCustomCoordBtn.MouseButton1Click:Connect(function()
-	task.spawn(function()
-		pcall(function()
-			local targetPos = ParseCoordinateString(CustomCoordBox.Text)
-			if not targetPos then
-				TpCustomCoordBtn.Text = "❌ Format X, Y, Z Salah!"
-				task.wait(1.5)
-				TpCustomCoordBtn.Text = "🚀 Teleport ke Koordinat"
-				return
-			end
-
-			getgenv().TyoConfig.CustomCoordInput = CustomCoordBox.Text
-			SaveConfig()
-
-			local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				pcall(function()
-					LocalPlayer:RequestStreamAroundAsync(targetPos, 10)
-				end)
-				hrp.Anchored = false
-				hrp.AssemblyLinearVelocity = Vector3.zero
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 0))
-				TpCustomCoordBtn.Text = "✅ Berhasil Teleport!"
-			else
-				TpCustomCoordBtn.Text = "❌ Karakter Belum Siap!"
-			end
-			task.wait(1.2)
-			TpCustomCoordBtn.Text = "🚀 Teleport ke Koordinat"
-		end)
-	end)
-end)
-
 local PencatatLokasiBtn = Instance.new("TextButton")
 PencatatLokasiBtn.Parent = PlayerPage
 PencatatLokasiBtn.Size = UDim2.new(1, -5, 0, 34)
 PencatatLokasiBtn.BackgroundColor3 = Color3.fromRGB(80, 255, 200)
-PencatatLokasiBtn.Text = "📍 Pencatat Lokasi (Copy CFrame)"
+PencatatLokasiBtn.Text = "📍 Pencatat Lokasi"
 PencatatLokasiBtn.TextColor3 = Color3.fromRGB(12, 16, 26)
 PencatatLokasiBtn.Font = Enum.Font.GothamBold
 PencatatLokasiBtn.TextSize = 11
@@ -2692,11 +2560,11 @@ PencatatLokasiBtn.MouseButton1Click:Connect(function()
 			end
 			PencatatLokasiBtn.Text = "✅ Tersalin!"
 			task.wait(1.5)
-			PencatatLokasiBtn.Text = "📍 Pencatat Lokasi (Copy CFrame)"
+			PencatatLokasiBtn.Text = "📍 Pencatat Lokasi"
 		else
 			PencatatLokasiBtn.Text = "❌ Karakter Belum Siap!"
 			task.wait(1.5)
-			PencatatLokasiBtn.Text = "📍 Pencatat Lokasi (Copy CFrame)"
+			PencatatLokasiBtn.Text = "📍 Pencatat Lokasi"
 		end
 	end)
 end)
@@ -2838,8 +2706,7 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	task.spawn(function()
 		while getgenv().NetworkBoostRunning do
 			pcall(function()
-				local net = settings():GetService("NetworkSettings")
-				if net then net.IncomingReplicationLag = 0 end
+				settings():GetService("NetworkSettings").IncomingReplicationLag = 0
 				for _, p in ipairs(Players:GetPlayers()) do
 					if p ~= LocalPlayer and p.Character then
 						for _, part in ipairs(p.Character:GetDescendants()) do
@@ -3144,9 +3011,7 @@ local function ApplyExtremePotatoAndNoWalls()
 		Lighting.FogEnd = 100
 		Lighting.FogStart = 0
 		Lighting.Brightness = 2
-		pcall(function()
-			settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-		end)
+		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 
 		pcall(function()
 			Workspace.CurrentCamera.CFrame = Workspace.CurrentCamera.CFrame
@@ -3369,7 +3234,6 @@ lcc.Parent = LoadConfigBtn
 LoadConfigBtn.MouseButton1Click:Connect(function()
 	LoadConfig()
 	TitleCoordFrame.Visible = (getgenv().TyoConfig.ShowCoordUnderTitle == true)
-	CustomCoordBox.Text = tostring(getgenv().TyoConfig.CustomCoordInput or "")
 	LoadConfigBtn.Text = "✅ Config Berhasil Dimuat!"
 	task.wait(1.5)
 	LoadConfigBtn.Text = "📂 Muat Konfigurasi (Manual Load)"
@@ -3390,7 +3254,6 @@ rcc.Parent = ResetConfigBtn
 ResetConfigBtn.MouseButton1Click:Connect(function()
 	ResetConfig()
 	TitleCoordFrame.Visible = (getgenv().TyoConfig.ShowCoordUnderTitle == true)
-	CustomCoordBox.Text = ""
 	ResetConfigBtn.Text = "🔄 Config Direset!"
 	task.wait(1.5)
 	ResetConfigBtn.Text = "🔄 Reset Konfigurasi"
