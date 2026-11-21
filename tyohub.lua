@@ -2478,6 +2478,41 @@ TitlePly.Font = Enum.Font.GothamBold
 TitlePly.TextSize = 12
 TitlePly.ZIndex = 13
 
+local PencatatLokasiBtn = Instance.new("TextButton")
+PencatatLokasiBtn.Parent = PlayerPage
+PencatatLokasiBtn.Size = UDim2.new(1, -5, 0, 34)
+PencatatLokasiBtn.BackgroundColor3 = Color3.fromRGB(80, 255, 200)
+PencatatLokasiBtn.Text = "📍 Pencatat Lokasi"
+PencatatLokasiBtn.TextColor3 = Color3.fromRGB(12, 16, 26)
+PencatatLokasiBtn.Font = Enum.Font.GothamBold
+PencatatLokasiBtn.TextSize = 11
+PencatatLokasiBtn.ZIndex = 13
+local plc = Instance.new("UICorner")
+plc.CornerRadius = UDim.new(0, 6)
+plc.Parent = PencatatLokasiBtn
+
+PencatatLokasiBtn.MouseButton1Click:Connect(function()
+	pcall(function()
+		local char = LocalPlayer.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			local pos = hrp.CFrame
+			local outStr = "CFrame.new(" .. tostring(pos) .. ")"
+			print(outStr)
+			if setclipboard then
+				setclipboard(outStr)
+			end
+			PencatatLokasiBtn.Text = "✅ Tersalin!"
+			task.wait(1.5)
+			PencatatLokasiBtn.Text = "📍 Pencatat Lokasi"
+		else
+			PencatatLokasiBtn.Text = "❌ Karakter Belum Siap!"
+			task.wait(1.5)
+			PencatatLokasiBtn.Text = "📍 Pencatat Lokasi"
+		end
+	end)
+end)
+
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Parent = PlayerPage
 SpeedBox.Size = UDim2.new(1, -5, 0, 36)
