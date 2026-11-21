@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara | Coord Under Title Toggle | Custom Coord TP
+-- FIXED: Safe execution wrapper + Custom Coord Edit & Teleport in Player tab
 -- ==============================================================================
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -106,6 +106,9 @@ local function LoadConfig()
 					if getgenv().TyoConfig[k] ~= nil then
 						getgenv().TyoConfig[k] = v
 					end
+				end
+				if type(getgenv().TyoConfig.CustomCoordInput) ~= "string" then
+					getgenv().TyoConfig.CustomCoordInput = tostring(getgenv().TyoConfig.CustomCoordInput or "")
 				end
 				getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 				getgenv().FavMutations = getgenv().TyoConfig.FavMutations
@@ -426,7 +429,8 @@ getgenv().JumpPowerValue = 100
 task.spawn(function()
 	while getgenv().NetworkBoostRunning do
 		pcall(function()
-			settings():GetService("NetworkSettings").IncomingReplicationLag = 0
+			local net = settings():GetService("NetworkSettings")
+			if net then net.IncomingReplicationLag = 0 end
 			for _, p in ipairs(Players:GetPlayers()) do
 				if p ~= LocalPlayer and p.Character then
 					for _, part in ipairs(p.Character:GetDescendants()) do
@@ -2547,14 +2551,17 @@ CustomCoordBox.Text = tostring(getgenv().TyoConfig.CustomCoordInput or "")
 CustomCoordBox.TextColor3 = Color3.fromRGB(210, 225, 240)
 CustomCoordBox.Font = Enum.Font.GothamMedium
 CustomCoordBox.TextSize = 11
+CustomCoordBox.ClearTextOnFocus = false
 CustomCoordBox.ZIndex = 13
 local ccbCorner = Instance.new("UICorner")
 ccbCorner.CornerRadius = UDim.new(0, 6)
 ccbCorner.Parent = CustomCoordBox
 
 CustomCoordBox.FocusLost:Connect(function()
-	getgenv().TyoConfig.CustomCoordInput = CustomCoordBox.Text
-	SaveConfig()
+	pcall(function()
+		getgenv().TyoConfig.CustomCoordInput = tostring(CustomCoordBox.Text or "")
+		SaveConfig()
+	end)
 end)
 
 local CoordActionRow = Instance.new("Frame")
@@ -2596,7 +2603,7 @@ local function ParseCoordinateString(str)
 	local nums = {}
 	for numStr in string.gmatch(str, "[-+]?%d+%.?%d*") do
 		local val = tonumber(numStr)
-		if val then
+		if val ~= nil then
 			table.insert(nums, val)
 		end
 	end
@@ -2831,7 +2838,8 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	task.spawn(function()
 		while getgenv().NetworkBoostRunning do
 			pcall(function()
-				settings():GetService("NetworkSettings").IncomingReplicationLag = 0
+				local net = settings():GetService("NetworkSettings")
+				if net then net.IncomingReplicationLag = 0 end
 				for _, p in ipairs(Players:GetPlayers()) do
 					if p ~= LocalPlayer and p.Character then
 						for _, part in ipairs(p.Character:GetDescendants()) do
@@ -3136,7 +3144,9 @@ local function ApplyExtremePotatoAndNoWalls()
 		Lighting.FogEnd = 100
 		Lighting.FogStart = 0
 		Lighting.Brightness = 2
-		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+		pcall(function()
+			settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+		end)
 
 		pcall(function()
 			Workspace.CurrentCamera.CFrame = Workspace.CurrentCamera.CFrame
