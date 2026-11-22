@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara Fixed | Coord Under Title Toggle | Spot Mancing Danau Added | Fixed Anti-AFK
+-- UPDATED: Removed Network Boost, Invisible Mode, Headless, Auto RGB Fire, Auto Ready/Confirm/Accept & Send Trade Request
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -50,9 +50,6 @@ getgenv().TyoConfig = {
 	SelectedTradeTarget = "",
 	AutoSaveEnabled = true,
 	AutoLoadEnabled = true,
-	AutoReadyTrade = false,
-	AutoConfirmTrade = false,
-	AutoAcceptTrade = false,
 	AutoAddAllFishTrade = false,
 	AutoAddCoinAndPearlTrade = false,
 	FavEventFishOnly = false,
@@ -76,7 +73,7 @@ getgenv().TyoConfig = {
 	},
 	UnfavMutations = {
 		["Galaxy"] = false, ["Corrupt"] = false, ["Gemstone"] = false, ["Ghost"] = false,
-		["Lightning"] = false, ["Fairy Dust"] = false, ["Gold"] = false, ["Midnight"] = false,
+		["Lightning"] = false, ["Fairy Dust"] = true, ["Gold"] = false, ["Midnight"] = false,
 		["Radioactive"] = false, ["Stone"] = false, ["Holographic"] = false, ["Albino"] = false,
 		["Sandy"] = false, ["Cosmic"] = false, ["Normal"] = false, ["Elemental"] = false,
 		["Festive"] = false, ["8-Bit"] = false, ["Bloodmoon"] = false, ["Abyssal"] = false,
@@ -89,6 +86,7 @@ getgenv().TyoConfig = {
 		["Spot Mancing Danau"] = { Enabled = false, Timer = "10" }
 	}
 }
+getgenv().TyoConfig.UnfavMutations["Fairy Dust"] = false
 
 getgenv().FavRarities = getgenv().TyoConfig.FavRarities
 getgenv().FavMutations = getgenv().TyoConfig.FavMutations
@@ -171,9 +169,6 @@ local function ResetConfig()
 			SelectedTradeTarget = "",
 			AutoSaveEnabled = true,
 			AutoLoadEnabled = true,
-			AutoReadyTrade = false,
-			AutoConfirmTrade = false,
-			AutoAcceptTrade = false,
 			AutoAddAllFishTrade = false,
 			AutoAddCoinAndPearlTrade = false,
 			FavEventFishOnly = false,
@@ -426,7 +421,7 @@ local function TriggerAntiAFKPulse()
 		VirtualUser:CaptureController()
 		local cam = Workspace.CurrentCamera
 		local cf = cam and cam.CFrame or CFrame.new()
-		VirtualUser:SetKeyDown("0x77") -- Key 'w'
+		VirtualUser:SetKeyDown("0x77")
 		task.wait(0.04)
 		VirtualUser:SetKeyUp("0x77")
 		if cam then
@@ -478,29 +473,8 @@ getgenv().AutoSummitRunning = false
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
-getgenv().InvisibleRunning = false
-getgenv().NetworkBoostRunning = true
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
-
--- Network Booster
-task.spawn(function()
-	while getgenv().NetworkBoostRunning do
-		pcall(function()
-			settings():GetService("NetworkSettings").IncomingReplicationLag = 0
-			for _, p in ipairs(Players:GetPlayers()) do
-				if p ~= LocalPlayer and p.Character then
-					for _, part in ipairs(p.Character:GetDescendants()) do
-						if part:IsA("BasePart") then
-							part.CastShadow = false
-						end
-					end
-				end
-			end
-		end)
-		task.wait(2)
-	end
-end)
 
 -- Auto Join Galatama
 task.spawn(function()
@@ -1009,47 +983,6 @@ local function AutoAddCoinAndPearlToTrade(forceNow)
 	end)
 end
 
-local function SendTradeRequestToTarget()
-	pcall(function()
-		local targetName = getgenv().TyoConfig.SelectedTradeTarget
-		if not targetName or targetName == "" then return end
-		local targetPlayer = Players:FindFirstChild(targetName)
-		if targetPlayer then
-			local reqRemote = GetTradeRemote("Request") or GetTradeRemote("SendRequest") or GetTradeRemote("KirimRequest")
-			if reqRemote then
-				if reqRemote:IsA("RemoteEvent") then
-					reqRemote:FireServer(targetPlayer)
-				elseif reqRemote:IsA("RemoteFunction") then
-					reqRemote:InvokeServer(targetPlayer)
-				end
-			end
-		end
-	end)
-end
-
-local function ClickGuiButtonByName(targetNames)
-	pcall(function()
-		for _, guiObj in ipairs(PlayerGui:GetDescendants()) do
-			if (guiObj:IsA("TextButton") or guiObj:IsA("ImageButton")) and guiObj.Visible then
-				local textVal = guiObj:IsA("TextButton") and string.lower(guiObj.Text) or ""
-				local nameVal = string.lower(guiObj.Name)
-
-				for _, tName in ipairs(targetNames) do
-					local targetLower = string.lower(tName)
-					if string.find(textVal, targetLower) or string.find(nameVal, targetLower) then
-						if firesignal then
-							firesignal(guiObj.MouseButton1Click)
-							firesignal(guiObj.Activated)
-						elseif getconnections then
-							for _, c in ipairs(getconnections(guiObj.MouseButton1Click)) do c:Fire() end
-						end
-					end
-				end
-			end
-		end
-	end)
-end
-
 task.spawn(function()
 	while true do
 		pcall(function()
@@ -1059,33 +992,6 @@ task.spawn(function()
 
 			if getgenv().TyoConfig.AutoAddCoinAndPearlTrade then
 				AutoAddCoinAndPearlToTrade(false)
-			end
-
-			if getgenv().TyoConfig.AutoReadyTrade then
-				ClickGuiButtonByName({"siap", "ready"})
-				local readyRemote = GetTradeRemote("Ready") or GetTradeRemote("Siap") or GetTradeRemote("SetReady")
-				if readyRemote then
-					if readyRemote:IsA("RemoteEvent") then readyRemote:FireServer(true)
-					elseif readyRemote:IsA("RemoteFunction") then readyRemote:InvokeServer(true) end
-				end
-			end
-
-			if getgenv().TyoConfig.AutoConfirmTrade then
-				ClickGuiButtonByName({"konfirmasi", "confirm", "ok", "yes"})
-				local confirmRemote = GetTradeRemote("Confirm") or GetTradeRemote("Konfirmasi") or GetTradeRemote("SetConfirm")
-				if confirmRemote then
-					if confirmRemote:IsA("RemoteEvent") then confirmRemote:FireServer()
-					elseif confirmRemote:IsA("RemoteFunction") then confirmRemote:InvokeServer() end
-				end
-			end
-
-			if getgenv().TyoConfig.AutoAcceptTrade then
-				ClickGuiButtonByName({"terima", "accept", "yes"})
-				local acceptRemote = GetTradeRemote("Accept") or GetTradeRemote("TerimaTrade")
-				if acceptRemote then
-					if acceptRemote:IsA("RemoteEvent") then acceptRemote:FireServer()
-					elseif acceptRemote:IsA("RemoteFunction") then acceptRemote:InvokeServer() end
-				end
 			end
 		end)
 		task.wait(0.25)
@@ -2255,35 +2161,6 @@ aatc.CornerRadius = UDim.new(0, 6)
 aatc.Parent = AddAllTradeBtn
 AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddCoinAndPearlToTrade(true) end)
 
-AddToggle(TradePage, "Auto Siap (Ready Trade)", function(v)
-	getgenv().TyoConfig.AutoReadyTrade = v
-	SaveConfig()
-end, getgenv().TyoConfig.AutoReadyTrade)
-
-AddToggle(TradePage, "Auto Konfirmasi (Confirm Trade)", function(v)
-	getgenv().TyoConfig.AutoConfirmTrade = v
-	SaveConfig()
-end, getgenv().TyoConfig.AutoConfirmTrade)
-
-AddToggle(TradePage, "Auto Accept Trade (Terima Otomatis)", function(v)
-	getgenv().TyoConfig.AutoAcceptTrade = v
-	SaveConfig()
-end, getgenv().TyoConfig.AutoAcceptTrade)
-
-local SendTradeReqBtn = Instance.new("TextButton")
-SendTradeReqBtn.Parent = TradePage
-SendTradeReqBtn.Size = UDim2.new(1, -5, 0, 34)
-SendTradeReqBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 220)
-SendTradeReqBtn.Text = "🚀 Kirim Request Trade ke Target"
-SendTradeReqBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SendTradeReqBtn.Font = Enum.Font.GothamBold
-SendTradeReqBtn.TextSize = 11
-SendTradeReqBtn.ZIndex = 13
-local strc = Instance.new("UICorner")
-strc.CornerRadius = UDim.new(0, 6)
-strc.Parent = SendTradeReqBtn
-SendTradeReqBtn.MouseButton1Click:Connect(function() SendTradeRequestToTarget() end)
-
 ----------------------------------------------------
 -- 4. GALATAMA PAGE
 ----------------------------------------------------
@@ -2764,170 +2641,9 @@ task.spawn(function()
 	end
 end)
 
-AddToggle(PlayerPage, "👻 Invisible Mode (Tak Terlihat Player Lain & Rod Hilang)", function(v)
-	getgenv().InvisibleRunning = v
-	pcall(function()
-		local char = LocalPlayer.Character
-		if not char then return end
-
-		if v then
-			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.CFrame = CFrame.new(0, -9999, 0)
-			end
-
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.Transparency = 1
-					part.CanCollide = false
-				elseif part:IsA("Decal") then
-					part.Transparency = 1
-				end
-			end
-
-			local hum = char:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-			end
-		else
-			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.CFrame = FishingSpots["Spot Mancing Jembatan"] + Vector3.new(0, 5, 0)
-			end
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-					part.Transparency = 0
-					part.CanCollide = true
-				elseif part:IsA("Decal") then
-					part.Transparency = 0
-				end
-			end
-		end
-	end)
-end)
-
-task.spawn(function()
-	while true do
-		if getgenv().InvisibleRunning then
-			pcall(function()
-				local char = LocalPlayer.Character
-				if char then
-					for _, tool in ipairs(char:GetChildren()) do
-						if tool:IsA("Tool") then
-							for _, p in ipairs(tool:GetDescendants()) do
-								if p:IsA("BasePart") then
-									p.Transparency = 1
-									p.CanCollide = false
-								end
-							end
-						end
-					end
-				end
-			end)
-		end
-		task.wait(0.3)
-	end
-end)
-
-AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
-	getgenv().NetworkBoostRunning = v
-	task.spawn(function()
-		while getgenv().NetworkBoostRunning do
-			pcall(function()
-				settings():GetService("NetworkSettings").IncomingReplicationLag = 0
-				for _, p in ipairs(Players:GetPlayers()) do
-					if p ~= LocalPlayer and p.Character then
-						for _, part in ipairs(p.Character:GetDescendants()) do
-							if part:IsA("BasePart") then
-								part.CastShadow = false
-							end
-						end
-					end
-				end
-			end)
-			task.wait(2)
-		end
-	end)
-end, true)
-
 AddToggle(PlayerPage, "Anti-AFK", function(v)
 	getgenv().AntiAFKRunning = v
 end, true)
-
-local HeadlessBtn = Instance.new("TextButton")
-HeadlessBtn.Parent = PlayerPage
-HeadlessBtn.Size = UDim2.new(1, -5, 0, 34)
-HeadlessBtn.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
-HeadlessBtn.Text = "👻 Enable Headless"
-HeadlessBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-HeadlessBtn.Font = Enum.Font.GothamBold
-HeadlessBtn.TextSize = 11
-HeadlessBtn.ZIndex = 13
-local hlc = Instance.new("UICorner")
-hlc.CornerRadius = UDim.new(0, 6)
-hlc.Parent = HeadlessBtn
-HeadlessBtn.MouseButton1Click:Connect(function()
-	pcall(function()
-		local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
-		if head then
-			head.Transparency = 1
-			for _, child in ipairs(head:GetChildren()) do if child:IsA("Decal") then child.Transparency = 1 end end
-		end
-	end)
-end)
-
-local FireRgbBtn = Instance.new("TextButton")
-FireRgbBtn.Parent = PlayerPage
-FireRgbBtn.Size = UDim2.new(1, -5, 0, 34)
-FireRgbBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 220)
-FireRgbBtn.Text = "🔥🌈 Auto RGB Fire: [OFF]"
-FireRgbBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FireRgbBtn.Font = Enum.Font.GothamBold
-FireRgbBtn.TextSize = 11
-FireRgbBtn.ZIndex = 13
-local frc = Instance.new("UICorner")
-frc.CornerRadius = UDim.new(0, 6)
-frc.Parent = FireRgbBtn
-local autoRgbActive = false
-FireRgbBtn.MouseButton1Click:Connect(function()
-	autoRgbActive = not autoRgbActive
-	FireRgbBtn.Text = "🔥🌈 Auto RGB Fire: " .. (autoRgbActive and "[ON]" or "[OFF]")
-	FireRgbBtn.BackgroundColor3 = autoRgbActive and Color3.fromRGB(80, 255, 200) or Color3.fromRGB(60, 120, 220)
-	pcall(function()
-		local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
-		if head then
-			local fire = head:FindFirstChild("TyoHeadFire")
-			if autoRgbActive and not fire then
-				fire = Instance.new("Fire")
-				fire.Name = "TyoHeadFire"
-				fire.Size = 5
-				fire.Heat = 15
-				fire.Parent = head
-			elseif not autoRgbActive and fire then
-				fire:Destroy()
-			end
-		end
-	end)
-end)
-
-task.spawn(function()
-	local colors = {Color3.fromRGB(80, 150, 255), Color3.fromRGB(80, 255, 200), Color3.fromRGB(150, 100, 255), Color3.fromRGB(255, 255, 255)}
-	local index = 1
-	while true do
-		if autoRgbActive then
-			pcall(function()
-				local head = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
-				local fire = head and head:FindFirstChild("TyoHeadFire")
-				if fire then
-					index = index % #colors + 1
-					fire.Color = colors[index]
-					fire.SecondaryColor = colors[(index % #colors) + 1]
-				end
-			end)
-		end
-		task.wait(1)
-	end
-end)
 
 ----------------------------------------------------
 -- 8. TELEPORT PLAYER PAGE
