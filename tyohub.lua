@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara | Coord Under Title Toggle | Spot Mancing Danau Added
+-- UPDATED: Removed Credits, Privacy & Halo Kepala | Event Fish Only Fav | Auto Add All Coin & Mutiara Fixed | Coord Under Title Toggle | Spot Mancing Danau Added | Fixed Anti-AFK
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -416,13 +416,51 @@ local function PerformTapClicker()
 end
 
 ------------------------------------------------------------------
--- AUTO RECONNECT
+-- ANTI-AFK & AUTO RECONNECT (FIXED)
 ------------------------------------------------------------------
+getgenv().AntiAFKRunning = true
+
+local function TriggerAntiAFKPulse()
+	if not getgenv().AntiAFKRunning then return end
+	pcall(function()
+		VirtualUser:CaptureController()
+		local cam = Workspace.CurrentCamera
+		local cf = cam and cam.CFrame or CFrame.new()
+		VirtualUser:SetKeyDown("0x77") -- Key 'w'
+		task.wait(0.04)
+		VirtualUser:SetKeyUp("0x77")
+		if cam then
+			cam.CFrame = cf
+		end
+	end)
+end
+
+if not getgenv().TyoAntiAFKIdledConnected then
+	getgenv().TyoAntiAFKIdledConnected = true
+	LocalPlayer.Idled:Connect(function()
+		if getgenv().AntiAFKRunning then
+			pcall(function()
+				VirtualUser:CaptureController()
+				VirtualUser:ClickButton2(Vector2.new(0, 0), Workspace.CurrentCamera and Workspace.CurrentCamera.CFrame or CFrame.new())
+			end)
+		end
+	end)
+end
+
+task.spawn(function()
+	while true do
+		task.wait(50)
+		if getgenv().AntiAFKRunning then
+			TriggerAntiAFKPulse()
+		end
+	end
+end)
+
 task.spawn(function()
 	pcall(function()
 		CoreGui.ChildAdded:Connect(function(child)
 			if child.Name == "ErrorPrompt" or child.Name == "DisconnectPrompt" then
-				task.wait(1)
+				task.wait(2)
 				pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end)
 			end
 		end)
@@ -437,7 +475,6 @@ getgenv().AutoSellRunning = false
 getgenv().AutoSellTimerInput = getgenv().TyoConfig.AutoSellTimer
 getgenv().AutoGalatamaRunning = true
 getgenv().AutoSummitRunning = false
-getgenv().AntiAFKRunning = true
 getgenv().AutoDetectCoreEvent = false
 getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
@@ -800,7 +837,7 @@ local function UnfavoriteByFilter()
 end
 
 ------------------------------------------------------------------
--- TRADE UTILITIES & AUTO ADD ALL COIN / MUTIARA
+-- TRADE UTILITIES & AUTO ADD ALL COIN / MUTIARA (FIXED)
 ------------------------------------------------------------------
 local function GetTradeRemote(actionName)
 	local res = nil
@@ -808,6 +845,14 @@ local function GetTradeRemote(actionName)
 		local tradeFolder = ReplicatedStorage:FindFirstChild("Remote") and ReplicatedStorage.Remote:FindFirstChild("Trade")
 		if tradeFolder then
 			res = tradeFolder:FindFirstChild(actionName)
+			if not res then
+				for _, child in ipairs(tradeFolder:GetDescendants()) do
+					if (child:IsA("RemoteEvent") or child:IsA("RemoteFunction")) and string.lower(child.Name) == string.lower(actionName) then
+						res = child
+						break
+					end
+				end
+			end
 		end
 	end)
 	return res
@@ -815,16 +860,24 @@ end
 
 local function IsCoinOrPearlName(nameStr)
 	local n = string.lower(tostring(nameStr or ""))
-	return string.find(n, "coin") or string.find(n, "koin") or string.find(n, "pearl") or string.find(n, "mutiara")
+	return string.find(n, "coin") or string.find(n, "koin") or string.find(n, "pearl") or string.find(n, "mutiara") or string.find(n, "muti")
 end
 
-local function FireTradeAdd(remote, payload)
+local function FireTradeAdd(remote, payload, amountVal)
 	if not remote or payload == nil then return end
 	pcall(function()
 		if remote:IsA("RemoteEvent") then
-			remote:FireServer(payload)
+			if amountVal and tonumber(amountVal) and tonumber(amountVal) > 0 then
+				remote:FireServer(payload, tonumber(amountVal))
+			else
+				remote:FireServer(payload)
+			end
 		elseif remote:IsA("RemoteFunction") then
-			remote:InvokeServer(payload)
+			if amountVal and tonumber(amountVal) and tonumber(amountVal) > 0 then
+				remote:InvokeServer(payload, tonumber(amountVal))
+			else
+				remote:InvokeServer(payload)
+			end
 		end
 	end)
 end
@@ -861,19 +914,37 @@ local function AutoAddAllFishToTrade()
 	end)
 end
 
-local function AutoAddCoinAndPearlToTrade()
-	pcall(function()
-		local itemRemote = GetTradeRemote("AddItem") or GetTradeRemote("TambahItem")
-		local currRemote = GetTradeRemote("AddCurrency") or GetTradeRemote("AddCoin") or GetTradeRemote("AddPearl") or GetTradeRemote("TambahKoin") or GetTradeRemote("TambahMutiara")
-		if not itemRemote and not currRemote then return end
+local RecentlyAddedCoinPearl = {}
 
-		local sentKeys = {}
-		local function SendOnce(key, payload, preferCurrency)
-			if not key or key == "" or sentKeys[key] then return end
-			sentKeys[key] = true
-			local targetRemote = (preferCurrency and currRemote) or itemRemote or currRemote
-			FireTradeAdd(targetRemote, payload)
-			task.wait(0.04)
+local function CollectEntriesFromTable(tbl, outList)
+	if type(tbl) ~= "table" then return end
+	for k, v in pairs(tbl) do
+		if type(v) == "table" then
+			table.insert(outList, v)
+		elseif type(k) == "string" and IsCoinOrPearlName(k) and (type(v) == "number" or type(v) == "string") then
+			table.insert(outList, { nama = k, jumlah = v })
+		end
+	end
+end
+
+local function AutoAddCoinAndPearlToTrade(forceNow)
+	pcall(function()
+		local itemRemote = GetTradeRemote("AddItem") or GetTradeRemote("TambahItem") or GetTradeRemote("AddFish")
+		local coinRemote = GetTradeRemote("AddCoin") or GetTradeRemote("TambahKoin") or GetTradeRemote("AddCurrency")
+		local pearlRemote = GetTradeRemote("AddPearl") or GetTradeRemote("TambahMutiara") or GetTradeRemote("AddCurrency")
+		if not itemRemote and not coinRemote and not pearlRemote then return end
+
+		local now = tick()
+		local cooldown = forceNow and 0.5 or 3.5
+
+		local function CanSend(key)
+			if not key or key == "" then return false end
+			local lastSent = RecentlyAddedCoinPearl[key]
+			if lastSent and (now - lastSent) < cooldown then
+				return false
+			end
+			RecentlyAddedCoinPearl[key] = now
+			return true
 		end
 
 		local containers = {LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character}
@@ -881,8 +952,15 @@ local function AutoAddCoinAndPearlToTrade()
 			if container then
 				for _, item in ipairs(container:GetDescendants()) do
 					if IsCoinOrPearlName(item.Name) then
-						local isCoin = string.find(string.lower(item.Name), "coin") or string.find(string.lower(item.Name), "koin")
-						SendOnce("inst_" .. tostring(item), item, isCoin)
+						local nameLower = string.lower(item.Name)
+						local isCoin = string.find(nameLower, "coin") or string.find(nameLower, "koin")
+						local targetRemote = isCoin and (coinRemote or itemRemote) or (pearlRemote or itemRemote)
+						local key = "inst_" .. tostring(item:GetDebugId())
+						if targetRemote and CanSend(key) then
+							local qty = item:GetAttribute("Count") or item:GetAttribute("Amount") or item:GetAttribute("Jumlah")
+							FireTradeAdd(targetRemote, item, qty)
+							task.wait(0.05)
+						end
 					end
 				end
 			end
@@ -894,16 +972,35 @@ local function AutoAddCoinAndPearlToTrade()
 			and repStorage.Remote.Inventaris:FindFirstChild("AmbilSemua")
 
 		if inventarisRemote then
-			local ok, result = pcall(function() return inventarisRemote:InvokeServer() end)
-			if ok and type(result) == "table" then
-				for _, entry in ipairs(result) do
+			local ok, r1, r2 = pcall(function() return inventarisRemote:InvokeServer() end)
+			if ok then
+				local candidates = {}
+				for _, rawRes in ipairs({r1, r2}) do
+					if type(rawRes) == "table" then
+						CollectEntriesFromTable(rawRes, candidates)
+						if type(rawRes.items) == "table" then CollectEntriesFromTable(rawRes.items, candidates) end
+						if type(rawRes.Items) == "table" then CollectEntriesFromTable(rawRes.Items, candidates) end
+						if type(rawRes.Inventory) == "table" then CollectEntriesFromTable(rawRes.Inventory, candidates) end
+						if type(rawRes.inventory) == "table" then CollectEntriesFromTable(rawRes.inventory, candidates) end
+					end
+				end
+
+				for _, entry in ipairs(candidates) do
 					if type(entry) == "table" then
-						local itemName = tostring(entry.nama or entry.Name or entry.item or entry.Item or "")
+						local itemName = tostring(entry.nama or entry.Name or entry.item or entry.Item or entry.tipe or entry.Type or "")
 						local itemUid = tostring(entry.uid or entry.UUID or entry.id or entry.Id or "")
+						local qty = entry.jumlah or entry.Jumlah or entry.amount or entry.Amount or entry.count or entry.Count or entry.total or entry.Total
+
 						if IsCoinOrPearlName(itemName) or IsCoinOrPearlName(itemUid) then
-							local isCoin = string.find(string.lower(itemName), "coin") or string.find(string.lower(itemName), "koin")
+							local combinedLower = string.lower(itemName .. " " .. itemUid)
+							local isCoin = string.find(combinedLower, "coin") or string.find(combinedLower, "koin")
+							local targetRemote = isCoin and (coinRemote or itemRemote) or (pearlRemote or itemRemote)
 							local payload = (itemUid ~= "" and itemUid) or itemName
-							SendOnce("inv_" .. tostring(payload), payload, isCoin)
+							local key = "inv_" .. tostring(payload) .. "_" .. tostring(qty or "")
+							if targetRemote and CanSend(key) then
+								FireTradeAdd(targetRemote, payload, qty)
+								task.wait(0.05)
+							end
 						end
 					end
 				end
@@ -961,7 +1058,7 @@ task.spawn(function()
 			end
 
 			if getgenv().TyoConfig.AutoAddCoinAndPearlTrade then
-				AutoAddCoinAndPearlToTrade()
+				AutoAddCoinAndPearlToTrade(false)
 			end
 
 			if getgenv().TyoConfig.AutoReadyTrade then
@@ -991,7 +1088,7 @@ task.spawn(function()
 				end
 			end
 		end)
-		task.wait(0.2)
+		task.wait(0.25)
 	end
 end)
 
@@ -2156,7 +2253,7 @@ AddAllTradeBtn.ZIndex = 13
 local aatc = Instance.new("UICorner")
 aatc.CornerRadius = UDim.new(0, 6)
 aatc.Parent = AddAllTradeBtn
-AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddCoinAndPearlToTrade() end)
+AddAllTradeBtn.MouseButton1Click:Connect(function() AutoAddCoinAndPearlToTrade(true) end)
 
 AddToggle(TradePage, "Auto Siap (Ready Trade)", function(v)
 	getgenv().TyoConfig.AutoReadyTrade = v
@@ -2753,30 +2850,9 @@ AddToggle(PlayerPage, "🚀 Peningkatan Jaringan (Network Booster)", function(v)
 	end)
 end, true)
 
-AddToggle(PlayerPage, "Anti-AFK", function(v) getgenv().AntiAFKRunning = v end, true)
-
-LocalPlayer.Idled:Connect(function()
-	if getgenv().AntiAFKRunning then
-		pcall(function()
-			VirtualUser:CaptureController()
-			VirtualUser:ClickButton2(Vector2.new(0, 0))
-		end)
-	end
-end)
-
-task.spawn(function()
-	while true do
-		task.wait(60)
-		if getgenv().AntiAFKRunning then
-			pcall(function()
-				VirtualUser:CaptureController()
-				VirtualUser:Button1Down(Vector2.new(0, 0))
-				task.wait(0.1)
-				VirtualUser:Button1Up(Vector2.new(0, 0))
-			end)
-		end
-	end
-end)
+AddToggle(PlayerPage, "Anti-AFK", function(v)
+	getgenv().AntiAFKRunning = v
+end, true)
 
 local HeadlessBtn = Instance.new("TextButton")
 HeadlessBtn.Parent = PlayerPage
