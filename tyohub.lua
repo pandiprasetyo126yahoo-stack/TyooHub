@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Updated Teleport Shop coordinates & added Toko Mutiara
+-- UPDATED: Updated Teleport Shop coordinates & added Toko Mutiara + Post-CP20 Portal Loop
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -2507,9 +2507,20 @@ task.spawn(function()
 
 				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if hrpFinal and getgenv().AutoSummitRunning then
-					hrpFinal.CFrame = CFrame.new(-6766.44629, 1320.69983, -10083.8037) + Vector3.new(0, 5, 0)
-					task.wait(0.3)
-					hrpFinal.CFrame = CFrame.new(-6834.84912, 1313.24744, -9902.42285) + Vector3.new(0, 5, 0)
+					SetPlatformStand(false)
+					hrpFinal.AssemblyLinearVelocity = Vector3.zero
+					hrpFinal.AssemblyAngularVelocity = Vector3.zero
+
+					-- 1. Teleport ke koordinat setelah Cp20
+					hrpFinal.CFrame = CFrame.new(-6767.3, 1310.4 + 3, -10086.4)
+					task.wait(0.4)
+
+					-- 2. Teleport ke tengah portal merah (antara -6822.5 dan -6838.6)
+					if getgenv().AutoSummitRunning and hrpFinal.Parent then
+						hrpFinal.AssemblyLinearVelocity = Vector3.zero
+						hrpFinal.CFrame = CFrame.new(-6830.55, 1311.0 + 1.5, -9846.85)
+						task.wait(0.8)
+					end
 				end
 			end)
 			task.wait(0.5)
