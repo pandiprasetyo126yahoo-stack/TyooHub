@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Removed Network Boost, Invisible Mode, Headless, Auto RGB Fire, Auto Ready/Confirm/Accept & Send Trade Request
+-- UPDATED: Updated Teleport Shop coordinates & added Toko Mutiara
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -20,6 +20,7 @@ local VirtualUser = game:GetService("VirtualUser")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
@@ -475,6 +476,101 @@ getgenv().LoopSpotEnabled = false
 getgenv().AutoFavoriteRunning = false
 getgenv().HighJumpRunning = false
 getgenv().JumpPowerValue = 100
+getgenv().FlyRunning = false
+getgenv().FlySpeedValue = 60
+
+------------------------------------------------------------------
+-- FLY MOVEMENT CONTROLLER
+------------------------------------------------------------------
+local flyBodyVel = nil
+local flyBodyGyro = nil
+
+local function StopFly()
+	getgenv().FlyRunning = false
+	pcall(function()
+		if flyBodyVel then flyBodyVel:Destroy() flyBodyVel = nil end
+		if flyBodyGyro then flyBodyGyro:Destroy() flyBodyGyro = nil end
+		local char = LocalPlayer.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.PlatformStand = false
+		end
+	end)
+end
+
+local function StartFly()
+	getgenv().FlyRunning = true
+	task.spawn(function()
+		while getgenv().FlyRunning do
+			pcall(function()
+				local char = LocalPlayer.Character
+				local hum = char and char:FindFirstChildOfClass("Humanoid")
+				local hrp = char and char:FindFirstChild("HumanoidRootPart")
+				local cam = Workspace.CurrentCamera
+
+				if char and hum and hrp and cam and hum.Health > 0 then
+					hum.PlatformStand = true
+
+					if not flyBodyVel or flyBodyVel.Parent ~= hrp then
+						if flyBodyVel then flyBodyVel:Destroy() end
+						flyBodyVel = Instance.new("BodyVelocity")
+						flyBodyVel.Name = "TyoFlyVel"
+						flyBodyVel.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+						flyBodyVel.Velocity = Vector3.zero
+						flyBodyVel.Parent = hrp
+					end
+
+					if not flyBodyGyro or flyBodyGyro.Parent ~= hrp then
+						if flyBodyGyro then flyBodyGyro:Destroy() end
+						flyBodyGyro = Instance.new("BodyGyro")
+						flyBodyGyro.Name = "TyoFlyGyro"
+						flyBodyGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+						flyBodyGyro.P = 1e4
+						flyBodyGyro.CFrame = cam.CFrame
+						flyBodyGyro.Parent = hrp
+					end
+
+					flyBodyGyro.CFrame = cam.CFrame
+
+					local moveDir = hum.MoveDirection
+					local vel = Vector3.zero
+					local speed = tonumber(getgenv().FlySpeedValue) or 60
+
+					if moveDir.Magnitude > 0 then
+						local forwardAmt = math.max(0, moveDir:Dot(cam.CFrame.LookVector))
+						if forwardAmt > 0.15 and not UIS:KeyboardEnabled then
+							vel = (cam.CFrame.LookVector * (forwardAmt * speed)) + (Vector3.new(moveDir.X, 0, moveDir.Z).Unit * (speed * 0.5))
+						else
+							vel = moveDir.Unit * speed
+						end
+					end
+
+					if UIS:KeyboardEnabled then
+						if UIS:IsKeyDown(Enum.KeyCode.Space) then
+							vel = vel + Vector3.new(0, speed, 0)
+						end
+						if UIS:IsKeyDown(Enum.KeyCode.LeftControl) or UIS:IsKeyDown(Enum.KeyCode.C) then
+							vel = vel - Vector3.new(0, speed, 0)
+						end
+					end
+
+					flyBodyVel.Velocity = vel
+				end
+			end)
+			RunService.RenderStepped:Wait()
+		end
+		StopFly()
+	end)
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+	if flyBodyVel then flyBodyVel:Destroy() flyBodyVel = nil end
+	if flyBodyGyro then flyBodyGyro:Destroy() flyBodyGyro = nil end
+	if getgenv().FlyRunning then
+		task.wait(0.5)
+		StartFly()
+	end
+end)
 
 -- Auto Join Galatama
 task.spawn(function()
@@ -499,7 +595,7 @@ local FishingSpots = {
 	["Spot Mancing Ikan Anomali"] = CFrame.new(-8199.52832, 1238.83752, -6278.13135, -0.999144316, 1.1644854e-08, -0.0413601957, 1.63464247e-08, 1, -1.13335595e-07, 0.0413601957, -1.13914709e-07, -0.999144316),
 	["Spot Mancing Danau"] = CFrame.new(-9492.4, 1334.6, -10328.1)
 }
-local NpcSellCFrame = CFrame.new(-6668.01416, 1312.69983, -9965.2998, 0.999977231, 1.08366018e-08, -0.00675115408, -1.09201403e-08, 1, -1.2337189e-08, 0.00675115408, 1.24106316e-08, 0.999977231)
+local NpcSellCFrame = CFrame.new(-7066.7, 1310.7, -9584.8)[span_7](start_span)[span_7](end_span)
 
 local function GetEquippedRod()
 	local char = LocalPlayer.Character
@@ -2287,12 +2383,13 @@ local function AddShopTeleportBtn(parent, name, cf)
 	btn.MouseButton1Click:Connect(function() pcall(function() LocalPlayer.Character.HumanoidRootPart.CFrame = cf + Vector3.new(0, 5, 0) end) end)
 end
 
-AddShopTeleportBtn(TeleportShopPage, "Tempat Jual Ikan", CFrame.new(-6668.79785, 1312.69983, -9964.06152))
-AddShopTeleportBtn(TeleportShopPage, "Skin Shop", CFrame.new(-6639.45947, 1312.69983, -9947.36133))
-AddShopTeleportBtn(TeleportShopPage, "Pet Shop", CFrame.new(-6640.44092, 1312.69983, -9917.93652))
-AddShopTeleportBtn(TeleportShopPage, "Upgrade Pet", CFrame.new(-6637.85156, 1312.69983, -9886.52441))
-AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-6638.09521, 1312.69983, -9857.41797))
-AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-6667.0249, 1312.69983, -9843.66113))
+AddShopTeleportBtn(TeleportShopPage, "Tempat Jual Ikan", CFrame.new(-7066.7, 1310.7, -9584.8))[span_8](start_span)[span_8](end_span)
+AddShopTeleportBtn(TeleportShopPage, "Skin Shop", CFrame.new(-7086.5, 1310.7, -9605.2))[span_9](start_span)[span_9](end_span)
+AddShopTeleportBtn(TeleportShopPage, "Pet Shop", CFrame.new(-7086.4, 1310.7, -9630.8))[span_10](start_span)[span_10](end_span)
+AddShopTeleportBtn(TeleportShopPage, "Upgrade Pet", CFrame.new(-7089.1, 1310.7, -9663.9))[span_11](start_span)[span_11](end_span)
+AddShopTeleportBtn(TeleportShopPage, "Rod Shop", CFrame.new(-7087.1, 1310.7, -9692.6))[span_12](start_span)[span_12](end_span)
+AddShopTeleportBtn(TeleportShopPage, "Title Shop", CFrame.new(-7065.5, 1310.7, -9716.9))[span_13](start_span)[span_13](end_span)
+AddShopTeleportBtn(TeleportShopPage, "Toko Mutiara", CFrame.new(381.3, 444.8, -8790.7))[span_14](start_span)[span_14](end_span)
 
 ----------------------------------------------------
 -- 6. SUMMIT PAGE
@@ -2572,6 +2669,36 @@ PencatatLokasiBtn.MouseButton1Click:Connect(function()
 			PencatatLokasiBtn.Text = "📍 Pencatat Lokasi"
 		end
 	end)
+end)
+
+AddToggle(PlayerPage, "🕊️ Fly Mode", function(v)
+	if v then
+		StartFly()
+	else
+		StopFly()
+	end
+end, false)
+
+local FlySpeedBox = Instance.new("TextBox")
+FlySpeedBox.Parent = PlayerPage
+FlySpeedBox.Size = UDim2.new(1, -5, 0, 36)
+FlySpeedBox.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
+FlySpeedBox.BackgroundTransparency = 0.2
+FlySpeedBox.PlaceholderText = "Ketik Kecepatan Fly (Cth: 60 / 120)"
+FlySpeedBox.PlaceholderColor3 = Color3.fromRGB(90, 110, 140)
+FlySpeedBox.Text = tostring(getgenv().FlySpeedValue or 60)
+FlySpeedBox.TextColor3 = Color3.fromRGB(210, 225, 240)
+FlySpeedBox.Font = Enum.Font.GothamMedium
+FlySpeedBox.TextSize = 11
+FlySpeedBox.ZIndex = 13
+local fsc = Instance.new("UICorner")
+fsc.CornerRadius = UDim.new(0, 6)
+fsc.Parent = FlySpeedBox
+FlySpeedBox.FocusLost:Connect(function()
+	local num = tonumber(FlySpeedBox.Text)
+	if num and num > 0 then
+		getgenv().FlySpeedValue = num
+	end
 end)
 
 local SpeedBox = Instance.new("TextBox")
