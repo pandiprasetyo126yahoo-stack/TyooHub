@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Updated Teleport Shop coordinates & added Toko Mutiara + Post-CP20 Portal Loop
+-- UPDATED: Keep post-CP20 shop/summit spot (-6767.3, 1310.4, -10086.4), then TP to red portal (-6830.55, 1311.0, -9846.85)
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -2511,11 +2511,11 @@ task.spawn(function()
 					hrpFinal.AssemblyLinearVelocity = Vector3.zero
 					hrpFinal.AssemblyAngularVelocity = Vector3.zero
 
-					-- 1. Teleport ke koordinat setelah Cp20
+					-- 1. Teleport ke titik setelah Cp20 (-6767.3, 1310.4, -10086.4) & tunggu summit selesai di titik ini
 					hrpFinal.CFrame = CFrame.new(-6767.3, 1310.4 + 3, -10086.4)
-					task.wait(0.4)
+					task.wait(1.0)
 
-					-- 2. Teleport ke tengah portal merah (antara -6822.5 dan -6838.6)
+					-- 2. Setelah summit di titik tersebut, baru teleport ke portal merah (-6830.55, 1311.0, -9846.85)
 					if getgenv().AutoSummitRunning and hrpFinal.Parent then
 						hrpFinal.AssemblyLinearVelocity = Vector3.zero
 						hrpFinal.CFrame = CFrame.new(-6830.55, 1311.0 + 1.5, -9846.85)
