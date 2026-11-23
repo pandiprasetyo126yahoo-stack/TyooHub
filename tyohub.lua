@@ -1,8 +1,8 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- FIXED: Guaranteed TP to post-CP20 spot (-6767.3, 1310.4, -10086.4) after CP20,
---        wait for summit at that spot, then TP to red portal (-6830.55, 1311.0, -9846.85)
+-- UPDATED: Summit spot after CP20 set to (-6767.1, 1310.2, -10083.6),
+--          then TP to red portal (-6830.55, 1311.0, -9846.85)
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -2530,15 +2530,14 @@ task.spawn(function()
 				finishedAllCheckpoints = true
 			end)
 
-			-- Di luar pcall utama agar pasti jalan setelah Cp20
 			if finishedAllCheckpoints and getgenv().AutoSummitRunning then
 				SetPlatformStand(false)
 
-				-- 1. TP ke titik setelah Cp20 (-6767.3, 1310.4, -10086.4) & tunggu summit selesai di titik ini
+				-- 1. TP ke titik summit setelah Cp20 (-6767.1, 1310.2, -10083.6) & tunggu summit selesai di titik ini
 				pcall(function()
-					LocalPlayer:RequestStreamAroundAsync(Vector3.new(-6767.3, 1310.4, -10086.4), 10)
+					LocalPlayer:RequestStreamAroundAsync(Vector3.new(-6767.1, 1310.2, -10083.6), 10)
 				end)
-				ForceTeleportCFrame(CFrame.new(-6767.3, 1310.4 + 3, -10086.4), 5)
+				ForceTeleportCFrame(CFrame.new(-6767.1, 1310.2 + 3, -10083.6), 5)
 				task.wait(1.0)
 
 				-- 2. Setelah summit di titik tersebut, baru TP ke portal merah (-6830.55, 1311.0, -9846.85)
