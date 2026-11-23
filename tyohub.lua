@@ -1,7 +1,8 @@
 -- ==============================================================================
 -- TYO HUB V3 (AEMEATH WUTHERING WAVES EDITION) | NO-KEY & MULTI-DEVICE
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
--- UPDATED: Keep post-CP20 shop/summit spot (-6767.3, 1310.4, -10086.4), then TP to red portal (-6830.55, 1311.0, -9846.85)
+-- FIXED: Guaranteed TP to post-CP20 spot (-6767.3, 1310.4, -10086.4) after CP20,
+--        wait for summit at that spot, then TP to red portal (-6830.55, 1311.0, -9846.85)
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -2365,6 +2366,29 @@ local function SetPlatformStand(state)
 	end)
 end
 
+local function ForceTeleportCFrame(targetCF, retries)
+	retries = retries or 4
+	for _ = 1, retries do
+		local char = LocalPlayer.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if hrp and hrp.Parent then
+			pcall(function()
+				hrp.Anchored = false
+				hrp.AssemblyLinearVelocity = Vector3.zero
+				hrp.AssemblyAngularVelocity = Vector3.zero
+				hrp.CFrame = targetCF
+			end)
+			task.wait(0.05)
+			if hrp.Parent and (hrp.Position - targetCF.Position).Magnitude < 12 then
+				return true
+			end
+		else
+			task.wait(0.1)
+		end
+	end
+	return false
+end
+
 AddToggle(SummitPage, "Auto Summit Loop (Fast TP)", function(v)
 	getgenv().AutoSummitRunning = v
 	if not v then
@@ -2451,13 +2475,14 @@ end
 task.spawn(function()
 	while true do
 		if getgenv().AutoSummitRunning then
+			local finishedAllCheckpoints = false
+
 			pcall(function()
 				local character = LocalPlayer.Character
 				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 				local hrp = character and character:FindFirstChild("HumanoidRootPart")
 
 				if not character or not humanoid or not hrp or humanoid.Health <= 0 then
-					task.wait(1)
 					return
 				end
 
@@ -2466,12 +2491,12 @@ task.spawn(function()
 				local cpHeight = tonumber(getgenv().SummitCpHeight) or 1.5
 
 				for _, point in ipairs(SummitPoints) do
-					if not getgenv().AutoSummitRunning then break end
+					if not getgenv().AutoSummitRunning then return end
 
 					character = LocalPlayer.Character
 					hrp = character and character:FindFirstChild("HumanoidRootPart")
 					humanoid = character and character:FindFirstChildOfClass("Humanoid")
-					if not hrp or not humanoid or humanoid.Health <= 0 then break end
+					if not hrp or not humanoid or humanoid.Health <= 0 then return end
 
 					local name = point[1]
 					local cpIndex = string.match(name, "^Cp(%d+)$")
@@ -2479,16 +2504,13 @@ task.spawn(function()
 
 					hrp.AssemblyLinearVelocity = Vector3.zero
 					hrp.AssemblyAngularVelocity = Vector3.zero
-
 					hrp.CFrame = point[2] + Vector3.new(0, height, 0)
 
-					if not getgenv().AutoSummitRunning then break end
+					if not getgenv().AutoSummitRunning then return end
 
 					if cpIndex then
 						TouchCheckpointFast(tonumber(cpIndex), point[2])
-
-						local delayTime = tonumber(getgenv().SummitDelay) or 0.45
-						task.wait(delayTime)
+						task.wait(tonumber(getgenv().SummitDelay) or 0.45)
 
 						if getgenv().SummitUseRemote then
 							pcall(function()
@@ -2505,24 +2527,30 @@ task.spawn(function()
 					end
 				end
 
-				local hrpFinal = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-				if hrpFinal and getgenv().AutoSummitRunning then
-					SetPlatformStand(false)
-					hrpFinal.AssemblyLinearVelocity = Vector3.zero
-					hrpFinal.AssemblyAngularVelocity = Vector3.zero
-
-					-- 1. Teleport ke titik setelah Cp20 (-6767.3, 1310.4, -10086.4) & tunggu summit selesai di titik ini
-					hrpFinal.CFrame = CFrame.new(-6767.3, 1310.4 + 3, -10086.4)
-					task.wait(1.0)
-
-					-- 2. Setelah summit di titik tersebut, baru teleport ke portal merah (-6830.55, 1311.0, -9846.85)
-					if getgenv().AutoSummitRunning and hrpFinal.Parent then
-						hrpFinal.AssemblyLinearVelocity = Vector3.zero
-						hrpFinal.CFrame = CFrame.new(-6830.55, 1311.0 + 1.5, -9846.85)
-						task.wait(0.8)
-					end
-				end
+				finishedAllCheckpoints = true
 			end)
+
+			-- Di luar pcall utama agar pasti jalan setelah Cp20
+			if finishedAllCheckpoints and getgenv().AutoSummitRunning then
+				SetPlatformStand(false)
+
+				-- 1. TP ke titik setelah Cp20 (-6767.3, 1310.4, -10086.4) & tunggu summit selesai di titik ini
+				pcall(function()
+					LocalPlayer:RequestStreamAroundAsync(Vector3.new(-6767.3, 1310.4, -10086.4), 10)
+				end)
+				ForceTeleportCFrame(CFrame.new(-6767.3, 1310.4 + 3, -10086.4), 5)
+				task.wait(1.0)
+
+				-- 2. Setelah summit di titik tersebut, baru TP ke portal merah (-6830.55, 1311.0, -9846.85)
+				if getgenv().AutoSummitRunning then
+					pcall(function()
+						LocalPlayer:RequestStreamAroundAsync(Vector3.new(-6830.55, 1311.0, -9846.85), 10)
+					end)
+					ForceTeleportCFrame(CFrame.new(-6830.55, 1311.0 + 1.5, -9846.85), 5)
+					task.wait(0.8)
+				end
+			end
+
 			task.wait(0.5)
 		else
 			SetPlatformStand(false)
