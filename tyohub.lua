@@ -3,6 +3,7 @@
 -- MAP: MOUNT SOREYA UPDATE (EXTREME POTATO & MINIMAL RENDER DISTANCE)
 -- UPDATED: Summit spot after CP20 set to (-6767.1, 1310.2, -10083.6),
 --          then TP to red portal (-6830.55, 1311.0, -9846.85)
+--          + AUTO SCALE UI SESUAI UKURAN LAYAR / SPLIT SCREEN
 -- ==============================================================================
 if not game:IsLoaded() then
 	game.Loaded:Wait()
@@ -1012,7 +1013,7 @@ Gui.ResetOnSpawn = false
 Gui.DisplayOrder = 2147483647
 
 ----------------------------------------------------
--- DRAGGABLE FUNCTION
+-- DRAGGABLE FUNCTION (SUPPORT UISCALE)
 ----------------------------------------------------
 local function MakeDraggable(guiObject, handleObject)
 	handleObject = handleObject or guiObject
@@ -1028,9 +1029,11 @@ local function MakeDraggable(guiObject, handleObject)
 		if delta.Magnitude > 6 then
 			isClick = false
 		end
+		local uiScale = guiObject:FindFirstChildOfClass("UIScale")
+		local s = uiScale and uiScale.Scale or 1
 		guiObject.Position = UDim2.new(
-			startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+			startPos.X.Scale, startPos.X.Offset + (delta.X / s),
+			startPos.Y.Scale, startPos.Y.Offset + (delta.Y / s)
 		)
 	end
 
@@ -1126,8 +1129,9 @@ end)
 local Main = Instance.new("ImageLabel")
 Main.Parent = Gui
 Main.Visible = true
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
 Main.Size = UDim2.new(0, 560, 0, 330)
-Main.Position = UDim2.new(0.5, -280, 0.5, -165)
+Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 Main.Image = "rbxassetid://106191671617535"
 Main.ImageTransparency = 0.35
 Main.BackgroundColor3 = Color3.fromRGB(12, 16, 26)
@@ -1143,6 +1147,37 @@ local MainStroke = Instance.new("UIStroke")
 MainStroke.Parent = Main
 MainStroke.Color = Color3.fromRGB(80, 150, 255)
 MainStroke.Thickness = 1.5
+
+-- ==========================================
+-- AUTO SCALE UI SESUAI UKURAN LAYAR / SPLIT
+-- ==========================================
+local MainScale = Instance.new("UIScale")
+MainScale.Parent = Main
+
+local function UpdateUIScale()
+	local cam = Workspace.CurrentCamera
+	if not cam then return end
+	local vp = cam.ViewportSize
+	if vp.X <= 0 or vp.Y <= 0 then return end
+
+	local scaleX = (vp.X * 0.88) / 560
+	local scaleY = (vp.Y * 0.85) / 330
+	local finalScale = math.min(scaleX, scaleY)
+
+	MainScale.Scale = math.clamp(finalScale, 0.45, 1.15)
+end
+
+UpdateUIScale()
+
+if Workspace.CurrentCamera then
+	Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateUIScale)
+end
+Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+	if Workspace.CurrentCamera then
+		UpdateUIScale()
+		Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateUIScale)
+	end
+end)
 
 local TopBar = Instance.new("Frame")
 TopBar.Parent = Main
